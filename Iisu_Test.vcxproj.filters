@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Finger.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Sphere.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="HandModel.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="HandPose.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="MyTools.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="CostFunction.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="PSO.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Initialization.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="AICP.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="HandInfo.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthMap.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Finger.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="HandModel.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="HandPose.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="MyTools.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="CostFunction.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="PSO.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Initialization.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="AICP.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="HandInfo.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="source">
+      <UniqueIdentifier>{787b8db2-41e6-4b9a-b982-8380649141d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{94ddb1ad-7b60-4e93-a9c0-d92605e23bad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{ebd7a53e-76a2-4ead-8c40-a301dd620af3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

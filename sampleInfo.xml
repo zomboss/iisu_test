@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<SampleInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <UniqueName>EasiiTutorialStep3Cpp</UniqueName>
+  <Title>Easii Tutorial Step 3 - Reading data and parameters</Title>
+  <Updated>2011-09-26T09:59:32.1761178+02:00</Updated>
+  <Tags>C++, User, Easii, Tutorial, Data, Parameters, Events</Tags>
+  <ScreenShotUrl>screenshot.jpg</ScreenShotUrl>
+  <Description>The third tutorial shows how to register data and parameters handles and to use them to detect simple jump and crouch actions.</Description>
+  <Local>false</Local>
+  <SourceFile>3. read_data.vcproj</SourceFile>
+  <BinFile>bin\3. read_data.exe</BinFile>
+  <Language>C++</Language>
+  <Layer>USER</Layer>
+  <Type>Tutorial</Type>
+  <IisuVersion>3.6.0</IisuVersion>
+</SampleInfo>

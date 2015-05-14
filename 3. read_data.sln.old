@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3. read_data", "3. read_data.vcproj", "{8825A2B6-5D25-4457-BF48-012FCA8EBEF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3} = {4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EasiiSDK", "..\..\EasiiSDK\EasiiSDK.vcproj", "{4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8825A2B6-5D25-4457-BF48-012FCA8EBEF9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8825A2B6-5D25-4457-BF48-012FCA8EBEF9}.Debug|Win32.Build.0 = Debug|Win32
+		{8825A2B6-5D25-4457-BF48-012FCA8EBEF9}.Release|Win32.ActiveCfg = Release|Win32
+		{8825A2B6-5D25-4457-BF48-012FCA8EBEF9}.Release|Win32.Build.0 = Release|Win32
+		{4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3}.Debug|Win32.Build.0 = Debug|Win32
+		{4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3}.Release|Win32.ActiveCfg = Release|Win32
+		{4CD809B3-3F30-4A5C-9B20-06EEB2C68AA3}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

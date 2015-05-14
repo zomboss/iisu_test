@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8825A2B6-5D25-4457-BF48-012FCA8EBEF9}</ProjectGuid>
+    <RootNamespace>iisu_test</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>iisu_test</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    </LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\PCL 1.6.0\3rdParty\Qhull\include;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\include\vtk-5.8;C:\Program Files (x86)\PCL 1.6.0\3rdParty\FLANN\include;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Eigen\include;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\include;C:\Program Files (x86)\PCL 1.6.0\include\pcl-1.6;C:\Users\weberliu\Desktop\ceres-windows-master\Eigen;C:\Users\weberliu\Desktop\ceres-windows-master\google-glog\src\windows;C:\Users\weberliu\Desktop\ceres-windows-master\ceres-solver\include;C:\Users\weberliu\Desktop\ceres-windows-master\win\include;C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii;$(IISU_SDK_DIR)\include;$(IISU_SDK_DIR)\include\iisu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLOG_NO_ABBREVIATED_SEVERITIES;GOOGLE_GLOG_DLL_DECL=;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINDOWS;EIGEN_USE_NEW_STDVECTOR;EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET;BOOST_ALL_NO_LIB;FLANN_STATIC;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\weberliu\Desktop\ceres-windows-master\Win32\Debug;C:\Program Files (x86)\PCL 1.6.0\lib$(Configuration);C:\Program Files (x86)\PCL 1.6.0\lib;C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii\Dependencies\lib;$(IISU_SDK_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_system-vc100-mt-gd-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_filesystem-vc100-mt-gd-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_thread-vc100-mt-gd-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_date_time-vc100-mt-gd-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_iostreams-vc100-mt-gd-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_common_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_octree_debug.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkCommon-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkRendering-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkHybrid-gd.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_io_debug.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\FLANN\lib\flann_cpp_s-gd.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_kdtree_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_search_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_sample_consensus_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_filters_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_segmentation_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_visualization_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_features_debug.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Qhull\lib\qhullstatic_d.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_surface_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_registration_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_keypoints_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_tracking_debug.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_apps_debug.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkGraphics-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkverdict-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkImaging-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkIO-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkFiltering-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkDICOMParser-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkNetCDF_cxx-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkmetaio-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtksys-gd.lib;ws2_32.lib;comctl32.lib;wsock32.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtksqlite-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkpng-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtktiff-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkzlib-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkjpeg-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkexpat-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkftgl-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkfreetype-gd.lib;opengl32.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkexoIIc-gd.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkNetCDF-gd.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(IISU_SDK_DIR)/bin/iisuSDK.dll" "$(OutDir)" /d/y
+xcopy "$(ProjectDir)Resources" "$(TargetDir)Resources" /i/d/e/y
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii;$(IISU_SDK_DIR)\include; $(IISU_SDK_DIR)\include\iisu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii\Dependencies\lib;$(IISU_SDK_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(IISU_SDK_DIR)/bin/iisuSDK.dll" "$(OutDir)" /d/y
+xcopy "$(ProjectDir)Resources" "$(TargetDir)Resources" /i/d/e/y
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>C:\Users\weberliu\Desktop\ceres-windows-master\win\include;C:\Users\weberliu\Desktop\ceres-windows-master\ceres-solver\include;C:\Users\weberliu\Desktop\ceres-windows-master\google-glog\src\windows;C:\Users\weberliu\Desktop\ceres-windows-master\Eigen;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Qhull\include;C:\Program Files (x86)\PCL 1.6.0\3rdParty\FLANN\include;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\include;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Eigen\include;C:\Program Files (x86)\PCL 1.6.0\include\pcl-1.6;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\include\vtk-5.8;C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii;$(IISU_SDK_DIR)\include;$(IISU_SDK_DIR)\include\iisu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLOG_NO_ABBREVIATED_SEVERITIES;GOOGLE_GLOG_DLL_DECL=;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINDOWS;EIGEN_USE_NEW_STDVECTOR;EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET;BOOST_ALL_NO_LIB;FLANN_STATIC;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <OpenMPSupport>true</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\weberliu\Desktop\ceres-windows-master\Win32\Release;C:\Program Files (x86)\PCL 1.6.0\lib$(Configuration);C:\Program Files (x86)\PCL 1.6.0\lib;C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii\Dependencies\lib;$(IISU_SDK_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_system-vc100-mt-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_filesystem-vc100-mt-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_thread-vc100-mt-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_date_time-vc100-mt-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Boost\lib\libboost_iostreams-vc100-mt-1_49.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_common_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_octree_release.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkCommon.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkRendering.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkHybrid.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_io_release.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\FLANN\lib\flann_cpp_s.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_kdtree_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_search_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_sample_consensus_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_filters_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_segmentation_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_visualization_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_features_release.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\Qhull\lib\qhullstatic.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_surface_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_registration_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_keypoints_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_tracking_release.lib;C:\Program Files (x86)\PCL 1.6.0\lib\pcl_apps_release.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkGraphics.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkverdict.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkImaging.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkIO.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkFiltering.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkDICOMParser.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkNetCDF_cxx.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkmetaio.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtksys.lib;ws2_32.lib;comctl32.lib;wsock32.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtksqlite.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkpng.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtktiff.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkzlib.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkjpeg.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkexpat.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkftgl.lib;C:\Program Files (x86)\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkfreetype.lib;opengl32.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkexoIIc.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkNetCDF.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(IISU_SDK_DIR)\bin\iisuSDK.dll" "$(OutDir)"
+copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>C:\Program Files\PCL 1.6.0\3rdParty\Qhull\include;C:\Program Files\PCL 1.6.0\3rdParty\FLANN\include;C:\Program Files\PCL 1.6.0\3rdParty\\Boost\include;C:\Program Files\PCL 1.6.0\3rdParty\Eigen\include;C:\Program Files\PCL 1.6.0\include\pcl-1.6;C:\Program Files\PCL 1.6.0\3rdParty\VTK\include\vtk-5.8;C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii;$(IISU_SDK_DIR)\include;$(IISU_SDK_DIR)\include\iisu;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINDOWS;EIGEN_USE_NEW_STDVECTOR;EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET;BOOST_ALL_NO_LIB;FLANN_STATIC;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Program Files\PCL 1.6.0\lib$(Configuration);C:\Program Files\PCL 1.6.0\lib;C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii\Dependencies\lib;$(IISU_SDK_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalDependencies>C:\Program Files\PCL 1.6.0\3rdParty\Boost\lib\libboost_system-vc100-mt-1_49.lib;C:\Program Files\PCL 1.6.0\3rdParty\Boost\lib\libboost_filesystem-vc100-mt-1_49.lib;C:\Program Files\PCL 1.6.0\3rdParty\Boost\lib\libboost_thread-vc100-mt-1_49.lib;C:\Program Files\PCL 1.6.0\3rdParty\Boost\lib\libboost_date_time-vc100-mt-1_49.lib;C:\Program Files\PCL 1.6.0\3rdParty\Boost\lib\libboost_iostreams-vc100-mt-1_49.lib;C:\Program Files\PCL 1.6.0\lib\pcl_common_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_octree_release.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkCommon.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkRendering.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkHybrid.lib;C:\Program Files\PCL 1.6.0\lib\pcl_io_release.lib;C:\Program Files\PCL 1.6.0\3rdParty\FLANN\lib\flann_cpp_s.lib;C:\Program Files\PCL 1.6.0\lib\pcl_kdtree_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_search_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_sample_consensus_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_filters_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_segmentation_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_visualization_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_features_release.lib;C:\Program Files\PCL 1.6.0\3rdParty\Qhull\lib\qhullstatic.lib;C:\Program Files\PCL 1.6.0\lib\pcl_surface_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_registration_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_keypoints_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_tracking_release.lib;C:\Program Files\PCL 1.6.0\lib\pcl_apps_release.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkGraphics.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkverdict.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkImaging.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkIO.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkFiltering.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkDICOMParser.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkNetCDF_cxx.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkmetaio.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtksys.lib;ws2_32.lib;comctl32.lib;wsock32.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtksqlite.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkpng.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtktiff.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkzlib.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkjpeg.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkexpat.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkftgl.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkfreetype.lib;opengl32.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkexoIIc.lib;C:\Program Files\PCL 1.6.0\3rdParty\VTK\lib\vtk-5.8\vtkNetCDF.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(IISU_SDK_DIR)\bin\iisuSDK.dll" "$(OutDir)"
+copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ceres-windows-master\win\ceres.vcxproj">
+      <Project>{fd1ea691-965a-49a9-83c7-530a9fe82b44}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ceres-windows-master\win\libglog_static.vcxproj">
+      <Project>{772c2111-bbbf-49e6-b912-198a7f7a88e5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\weberliu\Documents\iisuSDK\samples\iisu\easii\EasiiSDK\EasiiSDK.vcxproj">
+      <Project>{4cd809b3-3f30-4a5c-9b20-06eeb2c68aa3}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AICP.cxx" />
+    <ClCompile Include="CostFunction.cxx" />
+    <ClCompile Include="DepthMap.cpp" />
+    <ClCompile Include="Finger.cxx" />
+    <ClCompile Include="HandInfo.cxx" />
+    <ClCompile Include="HandPose.cxx" />
+    <ClCompile Include="HandModel.cxx" />
+    <ClCompile Include="Initialization.cxx" />
+    <ClCompile Include="MyTools.cxx" />
+    <ClCompile Include="PSO.cxx" />
+    <ClCompile Include="Sphere.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AICP.hxx" />
+    <ClInclude Include="CostFunction.hxx" />
+    <ClInclude Include="Finger.hxx" />
+    <ClInclude Include="HandInfo.hxx" />
+    <ClInclude Include="HandModel.hxx" />
+    <ClInclude Include="HandPose.hxx" />
+    <ClInclude Include="Initialization.hxx" />
+    <ClInclude Include="MyTools.hxx" />
+    <ClInclude Include="PSO.hxx" />
+    <ClInclude Include="Sphere.hxx" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
