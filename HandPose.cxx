@@ -197,6 +197,27 @@ void HandPose::setAllParameters(Array<float> newparameter)
 	global_rot[0] = newparameter[23]; global_rot[1] = newparameter[24]; global_rot[2] = newparameter[25];
 }
 
+void HandPose::setAllParameters(Array<float> newparameter, bool isvalid)
+{
+	j_thumb_base[1] = newparameter[0]; j_thumb_base[2] = newparameter[1];
+	j_thumb_mid[0] =  newparameter[2];
+	j_thumb_top[0] = newparameter[3];
+	j_index_base[0] = newparameter[4]; j_index_base[2] = newparameter[5];
+	j_index_mid[0] = newparameter[6];
+	j_index_top[0] = newparameter[7];
+	j_middle_base[0] = newparameter[8]; j_middle_base[2] = newparameter[9];
+	j_middle_mid[0] = newparameter[10];
+	j_middle_top[0] = newparameter[11];
+	j_ring_base[0] = newparameter[12]; j_ring_base[2] = newparameter[13];
+	j_ring_mid[0] = newparameter[14];
+	j_ring_top[0] = newparameter[15];
+	j_little_base[0] = newparameter[16]; j_little_base[2] = newparameter[17];
+	j_little_mid[0] = newparameter[18];
+	j_little_top[0] = newparameter[19];
+	global_pos[0] = newparameter[20]; global_pos[1] = newparameter[21]; global_pos[2] = newparameter[22];
+	global_rot[0] = newparameter[23]; global_rot[1] = newparameter[24]; global_rot[2] = newparameter[25];
+}
+
 void HandPose::setFingerPose(int f, Vector3 base, Vector3 mid, Vector3 top)
 {
 	switch(f)

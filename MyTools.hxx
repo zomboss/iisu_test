@@ -27,7 +27,9 @@ public:
 	static PointXYZ vectortoPointXYZ(SK::Vector3 vec);
 	static PointXYZRGB vectortoPointXYZRGB(SK::Vector3 vec);
 	static SK::Vector3 EigentoSKVector(Eigen::Vector3f &vec_e);
+	static SK::Array<float> EigentoSKVector(Eigen::VectorXf &vec_e);
 	static Eigen::Vector3f SKtoEigenVector(SK::Vector3 &vec_s);
+	static Eigen::VectorXf SKtoEigenVector(SK::Array<float> &vec_s);
 	static SK::Vector4 vector3to4(SK::Vector3 vec);
 	static SK::Vector3 vector4to3(SK::Vector4 vec);
 	static SK::Matrix4 matrix3to4(SK::Matrix3 mat);

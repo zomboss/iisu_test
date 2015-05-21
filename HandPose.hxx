@@ -73,6 +73,7 @@ public:
 	Vector3 getOrientation() {return global_ori;}
 	Array<float> getAllParameters();
 	void setAllParameters(Array<float> );
+	void setAllParameters(Array<float> , bool );
 	void setFingerPose(int , Vector3 , Vector3 , Vector3 );
 	void setFingerParameter(int , int , float );
 	void setGlobalParameter(int , float );

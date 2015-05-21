@@ -31,7 +31,10 @@
     <ClCompile Include="HandInfo.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="DepthMap.cpp">
+    <ClCompile Include="DataDriven.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadMAT.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -64,6 +67,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="HandInfo.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="DataDriven.hxx">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

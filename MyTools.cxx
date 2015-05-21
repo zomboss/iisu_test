@@ -33,6 +33,14 @@ SK::Vector3 MyTools::EigentoSKVector(Eigen::Vector3f &vec_e)
 	return vec_s;
 }
 
+SK::Array<float> MyTools::EigentoSKVector(Eigen::VectorXf &vec_e)
+{
+	SK::Array<float> vec_s;
+	for(size_t i = 0; i < vec_e.size(); i++)
+		vec_s.pushBack(vec_e[i]);
+	return vec_s;
+}
+
 Eigen::Vector3f MyTools::SKtoEigenVector(SK::Vector3 &vec_s)
 {
 	Eigen::Vector3f vec_e = Eigen::Vector3f();
@@ -41,6 +49,14 @@ Eigen::Vector3f MyTools::SKtoEigenVector(SK::Vector3 &vec_s)
 	vec_e[2] = vec_s[2];
 	return vec_e;
 
+}
+
+Eigen::VectorXf MyTools::SKtoEigenVector(SK::Array<float> &vec_s)
+{
+	Eigen::VectorXf vec_e = Eigen::VectorXf();
+	for(size_t i = 0; i < vec_s.size(); i++)
+		vec_e[i] = vec_s[i];
+	return vec_e;
 }
 
 SK::Vector4 MyTools::vector3to4(SK::Vector3 vec)
