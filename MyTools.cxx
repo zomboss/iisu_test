@@ -53,9 +53,11 @@ Eigen::Vector3f MyTools::SKtoEigenVector(SK::Vector3 &vec_s)
 
 Eigen::VectorXf MyTools::SKtoEigenVector(SK::Array<float> &vec_s)
 {
-	Eigen::VectorXf vec_e = Eigen::VectorXf();
+	Eigen::VectorXf vec_e;
+	vec_e.resize(vec_s.size());
 	for(size_t i = 0; i < vec_s.size(); i++)
 		vec_e[i] = vec_s[i];
+	
 	return vec_e;
 }
 

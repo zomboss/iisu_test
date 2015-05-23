@@ -82,41 +82,12 @@ int main(int argc, char **argv)
 	viewer->addCoordinateSystem (1.0);
 	
 	// get dataset
-	DataDriven data_driven = DataDriven("dataset/Trial01_General.mat");
-/*	int count = 0;
-	SK::Array<SK::Array<float>> dataset;
-	ifstream infile("dataset/Trial03_General.mat");
-	float tmpdata[26];
-	int tmplate[] = {7, 6, 8, 9, 11, 10, 12, 13, 15, 14, 16, 17, 19, 18, 20, 21, 23, 22, 24, 25};
-	while(infile >> tmpdata[0] >> tmpdata[1] >> tmpdata[2] >> tmpdata[3] >> tmpdata[4] >> tmpdata[5] >> tmpdata[6] >> tmpdata[7] 
-				 >> tmpdata[8] >> tmpdata[9] >> tmpdata[10] >> tmpdata[11] >> tmpdata[12] >> tmpdata[13] >> tmpdata[14] >> tmpdata[15]
-				 >> tmpdata[16] >> tmpdata[17] >> tmpdata[18] >> tmpdata[19] >> tmpdata[20] >> tmpdata[21] >> tmpdata[22] >> tmpdata[23]
-				 >> tmpdata[24] >> tmpdata[25])
-	{
-		SK::Array<float> tmpset;
-//		cout << "line " << count <<": ";
-		for(int i = 0; i < 26; i++)
-		{
-//			cout << tmpdata[i] << " ";
-			// Build parameter properly
-			if(i < 20)
-			{
-				// Need to inverse x parameters: 
-				if(i != 1 && i != 5 && i != 9 && i != 13 && i != 17)
-					tmpset.pushBack(tmpdata[tmplate[i]] * -1);
-				else
-					tmpset.pushBack(tmpdata[tmplate[i]]);
-			}
-			else
-			{
-//				tmpset.pushBack(0.0);
-				tmpset.pushBack(tmpdata[i - 20]);
-			}
-		}
-//		cout << endl;
-		dataset.pushBack(tmpset);
-		count++;
-	}*/
+	int file_num;
+	cout << "choose one trail: ";
+	cin >> file_num;
+//	DataDriven data_driven = DataDriven();
+	DataDriven data_driven = DataDriven(file_num);
+//	DataDriven data_driven = DataDriven("dataset/Trial07_General.mat");
 	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
 	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
 	data_driven.startPCA(10);

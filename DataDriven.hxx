@@ -16,11 +16,13 @@ class DataDriven
 {
 public:
 	DataDriven();
+	DataDriven(int );
 	DataDriven(char* );
 	void startPCA(int );
 	SK::Array<SK::Array<float>> getDataSet() {return dataset;}
 	MatrixXf getCovMatrix() {return cov_matrix;}
-	MatrixXf getTransMatrix();
+	MatrixXf getTransMatrix(){return trans_matrix;}
+	MatrixXf getrevMatrix(){return trans_matrix.transpose();}
 	VectorXf getMeanVector() {return mean_vector;}
 	int getDataSetSize() {return n;}
 
@@ -32,6 +34,5 @@ private:
 	MatrixXf cov_matrix;
 	MatrixXf trans_matrix;
 	VectorXf mean_vector;
-
 
 };
