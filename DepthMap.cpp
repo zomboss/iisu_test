@@ -350,7 +350,7 @@ int main(int argc, char** argv)
 	double total_t = double(end - begin);
 	cout << "total comsume = " << total_t  << " ms" << endl;/**/
 	
-	// Show th model
+	// Show the model
 	addHandModel(handmodel, skel);
 	if(skel)	addHandSkeleton(handmodel);
 

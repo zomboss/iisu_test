@@ -34,7 +34,10 @@
     <ClCompile Include="DataDriven.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="LoadMAT.cpp">
+    <ClCompile Include="ICPPCA.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="DDTest.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -70,6 +73,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="DataDriven.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="ICPPCA.hxx">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

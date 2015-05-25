@@ -18,6 +18,7 @@ public:
 	DataDriven();
 	DataDriven(int );
 	DataDriven(char* );
+	void startPCA();
 	void startPCA(int );
 	SK::Array<SK::Array<float>> getDataSet() {return dataset;}
 	MatrixXf getCovMatrix() {return cov_matrix;}
@@ -32,7 +33,7 @@ private:
 	int l;	// (pc space dimensions)
 	SK::Array<SK::Array<float>> dataset;
 	MatrixXf cov_matrix;
-	MatrixXf trans_matrix;
-	VectorXf mean_vector;
+	MatrixXf trans_matrix;	// (l + 6) * 26 matrix
+	VectorXf mean_vector;	// 26-d vector with 6 zero-till
 
 };

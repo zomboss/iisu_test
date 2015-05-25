@@ -202,12 +202,13 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClCompile Include="AICP.cxx" />
     <ClCompile Include="CostFunction.cxx" />
     <ClCompile Include="DataDriven.cpp" />
+    <ClCompile Include="DDTest.cpp" />
     <ClCompile Include="Finger.cxx" />
     <ClCompile Include="HandInfo.cxx" />
     <ClCompile Include="HandPose.cxx" />
     <ClCompile Include="HandModel.cxx" />
+    <ClCompile Include="ICPPCA.cxx" />
     <ClCompile Include="Initialization.cxx" />
-    <ClCompile Include="LoadMAT.cpp" />
     <ClCompile Include="MyTools.cxx" />
     <ClCompile Include="PSO.cxx" />
     <ClCompile Include="Sphere.cxx" />
@@ -220,6 +221,7 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClInclude Include="HandInfo.hxx" />
     <ClInclude Include="HandModel.hxx" />
     <ClInclude Include="HandPose.hxx" />
+    <ClInclude Include="ICPPCA.hxx" />
     <ClInclude Include="Initialization.hxx" />
     <ClInclude Include="MyTools.hxx" />
     <ClInclude Include="PSO.hxx" />
