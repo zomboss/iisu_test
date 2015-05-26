@@ -25,6 +25,8 @@ public:
 	MatrixXf getTransMatrix(){return trans_matrix;}
 	MatrixXf getrevMatrix(){return trans_matrix.transpose();}
 	VectorXf getMeanVector() {return mean_vector;}
+	VectorXf getMaxVector() {return max_vector;}
+	VectorXf getMinVector() {return min_vector;}
 	int getDataSetSize() {return n;}
 
 private:
@@ -35,5 +37,7 @@ private:
 	MatrixXf cov_matrix;
 	MatrixXf trans_matrix;	// (l + 6) * 26 matrix
 	VectorXf mean_vector;	// 26-d vector with 6 zero-till
+	VectorXf max_vector;	// l-d vector with 6 zero-till
+	VectorXf min_vector;	// l-d vector with 6 zero-till
 
 };

@@ -63,7 +63,7 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 			Solver::Options options;
 			options.max_num_iterations = iter;
 			options.linear_solver_type = ceres::DENSE_QR;
-			options.minimizer_progress_to_stdout = true;
+			options.minimizer_progress_to_stdout = false;
 
 			// Run the solver
 			Solver::Summary summary;
@@ -90,7 +90,7 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 			Solver::Options options;
 			options.max_num_iterations = iter;
 			options.linear_solver_type = ceres::DENSE_QR;
-			options.minimizer_progress_to_stdout = true;
+			options.minimizer_progress_to_stdout = false;
 
 			// Run the solver
 			Solver::Summary summary;
@@ -103,4 +103,17 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 
 
 	}
+}
+
+HandPose ICPPCA::pureTrans(int length)
+{
+	VectorXf ori_vec = MyTools::SKtoEigenVector(bestpose.getAllParameters());
+	VectorXf pca_vec = Eigen::VectorXf::Zero(length + 6);
+	pca_vec = trans_matrix * (ori_vec - mean_vector);
+	VectorXf aft_vec = VectorXf::Zero(26);
+	aft_vec = trans_matrix.transpose() * pca_vec + mean_vector;
+	HandPose newpose = HandPose();
+	newpose.setAllParameters(MyTools::EigentoSKVector(aft_vec));
+	newpose.setOrientation(bestpose.getOrientation());
+	return newpose;
 }

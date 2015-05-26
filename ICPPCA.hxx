@@ -39,15 +39,17 @@ public:
 
 	void run(const PointCloud<PointXYZRGB> &);
 
+	HandPose pureTrans(int );
+
+	void updateGlobal(double *);
+	void updatePose(double *);
+
 private:
 	int times;
 	int iter;
 	HandPose bestpose;
 	MatrixXf trans_matrix;
 	VectorXf mean_vector;
-
-	void updateGlobal(double *);
-	void updatePose(double *);
 
 };
 

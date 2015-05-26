@@ -1,0 +1,357 @@
+<--------------------test 1--------------------->
+// Condition: five fingers in almost initial pose
+// Plam: <3,242,-135> -> <-7, 143, -146>
+// Fingers: <-11,246,-14> <23,230,-22> <-87,230,-121> <-52,247,-33> <65,205,-61>
+// Code:(in Iisu_Test)
+pos1 = Vector3(3,242,-135)
+ori1 = Vector3(-10,-99,-11)
+testpos1 = Vector3(-11,246,-14) //(0, 255, 0) -> green (middle)
+testpos2 = Vector3(23,230,-22) //(127, 127, 0) -> yellow (ring)
+testpos3 = Vector3(-87,230,-121) //(0, 127, 127) -> cyan (thumb)
+testpos4 = Vector3(-52,247,-33) //(127, 0, 127) -> purple (index)
+testpos5 = Vector3(65,205,-61) //(84, 84, 84) -> white (little)
+// Code:(in ceres-2010)
+// getTarget
+{-44.7499, 106.7453, -9.97282, -2.19852, 120.835, -15.0394, 32.3884, 110.645, -1.78782, 72.7824, 69.7453, 22.7628}
+// getTips
+{-34.0, 107.0, 0.0, -12.0, 119.0, 0.0, 12.0, 117.0, 0.0, 34.0, 112.0, 0.0}
+// getJoint
+{34.0, -37.0, 0.0, -12.0, 49.0, 0.0, 12.0, 47.0, 0.0, 34.0, 42.0, 0.0}
+// Answers:
+tmp1 = Vector3(-0.0672171,0,0.0591354) // index
+tmp2 = Vector3(-0.174533,0,-0.13538) // middle
+tmp6 = Vector3(-0.0267428,0,-0.309978) // ring
+tmp7 = Vector3(0.478573,0,-0.523599) //little
+
+<--------------------test 2--------------------->
+// Condition: five fingers with a liitle bent
+// Plam: <29, 201, -98> -> <36, 102, -108>
+// Fingers: <47,152,-19> <-18,181,14> <18,161,5> <-52,159,-92> <-51,183,-12>
+// Code:(in Iisu_Test)
+pos1 = Vector3(29,201,-98)
+ori1 = Vector3(7, -99, -10)
+testpos1 = Vector3(47,152,-19) //(0, 255, 0) -> green (little)
+testpos2 = Vector3(-18,181,14) //(127, 127, 0) -> yellow (middle)
+testpos3 = Vector3(18,161,5) //(0, 127, 127) -> cyan (ring)
+testpos4 = Vector3(-52,159,-92) //(127, 0, 127) -> purple (thumb)
+testpos5 = Vector3(-51,183,-12) //(84, 84, 84) -> white (index)
+// Special issue: rotate PI/12 clockwise by z axis
+	Matrix4 sp = Matrix4::IDENTITY;
+	sp.rotateZ(-M_PI / 12.0);
+	pos1 = sp.multiplyByPoint(pos1);
+	testpos1 = sp.multiplyByPoint(testpos1); //(0, 255, 0) -> green (little)
+	testpos2 = sp.multiplyByPoint(testpos2); //(127, 127, 0) -> yellow (middle)
+	testpos3 = sp.multiplyByPoint(testpos3); //(0, 127, 127) -> cyan (ring)
+	testpos4 = sp.multiplyByPoint(testpos4); //(127, 0, 127) -> purple (thumb)
+	testpos5 = sp.multiplyByPoint(testpos5); //(84, 84, 84) -> white (index)
+// Code:(in ceres-2010)
+// getTarget
+// with rotation
+{-45.583, 108.621, 15.3339, -5.90272, 122.257, 12.5406, 26.9916, 103.173, 30.7164, 47.3585, 71.5754, 39.8866}
+// without rotation
+{-72.1429, 93.1219, 15.3339, -37.344, 116.563, 12.5406, -0.631261, 106.644, 30.7164, 27.2198, 81.3938, 39.8866}
+// getTips
+{-34.0, 107.0, 0.0, -12.0, 119.0, 0.0, 12.0, 117.0, 0.0, 34.0, 112.0, 0.0}
+// getJoint
+{34.0, -37.0, 0.0, -12.0, 49.0, 0.0, 12.0, 47.0, 0.0, 34.0, 42.0, 0.0}
+// Answers:
+// with rotation first, without rotation last
+tmp1 = Vector3(0.101939,0,0.0569755) // index
+tmp2 = Vector3(0.169013,0,-0.0830577) // middle
+tmp6 = Vector3(0.486042,0,-0.260789) // ring
+tmp7 = Vector3(0.887716,0,-0.424057) //little
+// with rotation first, with rotation last
+tmp1 = Vector3(0.100555,0,0.35403) // index
+tmp2 = Vector3(0.168378,0,0.523599) // middle
+tmp6 = Vector3(0.439587,0,0.472537) // ring
+tmp7 = Vector3(0.700673,0,0.442961) //little
+global = -0.416479
+
+<--------------------test 3--------------------->
+// Condition: two fingers "ya~"
+// Plam: <46, 204, -120> -> <13, 116, -152>
+// Fingers: <0,0,0> <7,208,-4> <0,0,0> <0,0,0> <-37,225,-39>
+// Code:(in Iisu_Test)
+pos1 = Vector3(46,204,-120)
+ori1 = Vector3(-23,-88,-32)
+testpos1 = Vector3(7,208,-4) //(0, 255, 0) -> green (middle)
+testpos2 = Vector3(-37,225,-39) //(127, 127, 0) -> yellow (index)
+// Code:(in ceres-2010)
+// getTarget
+{-48.2577, 105.6926, -8.8927, 7.86406, 118.557, -18.5227}
+// getTips
+{-34.0, 107.0, 0.0, -12.0, 119.0, 0.0, 12.0, 117.0, 0.0, 34.0, 112.0, 0.0}
+// getJoint
+{34.0, -37.0, 0.0, -12.0, 49.0, 0.0, 12.0, 47.0, 0.0, 34.0, 42.0, 0.0}
+// Answers:
+tmp1 = Vector3(-0.0596603,0,0.0810737) // index
+tmp2 = Vector3(-0.174533,0,-0.277901) // middle
+
+<--------------------test 4--------------------->
+// Condition: normal five fingers with direction
+// Plam: <8, 245, -105> -> <4, 145, -97>
+// Fingers: <-84,232,-107> <55,232,-18> <-30,269,5> <11,256,8> <-67,262,-18>
+// Code:(in Iisu_Test)
+pos1 = Vector3(8,245,-105)
+ori1 = Vector3(-4,-100,8)
+testpos1 = Vector3(-84,232,-107) //(0, 255, 0) -> green (thumb)
+testpos2 = Vector3(55,232,-18) //(127, 127, 0) -> yellow (little)
+testpos3 = Vector3(-30,269,5) //(0, 127, 127) -> cyan (middle)
+testpos4 = Vector3(11,256,8) //(127, 0, 127) -> purple (ring)
+testpos5 = Vector3(-67,262,-18) //(84, 84, 84) -> white (index)
+testori1 = Vector3(96,7,-28)
+testori2 = Vector3(51,-19,84)
+testori3 = Vector3(22,-22,-95)
+testori4 = Vector3(-1,-18,-99)
+testori5 = Vector3(45,-18,-88)
+// Code:(in ceres-2010)
+// getTarget
+// with rotation
+{-46.083, 106.383, -6.75743, -4.02808, 118.037, -13.3037, 36.1941, 107.667, -1.74107, 70.8393, 67.8154, 18.2627, -88.2799, 23.9497, 16.4485}
+// without rotation
+{-72.0648, 90.8311, -6.75743, -34.4411, 112.973, -13.3037, 7.09462, 113.366, -1.74107, 50.8736, 83.8392, 18.2627, -91.4686, 0.285603, 16.4485}
+// getDirection
+// with rotation
+{17.1495, -98.6108, 8.86607, -6.83552, -98.8779, 13.1882, -30.0408, -95.5642, 9.79006, -73.8523, -63.2406, -23.8317, 83.2916, -54.2224, -13.1099}
+// without rotation
+{42.0875, -90.8121, 8.86607, 18.9889, -97.2779, 13.1822, -4.28332, -100.083, 9.79006, -54.968, -80.2001, -23.8317, 94.4873, -30.8173, -13.1099}
+// getTips
+{-34.0, 107.0, 0.0, -12.0, 119.0, 0.0, 12.0, 117.0, 0.0, 34.0, 112.0, 0.0, -59.0, 55.0, 0.0}
+// getJoint
+{34.0, -37.0, 0.0, -12.0, 49.0, 0.0, 12.0, 47.0, 0.0, 34.0, 42.0, 0.0, -20.0, -23.0, 0.0}
+// Answers:
+// with rotation first, without rotation last
+tmp1 = Vector3(-0.0454799,0,0.0677856) // index
+tmp2 = Vector3(-0.174533,0,-0.114964) // middle
+tmp6 = Vector3(-0.266504,0,-0.379463) // ring
+tmp7 = Vector3(0.413434,0,-0.523599) //little
+// with rotation first, with rotation last
+tmp1 = Vector3(-0.0468433,0,0.0511305) // index
+tmp2 = Vector3(-0.174533,0,-0.160102) // middle
+tmp6 = Vector3(-0.0250983,0,-0.397793) // ring
+tmp7 = Vector3(0.281259,0,-0.523599) //little
+tmp8 = Vector3(0.0,0.369268,0.153323) //thumb
+global = 0.0273856
+// without rotation first, with rotation last
+tmp1 = Vector3(-0.045404,0,0.114452) // index
+tmp2 = Vector3(-0.174533,0,-0.00280097) // middle
+tmp6 = Vector3(-0.0267493,0,-0.265335) // ring
+tmp7 = Vector3(0.40864,0,-0.523599) //little
+tmp8 = Vector3(0.0,-0.21238,1.11737) //thumb
+global = 0.185863
+
+<--------------------pcd_reader(test 1)--------------------->
+// iisu_test data input
+getTipVector
+data[5][3] = {{-16, 252, -34}, {-47, 203, -117}, {25, 253, -16}, {92, 207, -45}, {52, 239, -21}};
+getFingerDirection
+str[5][3] = {{-16, 252, -34}, {-47, 203, -117}, {25, 253, -16}, {92, 207, -45}, {52, 239, -21}};
+end[5][3] = {{10, 220, -125}, {39, 196, -167}, {40, 218, -109}, {61, 212, -140}, {47, 200, -112}};
+getPlamDirection()
+direction.pushBack(Vector3(42, 230, -133));
+direction.pushBack(Vector3(41, 131, -121));
+
+// ceres-2010 data input
+getTarget
+{-57.1962, 101.577, -8.71252, -16.0282, 119.21, -7.83542, 11.0428, 112.234, 5.15784, 51.0808, 83.9986, 33.4814, -88.5935, 13.2442, 29.7223}
+getDirection
+{25.3675, -94.6213, 19.974, 14.3748, -96.8901, 22.8089, -5.56804, -95.2355, 27.2336, -31.9939, -93.3975, -16.6907, 85.5527, -51.2804, -0.249376}
+// index
+finger 0: tips = Vector3(-57.1962, 101.577, -8.71252), ori = Vector3(25.3675, -94.6213, 19.974)
+// thumb
+finger 1: tips = Vector3(-88.5935, 13.2442, 29.7223), ori = Vector3(85.5527, -51.2804, -0.249376)
+// middle
+finger 2: tips = Vector3(-16.0282, 119.21, -7.83542), ori = Vector3(14.3748, -96.8901, 22.8089)
+// little
+finger 3: tips = Vector3(51.0808, 83.9986, 33.4814), ori = Vector3(-31.9939, -93.3975, -16.6907)
+// ring
+finger 4: tips = Vector3(11.0428, 112.234, 5.15784), ori = Vector3(-5.56804, -95.2355, 27.2336)
+//Answers:
+Final cost = 215.341
+Final theta = (-0.0586839, -0.107558, 0.0800233, 0.656611, 1.1001)
+phi = (0.0354309, -0.191773, -0.245905, -0.523599, -0.390934)
+global = 0.14347
+
+Final cost = 200.532
+Final theta = (-0.0587526, -0.107299, 0.0800129, 0.658569, 1.17076)
+phi = (0.029693, -0.204967, -0.260783, -0.523599, -0.382317)
+global = 0.149578
+
+Final cost = 836.36
+Final theta = (-0.0593308, -0.104054, 0.0797768, 0.734575, 0.349066)
+phi = (-0.0362806, -0.344614, -0.349066, -0.349066, -0.174533)
+global = 0.237759
+
+<--------------------pcd_reader(test 2)--------------------->
+// data input
+getTipVector
+data[5][3] = {{21, 223, -3}, {-40, 234, -24}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+getFingerDirection
+str[5][3] = {{21, 223, -3}, {-40, 234, -24}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+end[5][3] = {{25, 221, -102}, {7, 227, -111}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+getPlamDirection()
+direction.pushBack(Vector3(18, 222, -120));
+direction.pushBack(Vector3(-64, 171, -145));
+finger_match.pushBack(2);finger_match.pushBack(1);finger_match.pushBack(0);finger_match.pushBack(3);finger_match.pushBack(4);
+
+// ceres-2010 data input
+getTarget
+{65.0365, 88.5227, 21.3156, 96.0187, 58.8531, -27.6308, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+getDirection
+{-61.7497, -74.637, -16.7258, -79.7898, -54.1132, 18.5948, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+Answers:
+Final cost = 123.461
+Final theta = (0.149271, -0.174533, 0, 0, 0)
+phi = (0.00390387, -0.310629, 0, 0, 0)
+global = -0.948655
+
+Final cost = 124.506
+Final theta = (0.149091, -0.174533, 0, 0, 0)
+phi = (0.015672, -0.278891, 0, 0, 0)
+global = -0.966753
+
+<--------------------pcd_reader(test 3)--------------------->
+// data input
+getTipVector
+data[5][3] = {{31, 225, -32}, {-2, 235, -20}, {58, 214, -59}, {-56, 196, -98}, {-42, 231, -38}};
+getFingerDirection
+str[5][3] = {{31, 225, -32}, {-2, 235, -20}, {58, 214, -59}, {-56, 196, -98}, {-42, 231, -38}};
+end[5][3] = {{28, 277, -117}, {18, 280, -107}, {61, 249, -152}, {3, 255, -153}, {-16, 273, -125}};
+getPlamDirection()
+direction.pushBack(Vector3(16, 241, -123));
+direction.pushBack(Vector3(31, 142, -118));
+finger_match.pushBack(3);finger_match.pushBack(2);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
+
+// ceres-2010 data input
+getTarget
+{-70.888, 75.0607, 5.53665, -33.8707, 98.7469, 8.49047, -1.18361, 90.8118, 22.6901, 27.735, 67.1488, 36.2136, -80.532, 11.3115, 34.9406}
+getDirection
+{44.3664, -79.2181, -42.0261, 38.9158, -79.8443, -45.8863, 17.0902, -80.5956, -56.1378, 21.77, -88.8822, -38.8613, 74.2652, -41.7503, -52.2421}
+Answers:
+Final cost = 928.748
+Final theta = (0.0410083, 0.138736, 0.476859, 1.18863, 0.627738)
+phi = (-0.012622, -0.469648, -0.523599, -0.523599, -0.499068)
+global = 0.465619
+pose[5][3] = {{0, -0.499068, 0.627738}, {0.0410083, 0, -0.012622}, {0.138736, 0, -0.469648}, {0.476859, 0, -0.523599}, {1.18863, 0, -0.523599}};
+
+Final cost = 1363.62
+Final theta = (0.0408662, 0.142484, 0.493609, 1.22111, 0.300835)
+phi = (0.0209671, -0.349066, -0.349066, -0.349066, -0.174533)
+global = 0.410033
+
+<--------------------pcd_reader(test 4)--------------------->
+//raw data
+finger 0 tips : Vector3(3.46493, 304.123, 6.66853)
+direct to : Vector3(30.1462, 289.314, -88.5618)
+finger 1 tips : Vector3(37.2374, 302.49, 0.927681)
+direct to : Vector3(38.8522, 269.612, -93.4995)
+finger 2 tips : Vector3(77.8514, 267.306, -20.8695)
+direct to : Vector3(47.9748, 269.833, -116.269)
+finger 3 tips : Vector3(-39.6159, 239.362, -74.8323)
+direct to : Vector3(5.07187, 277.856, -155.586)
+finger 4 tips : Vector3(-38.7027, 264.891, -28.0148)
+direct to : Vector3(14.2773, 307.59, -101.295)
+Plam ori: Vector3(29.8961, 272.654, -105.193) -> Vector3(39.165, 176.045, -81.0917)
+finger_match.pushBack(2);finger_match.pushBack(3);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
+
+<--------------------pcd_reader(test 5)--------------------->
+//raw data
+finger 0 tips : Vector3(0, 0, 0)
+direct to : Vector3(0, 0, 0)
+finger 1 tips : Vector3(0, 0, 0)
+direct to : Vector3(0, 0, 0)
+finger 2 tips : Vector3(0, 0, 0)
+direct to : Vector3(0, 0, 0)
+finger 3 tips : Vector3(0, 0, 0)
+direct to : Vector3(0, 0, 0)
+finger 4 tips : Vector3(4.36473, 255.802, -37.1156)
+direct to : Vector3(17.9316, 250.2, -136.033)
+Plam ori: Vector3(14.2994, 252.356, -113.499) -> Vector3(101.072, 209.603, -88.1464)
+
+<--------------------pcd_reader(test 6)--------------------->
+//raw data
+finger 0 tips : Vector3(43.8998, 264.451, -50.2532)
+direct to : Vector3(45.1178, 288.607, -147.284)
+finger 1 tips : Vector3(-71.4137, 296.391, -59.2252)
+direct to : Vector3(-27.1685, 292.02, -148.798)
+finger 2 tips : Vector3(-17.4047, 232.933, -107.672)
+direct to : Vector3(18.3417, 299.891, -172.779)
+finger 3 tips : Vector3(-31.9639, 308.884, -31.7897)
+direct to : Vector3(2.58382, 269.086, -116.776)
+finger 4 tips : Vector3(-7.53237, 233.437, -78.3683)
+direct to : Vector3(-8.90246, 329.548, -105.95)
+Plam ori: Vector3(13.8882, 281.819, -144.746) -> Vector3(40.8446, 378.088, -147.146)
+														(-13.0682, 184.731, -142.346)???
+data[5][3] = {{43.8998, 264.451, -50.2532}, {-71.4137, 296.391, -59.2252}, {-17.4047, 232.933, -107.672}, {-31.9639, 308.884, -31.7897}, {-7.53237, 233.437, -78.3683}};
+str[5][3] = {{43.8998, 264.451, -50.2532}, {-71.4137, 296.391, -59.2252}, {-17.4047, 232.933, -107.672}, {-31.9639, 308.884, -31.7897}, {-7.53237, 233.437, -78.3683}};
+end[5][3] = {{45.1178, 288.607, -147.284}, {-27.1685, 292.02, -148.798}, {18.3417, 299.891, -172.779}, {2.58382, 269.086, -116.776}, {-8.90246, 329.548, -105.95}};
+finger_match.pushBack(4);finger_match.pushBack(1);finger_match.pushBack(0);finger_match.pushBack(2);finger_match.pushBack(3);
+
+
+<--------------------pcd_reader(test 7)--------------------->
+order: 3 2 0
+finger num = 3
+finger 0 tips : Vector3(13.2824, 216.939, 111.368)
+direct to : Vector3(3.49755, 261.811, 22.5375)
+finger 1 tips : Vector3(0, 0, 0)
+direct to : Vector3(0, 0, 0)
+finger 2 tips : Vector3(-45.0043, 238.891, 117.011)
+direct to : Vector3(-6.13132, 254.403, 26.1912)
+finger 3 tips : Vector3(-85.5206, 255.751, 36.1355)
+direct to : Vector3(4.68098, 264.095, -6.22085)
+finger 4 tips : Vector3(0, 0, 0)
+direct to : Vector3(0, 0, 0)
+Plam ori: Vector3(2.09738, 268.865, 14.6442) -> Vector3(-22.1352, 187.514, -38.2218)
+
+<--------------------pcd_reader(test 8)--------------------->
+finger num = 5
+finger 0 tips : Vector3(24.5144, 306.18, 54.7968)
+direct to : Vector3(41.924, 379.118, -11.3622)
+finger 1 tips : Vector3(-70.8291, 326.933, -44.6531)
+direct to : Vector3(17.1942, 365.546, -72.2386)
+finger 2 tips : Vector3(-56.057, 330.623, 43.5999)
+direct to : Vector3(14.7944, 389.401, 4.54638)
+finger 3 tips : Vector3(58.2252, 301.531, 24.1421)
+direct to : Vector3(34.7947, 371.129, -43.7337)
+finger 4 tips : Vector3(-9.15958, 324.138, 67.1702)
+direct to : Vector3(15.5087, 384.96, -8.27587)
+Plam ori: Vector3(18.5048, 355.56, -41.6531) -> Vector3(17.3704, 257.711, -62.2542)
+finger_match.pushBack(3);finger_match.pushBack(0);finger_match.pushBack(1);finger_match.pushBack(4);finger_match.pushBack(2);
+data[5][3] = {{24.5144, 306.18, 54.7968}, {-70.8291, 326.933, -44.6531}, {-56.057, 330.623, 43.5999}, {58.2252, 301.531, 24.1421}, {-9.15958, 324.138, 67.1702}};
+str[5][3] = {{24.5144, 306.18, 54.7968}, {-70.8291, 326.933, -44.6531}, {-56.057, 330.623, 43.5999}, {58.2252, 301.531, 24.1421}, {-9.15958, 324.138, 67.1702}};
+end[5][3] = {{41.924, 379.118, -11.3622}, {17.1942, 365.546, -72.2386}, {14.7944, 389.401, 4.54638}, {34.7947, 371.129, -43.7337}, {15.5087, 384.96, -8.27587}};
+
+
+<--------------------pcd_reader(test 9)--------------------->
+finger num = 5
+finger 0 tips : Vector3(37.5714, 295.46, 77.926)
+direct to : Vector3(27.4743, 319.138, -18.7044)
+finger 1 tips : Vector3(-21.4612, 350.523, 80.8923)
+direct to : Vector3(-1.4965, 343.182, -16.8192)
+finger 2 tips : Vector3(56.3304, 265.788, 35.05)
+direct to : Vector3(31.7353, 326.943, -40.1506)
+finger 3 tips : Vector3(-53.3599, 377.658, -5.33599)
+direct to : Vector3(27.6647, 339.774, -50.0551)
+finger 4 tips : Vector3(12.1443, 322.319, 91.0819)
+direct to : Vector3(23.2306, 319.797, -8.26963)
+Plam ori: Vector3(19.2832, 341.86, -27.9837) -> Vector3(-45.5201, 270.517, -54.6425)
+data[5][3] = {{37.5714, 295.46, 77.926}, {-21.4612, 350.523, 80.8923}, {56.3304, 265.788, 35.05}, {-53.3599, 377.658, -5.33599}, {12.1443, 322.319, 91.0819}};
+str[5][3] = {{37.5714, 295.46, 77.926}, {-21.4612, 350.523, 80.8923}, {56.3304, 265.788, 35.05}, {-53.3599, 377.658, -5.33599}, {12.1443, 322.319, 91.0819}};
+end[5][3] = {{27.4743, 319.138, -18.7044}, {-1.4965, 343.182, -16.8192}, {31.7353, 326.943, -40.1506}, {27.6647, 339.774, -50.0551}, {23.2306, 319.797, -8.26963}};
+finger_match.pushBack(3);finger_match.pushBack(1);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(2);
+
+<--------------------pcd_reader(test 10)--------------------->
+order: 1 0 2 3 4
+finger num = 5
+finger 0 tips : Vector3(-45.602, 333.881, 72.3342)
+direct to : Vector3(-31.4786, 429.463, 46.5546)
+finger 1 tips : Vector3(-68.2036, 329.124, 4.65025)
+direct to : Vector3(4.28465, 396.622, -9.1186)
+finger 2 tips : Vector3(-6.2276, 330.572, 88.7433)
+direct to : Vector3(-37.8475, 261.703, 153.991)
+finger 3 tips : Vector3(29.9649, 334.861, 77.2779)
+direct to : Vector3(43.7297, 357.681, -19.1057)
+finger 4 tips : Vector3(55.0884, 324.91, 52.0279)
+direct to : Vector3(47.866, 277.011, 139.512)
+Plam ori: Vector3(12.159, 359.584, 1.4802) -> Vector3(20.2947, 262.236, -19.9018)
+														

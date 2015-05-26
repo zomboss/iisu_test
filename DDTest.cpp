@@ -15,6 +15,7 @@
 #include "HandModel.hxx"
 #include "DataDriven.hxx"
 #include "PSO.hxx"
+#include "ICPPCA.hxx"
 #include "Initialization.hxx"
 
 using namespace std;
@@ -25,7 +26,7 @@ using namespace Eigen;
 const int HEIGHT = 240;
 const int WIDTH = 320;
 // for testing
-const bool skel = false;
+const bool skel = true;
 
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
@@ -35,14 +36,14 @@ boost::shared_ptr<RangeImagePlanar> planar (new RangeImagePlanar());
 
 Vector3 getTipVector(int finger)
 {
-	float data[5][3] = {{37.5714, 295.46, 77.926}, {-21.4612, 350.523, 80.8923}, {56.3304, 265.788, 35.05}, {-53.3599, 377.658, -5.33599}, {12.1443, 322.319, 91.0819}};
+	float data[5][3] = {{31, 225, -32}, {-2, 235, -20}, {58, 214, -59}, {-56, 196, -98}, {-42, 231, -38}};
 	return Vector3(data[finger][0], data[finger][1], data[finger][2]);
 }
 
 SK::Array<Vector3> getFingerDirection(int finger)
 {
-	float str[5][3] = {{37.5714, 295.46, 77.926}, {-21.4612, 350.523, 80.8923}, {56.3304, 265.788, 35.05}, {-53.3599, 377.658, -5.33599}, {12.1443, 322.319, 91.0819}};
-	float end[5][3] = {{27.4743, 319.138, -18.7044}, {-1.4965, 343.182, -16.8192}, {31.7353, 326.943, -40.1506}, {27.6647, 339.774, -50.0551}, {23.2306, 319.797, -8.26963}};
+	float str[5][3] = {{31, 225, -32}, {-2, 235, -20}, {58, 214, -59}, {-56, 196, -98}, {-42, 231, -38}};
+	float end[5][3] = {{28, 277, -117}, {18, 280, -107}, {61, 249, -152}, {3, 255, -153}, {-16, 273, -125}};
 	SK::Array<Vector3> direction;
 	direction.pushBack(Vector3(str[finger][0], str[finger][1], str[finger][2]));
 	direction.pushBack(Vector3(end[finger][0], end[finger][1], end[finger][2]));
@@ -52,8 +53,8 @@ SK::Array<Vector3> getFingerDirection(int finger)
 SK::Array<Vector3> getPalmDirection()
 {
 	SK::Array<Vector3> direction;
-	direction.pushBack(Vector3(19.2832, 341.86, -27.9837));
-	direction.pushBack(Vector3(-45.5201, 270.517, -54.6425));
+	direction.pushBack(Vector3(16, 241, -123));
+	direction.pushBack(Vector3(31, 142, -118));
 	return direction;
 }
 
@@ -148,16 +149,50 @@ void updateHandSkeleton(HandModel &handmodel)
 	}
 }
 
+void showParameter(HandPose &strpose, HandPose &endpose)
+{
+	cout << "checking parameter..." << endl;
+	cout << "thumb, origin:\t" << strpose.getThumbPose()[0] << ", " << strpose.getThumbPose()[1] << ", " << strpose.getThumbPose()[2] << endl
+		 << "after opt:\t" << endpose.getThumbPose()[0] << ", " << endpose.getThumbPose()[1] << ", " << endpose.getThumbPose()[2] << endl
+		 << "index, origin:\t" << strpose.getIndexPose()[0] << ", " << strpose.getIndexPose()[1] << ", " << strpose.getIndexPose()[2] << endl
+		 << "after opt:\t" << endpose.getIndexPose()[0] << ", " << endpose.getIndexPose()[1] << ", " << endpose.getIndexPose()[2] << endl
+		 << "middle, origin:\t" << strpose.getMiddlePose()[0] << ", " << strpose.getMiddlePose()[1] << ", " << strpose.getMiddlePose()[2] << endl
+		 << "after opt:\t" << endpose.getMiddlePose()[0] << ", " << endpose.getMiddlePose()[1] << ", " << endpose.getMiddlePose()[2] << endl
+		 << "ring, origin:\t" << strpose.getRingPose()[0] << ", " << strpose.getRingPose()[1] << ", " << strpose.getRingPose()[2] << endl
+		 << "after opt:\t" << endpose.getRingPose()[0] << ", " << endpose.getRingPose()[1] << ", " << endpose.getRingPose()[2] << endl
+		 << "little, origin:\t" << strpose.getLittlePose()[0] << ", " << strpose.getLittlePose()[1] << ", " << strpose.getLittlePose()[2] << endl
+		 << "after opt:\t" << endpose.getLittlePose()[0] << ", " << endpose.getLittlePose()[1] << ", " << endpose.getLittlePose()[2] << endl
+		 << "position, origin:\t" << strpose.getPosition() << endl
+		 << "after opt:\t" << endpose.getPosition() << endl
+		 << "rotation, origin:\t" << strpose.getRotation() << endl
+		 << "after opt:\t" << endpose.getRotation() << endl
+		 << "orientation, origin:\t" << strpose.getOrientation() << endl
+		 << "after opt:\t" << endpose.getOrientation() << endl;
+}
+
+void showParameter(HandPose &pose)
+{
+	cout << "checking parameter..." << endl;
+	cout << "thumb:\t" << pose.getThumbPose()[0] << ", " << pose.getThumbPose()[1] << ", " << pose.getThumbPose()[2] << endl
+		 << "index:\t" << pose.getIndexPose()[0] << ", " << pose.getIndexPose()[1] << ", " << pose.getIndexPose()[2] << endl
+		 << "middle:\t" << pose.getMiddlePose()[0] << ", " << pose.getMiddlePose()[1] << ", " << pose.getMiddlePose()[2] << endl
+		 << "ring, origin:\t" << pose.getRingPose()[0] << ", " << pose.getRingPose()[1] << ", " << pose.getRingPose()[2] << endl
+		 << "little, origin:\t" << pose.getLittlePose()[0] << ", " << pose.getLittlePose()[1] << ", " << pose.getLittlePose()[2] << endl
+		 << "position, origin:\t" << pose.getPosition() << endl
+		 << "rotation, origin:\t" << pose.getRotation() << endl
+		 << "orientation, origin:\t" << pose.getOrientation() << endl;
+}
+
 int main(int argc, char **argv)
 {
 	google::InitGoogleLogging(argv[0]);
 
-	if (io::loadPCDFile<PointXYZRGB> ("data/test_pcd_9.pcd", *cloudptr) == -1) //* load the file
+	if (io::loadPCDFile<PointXYZRGB> ("data/test_pcd_3.pcd", *cloudptr) == -1) //* load the file
 	{
-		PCL_ERROR ("Couldn't read file test_pcd_9.pcd \n");
+		PCL_ERROR ("Couldn't read file test_pcd_3.pcd \n");
 		return -1;
 	}
-	cout << "Loaded " << cloudptr->width * cloudptr->height << " data points from test_pcd_9.pcd." <<  endl;
+	cout << "Loaded " << cloudptr->width * cloudptr->height << " data points from test_pcd_3.pcd." <<  endl;
 
 	// Viewer initialization
 	viewer->setBackgroundColor (0, 0, 0);
@@ -186,7 +221,7 @@ int main(int argc, char **argv)
 	// Get tips and plam normal (hand feature)
 	SK::Array<Vector3> pc_tips, pc_dirs;
 	SK::Array<int> finger_match;			// Special case!!!
-	finger_match.pushBack(3);finger_match.pushBack(1);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(2);
+	finger_match.pushBack(3);finger_match.pushBack(2);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
 	addNPCFeature(pc_tips, pc_dirs, finger_match);/**/
 
 	// Hand Model & pose initialization
@@ -213,7 +248,7 @@ int main(int argc, char **argv)
 /*	handpose.applyPose(handmodel);*/
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(15, 24, -10, 1);
+/*	PSO pso = PSO(15, 24, -10, 1);
 	pso.generateParticles(handpose);
 	cout << "PSO initial done..." << endl;
 	pso.goGeneration_mp(cloud, handmodel, false, false);
@@ -221,28 +256,40 @@ int main(int argc, char **argv)
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
 	bestpose.applyPose(handmodel);
-	cout << "show point: " << pso.getBestPoint() << endl;/**/
+	cout << "show point: " << pso.getBestPoint() << endl;*/
 
 
 	// ICPPCA Optimization
+	ICPPCA icppca = ICPPCA(6, 10, handpose, data_driven.getTransMatrix(), data_driven.getMeanVector());
+/*	icppca.run(cloud);
+	HandPose bestpose = icppca.getBestPose();
+	bestpose.applyPose(handmodel);*/
 
-
-
-
-
-
-
+	int length;
+	cout << "enter length = ";
+	cin >> length;
+	HandPose tmppose = icppca.pureTrans(length);
+	showParameter(handpose, tmppose);
 
 	// Show the model
 	addHandModel(handmodel, skel);
 	if(skel)	addHandSkeleton(handmodel);
 
 	// Main while
+	int frame = 0;
 	while(!viewer->wasStopped())
 	{
+		handmodel = HandModel();
+		if(frame % 2 == 0)	handpose.applyPose(handmodel);
+		else				tmppose.applyPose(handmodel);
+
+		updateHandModel(handmodel, skel);
+		if(skel)	updateHandSkeleton(handmodel);
+
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
 		viewer->spinOnce(100);
 		rviewer->spinOnce(100);
+		frame++;
 	}
 
 	return 0;
