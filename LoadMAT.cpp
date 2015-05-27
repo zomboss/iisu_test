@@ -87,18 +87,15 @@ int main(int argc, char **argv)
 	int file_num;
 	cout << "choose one trail: ";
 	cin >> file_num;
-	DataDriven data_driven;
-	if(file_num >= 0 && file_num < 17)
-		data_driven = DataDriven(file_num);
-	else
-		data_driven = DataDriven();
+	DataDriven data_driven = (file_num >= 0 && file_num < 17)? DataDriven(file_num) : DataDriven();
 	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
 	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
 	data_driven.startPCA();
 //	data_driven.startPCA(10);
 	MatrixXf transmat = data_driven.getTransMatrix();
 	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
-
+	cout << endl << "min vector: " << endl << data_driven.getMinVector() << endl;
+	cout << endl << "max vector: " << endl << data_driven.getMaxVector() << endl;
 
 	HandModel handmodel = HandModel();
 	addHandModel(handmodel, skel);

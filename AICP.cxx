@@ -109,8 +109,8 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 		int finger = -2, joint = -2;
 		double theta = 0.0, upper = 0.0, lower = 0.0;
 		int seed = getRandomJoint(finger, joint, theta, upper, lower);
-		cout << "In time " << t << ", seed = " << seed << endl;
-/*		if(finger == -1)
+/*		cout << "In time " << t << ", seed = " << seed << endl;
+		if(finger == -1)
 			cout << "Get finger = " << finger << ", joint = " << joint << ", theta = " << theta << endl;
 		else
 			cout << "Get finger = " << finger << ", joint = " << joint << ", theta = " << theta << ", upper = " << upper << ", lower = " << lower << endl;*/
@@ -128,7 +128,7 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 			problem.SetParameterUpperBound(&theta, 0, upper);
 			problem.SetParameterLowerBound(&theta, 0, lower);
 		}
-		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
+//		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
 
 		// Set the solver
 		Solver::Options options;
@@ -141,7 +141,7 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 		Solve(options, &problem, &summary);
 
 		// Recover the theta
-		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
+//		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(seed, theta);
 	}
 }

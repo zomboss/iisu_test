@@ -9,13 +9,16 @@ ICPPCA::ICPPCA()
 
 }
 
-ICPPCA::ICPPCA(int t, int it, const HandPose &pose, const MatrixXf &mat, const VectorXf &vec)
+ICPPCA::ICPPCA(int t, int it, int l, const HandPose &pose, const MatrixXf &mat, const VectorXf &mean, const VectorXf &max, const VectorXf &min)
 {
 	times = t;
 	iter = it;
+	length = l;
 	bestpose = pose;
 	trans_matrix = mat;
-	mean_vector = vec;
+	mean_vector = mean;
+	min_vector = min;
+	max_vector = max;
 }
 
 void ICPPCA::updateGlobal(double *para)
@@ -28,15 +31,14 @@ void ICPPCA::updateGlobal(double *para)
 
 void ICPPCA::updatePose(double *para)
 {
-	// Suppose 2 parameter!!!!
 	// recover to 26-d parameters
 	SK::Vector3 pos_vec = bestpose.getPosition();
 	SK::Vector3 rot_vec = bestpose.getRotation();
 	Eigen::VectorXf curr_pca_para;
-	curr_pca_para.resize(2 + 6);
-	curr_pca_para[0] = (float)para[0];	curr_pca_para[1] = (float)para[1];
-	curr_pca_para[2] = pos_vec[0];	curr_pca_para[3] = pos_vec[1];	curr_pca_para[4] = pos_vec[2];
-	curr_pca_para[5] = rot_vec[0];	curr_pca_para[6] = rot_vec[1];	curr_pca_para[7] = rot_vec[2];
+	curr_pca_para.resize(length + 6);
+	for(int i = 0; i < length; i++)	curr_pca_para[i] = (float)para[i];
+	curr_pca_para[length] = pos_vec[0];	curr_pca_para[length + 1] = pos_vec[1];	curr_pca_para[length + 2] = pos_vec[2];
+	curr_pca_para[length + 3] = rot_vec[0];	curr_pca_para[length + 4] = rot_vec[1];	curr_pca_para[length + 5] = rot_vec[2];
 	Eigen::VectorXf curr_nor_para = Eigen::VectorXf::Zero(26);
 	curr_nor_para = trans_matrix.transpose() * curr_pca_para + mean_vector;
 	SK::Array<float> curr_nor_array = MyTools::EigentoSKVector(curr_nor_para);
@@ -74,17 +76,48 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 		}
 		else
 		{
-			// Assume 2 parameter!!!!
 			// Construct pca parameters
 			VectorXf nor_vec = MyTools::SKtoEigenVector(bestpose.getAllParameters());
-			VectorXf pca_vec = Eigen::VectorXf::Zero(2 + 6);
+			VectorXf pca_vec = Eigen::VectorXf::Zero(length + 6);
 			pca_vec = trans_matrix * (nor_vec - mean_vector);
-			double *pose_para = new double[2];
-			for(int i = 0; i < 2; i++)	pose_para[i] = (double)pca_vec[i];
+			double *pose_para = new double[length];
+			for(int i = 0; i < length; i++)	pose_para[i] = (double)pca_vec[i];
 
 			Problem problem;
-			ceres::CostFunction* cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
-			problem.AddResidualBlock(cf_curr, NULL, &pose_para[0], &pose_para[1]);
+			ceres::CostFunction* cf_curr;
+			switch(length)
+			{
+			case 1:
+				cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
+				problem.AddResidualBlock(cf_curr, NULL, &pose_para[0]);
+				break;
+			case 2:
+				cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
+				problem.AddResidualBlock(cf_curr, NULL, &pose_para[0], &pose_para[1]);
+				break;
+			case 3:
+				cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
+				problem.AddResidualBlock(cf_curr, NULL, &pose_para[0], &pose_para[1], &pose_para[2]);
+				break;
+			case 4:
+				cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1, 1, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
+				problem.AddResidualBlock(cf_curr, NULL, &pose_para[0], &pose_para[1], &pose_para[2], &pose_para[3]);
+				break;
+			case 5:
+				cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1, 1, 1, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
+				problem.AddResidualBlock(cf_curr, NULL, &pose_para[0], &pose_para[1], &pose_para[2], &pose_para[3], &pose_para[4]);
+				break;
+			case 6:
+				cf_curr = new NumericDiffCostFunction<CF_PCA_Joint, CENTRAL, 1, 1, 1, 1, 1, 1, 1> (new CF_PCA_Joint(cloud, bestpose, trans_matrix.transpose(), mean_vector));
+				problem.AddResidualBlock(cf_curr, NULL, &pose_para[0], &pose_para[1], &pose_para[2], &pose_para[3], &pose_para[4], &pose_para[5]);
+				break;
+			}
+
+			for(int i = 0; i < length; i++)
+			{
+				problem.SetParameterUpperBound(&pose_para[i], 0, (double)max_vector[i]);
+				problem.SetParameterLowerBound(&pose_para[i], 0, (double)min_vector[i]);
+			}
 
 			// Set the solver
 			Solver::Options options;

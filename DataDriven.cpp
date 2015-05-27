@@ -130,17 +130,18 @@ DataDriven::DataDriven(char* filename)
 	cout << "DataDriven setup done" << endl;
 }
 
-void DataDriven::startPCA()
+void DataDriven::startPCA(bool show = false)
 {
 	int joint_m = m - 6;
 	// assgin dataset into matrix
-	MatrixXf data_matrix = MatrixXf::Zero(joint_m, n);
+	data_matrix = MatrixXf::Zero(joint_m, n);
 	for(int i = 0; i < n; i++)
 	{
 		VectorXf tmpvec = MyTools::SKtoEigenVector(dataset[i]);
 		VectorXf tmpvec2 = tmpvec.segment(0, joint_m);
 		data_matrix.col(i) = tmpvec2;
 	}
+	MatrixXf zero_mean_matrix = data_matrix;
 
 	typedef pair<float, int> myPair;
 	typedef vector<myPair> PermutationIndices;
@@ -152,13 +153,13 @@ void DataDriven::startPCA()
 		float mean = (data_matrix.row(i).sum())/ n;		 //compute mean
 		mean_vector[i] = mean;
 		VectorXf tmp_vec  = VectorXf::Constant(n, mean); // create a vector with constant value = mean
-		data_matrix.row(i) -= tmp_vec;
+		zero_mean_matrix.row(i) -= tmp_vec;
 	}
-	cout << "mean vector: " << endl << mean_vector << endl;
+	if(show)	cout << "mean vector: " << endl << mean_vector << endl;
 
 	// Get the covariance matrix
 	cov_matrix = MatrixXf::Zero(joint_m, joint_m);
-	cov_matrix = (1 / (float) n) * data_matrix * data_matrix.transpose();
+	cov_matrix = (1 / (float) n) * zero_mean_matrix * zero_mean_matrix.transpose();
 
 	// Compute the eigenvalue on the cov Matrix
 	EigenSolver<MatrixXf> m_solve(cov_matrix);
@@ -192,46 +193,42 @@ void DataDriven::startPCA()
 			break;
 		}
 	}
-	cout << "suitable l = " << l << endl;
+	if(show)	cout << "suitable l = " << l << endl;
 	
 	// For checking
-	for (int i = 0; i < joint_m ; i++)
-		cout << "eigen = " << pi[i].first << " pi = " << pi[i].second << " var = " << (pi[i].first / total_var) << endl;
+	if(show)
+		for (int i = 0; i < joint_m ; i++)
+			cout << "eigen = " << pi[i].first << " pi = " << pi[i].second << " var = " << (pi[i].first / total_var) << endl;
 
 	// consider the subspace corresponding to the top-k eigenvectors
 	MatrixXf cmat = MatrixXf::Zero(l, joint_m);
 	for(int i = 0; i < l; i++)
 	{
-		cout << "Top " << (i + 1) << " in index = " << pi[i].second << " eigenvector:\n" << eigenVectors.row(pi[i].second) << endl;
+		if(show)	cout << "Top " << (i + 1) << " in index = " << pi[i].second << " eigenvector:\n" << eigenVectors.row(pi[i].second) << endl;
 		cmat.row(i) = eigenVectors.row(pi[i].second);
 	}
-/*	unsigned int i = pi.size()-1;
-	unsigned int howMany = i - l;
-	for (; i > howMany; i--)
-	{
-		cout << i << "-eigenvector: " << eigenVectors.row(i) << endl;
-	}*/
 
-	// build trans matrix
 	trans_matrix = MatrixXf::Zero((l + 6), (joint_m + 6));
 	trans_matrix.topLeftCorner(l, joint_m) = cmat;
 	trans_matrix.bottomRightCorner(6, 6) = MatrixXf::Identity(6, 6);
 
+	// build min & max vectors
+	buildMinMax();
 }
 
-
-void DataDriven::startPCA(int pc_d)
+void DataDriven::startPCA(int pc_d, bool show = false)
 {
 	l = pc_d;
 	int joint_m = m - 6;
 	// assgin dataset into matrix
-	MatrixXf data_matrix = MatrixXf::Zero(joint_m, n);
+	data_matrix = MatrixXf::Zero(joint_m, n);
 	for(int i = 0; i < n; i++)
 	{
 		VectorXf tmpvec = MyTools::SKtoEigenVector(dataset[i]);
 		VectorXf tmpvec2 = tmpvec.segment(0, joint_m);
 		data_matrix.col(i) = tmpvec2;
 	}
+	MatrixXf zero_mean_matrix = data_matrix;
 
 	typedef pair<float, int> myPair;
 	typedef vector<myPair> PermutationIndices;
@@ -243,24 +240,18 @@ void DataDriven::startPCA(int pc_d)
 		float mean = (data_matrix.row(i).sum())/ n;		 //compute mean
 		mean_vector[i] = mean;
 		VectorXf tmp_vec  = VectorXf::Constant(n, mean); // create a vector with constant value = mean
-		data_matrix.row(i) -= tmp_vec;
+		zero_mean_matrix.row(i) -= tmp_vec;
 	}
-	cout << "mean vector: " << endl << mean_vector << endl;
-/*	for (int i = 0; i < data_matrix.cols(); i++)
-	{
-		float mean = (data_matrix.col(i).sum())/ joint_m;		 //compute mean
-		VectorXf tmp_vec  = VectorXf::Constant(joint_m, mean); // create a vector with constant value = mean
-		data_matrix.col(i) -= tmp_vec;
-	}*/
+//	cout << "mean vector: " << endl << mean_vector << endl;
 
 	// Get the covariance matrix
 	cov_matrix = MatrixXf::Zero(joint_m, joint_m);
-	cov_matrix = (1 / (float) n) * data_matrix * data_matrix.transpose();
+	cov_matrix = (1 / (float) n) * zero_mean_matrix * zero_mean_matrix.transpose();
 
 	// Compute the eigenvalue on the cov Matrix
 	EigenSolver<MatrixXf> m_solve(cov_matrix);
 	
-	cout << "PCA computation done." << endl;
+	if(show)	cout << "PCA computation done." << endl;
 	VectorXf eigenvalues = VectorXf::Zero(joint_m);
 	eigenvalues = m_solve.eigenvalues().real();
 
@@ -279,26 +270,39 @@ void DataDriven::startPCA(int pc_d)
 	reverse(pi.begin(), pi.end());
 
 	// For checking
-	for (int i = 0; i < joint_m ; i++)
-		cout << "eigen = " << pi[i].first << " pi = " << pi[i].second << " var = " << (pi[i].first / total_var) << endl;
+	if(show)
+		for (int i = 0; i < joint_m ; i++)
+			cout << "eigen = " << pi[i].first << " pi = " << pi[i].second << " var = " << (pi[i].first / total_var) << endl;
 
 	// consider the subspace corresponding to the top-k eigenvectors
 	MatrixXf cmat = MatrixXf::Zero(l, joint_m);
 	for(int i = 0; i < l; i++)
 	{
-		cout << "Top " << (i + 1) << " in index = " << pi[i].second << " eigenvector:\n" << eigenVectors.row(pi[i].second) << endl;
+		if(show)	cout << "Top " << (i + 1) << " in index = " << pi[i].second << " eigenvector:\n" << eigenVectors.row(pi[i].second) << endl;
 		cmat.row(i) = eigenVectors.row(pi[i].second);
 	}
-/*	unsigned int i = pi.size()-1;
-	unsigned int howMany = i - l;
-	for (; i > howMany; i--)
-	{
-		cout << i << "-eigenvector: " << eigenVectors.row(i) << endl;
-	}*/
 
 	// build trans matrix
 	trans_matrix = MatrixXf::Zero((l + 6), (joint_m + 6));
 	trans_matrix.topLeftCorner(l, joint_m) = cmat;
 	trans_matrix.bottomRightCorner(6, 6) = MatrixXf::Identity(6, 6);
 
+	// build min & max vectors
+	buildMinMax();
+}
+
+void DataDriven::buildMinMax()
+{
+	max_vector = VectorXf::Zero(l + 6);
+	min_vector = VectorXf::Zero(l + 6);
+	MatrixXf prin_matrix = trans_matrix.topLeftCorner(l, m - 6);
+	MatrixXf pca_data_matrix = prin_matrix * data_matrix;
+//	cout << "show pca_data_matrix size = (" << pca_data_matrix.rows() << ", " << pca_data_matrix.cols() << ")\n";
+	for (int i = 0; i < pca_data_matrix.rows(); i++)
+	{
+		float max = pca_data_matrix.row(i).maxCoeff();
+		max_vector[i] = max;
+		float min = pca_data_matrix.row(i).minCoeff();
+		min_vector[i] = min;
+	}
 }

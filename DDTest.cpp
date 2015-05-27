@@ -15,6 +15,7 @@
 #include "HandModel.hxx"
 #include "DataDriven.hxx"
 #include "PSO.hxx"
+#include "AICP.hxx"
 #include "ICPPCA.hxx"
 #include "Initialization.hxx"
 
@@ -210,10 +211,13 @@ int main(int argc, char **argv)
 	viewer->addPointCloud(cloudptr, "mycloud");
 	
 	// get dataset
-	DataDriven data_driven = DataDriven(0);
+	int file_num;
+	cout << "choose one trail: ";
+	cin >> file_num;
+	DataDriven data_driven = (file_num >= 0 && file_num < 17)? DataDriven(file_num) : DataDriven();
 	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
 	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
-	data_driven.startPCA();
+	data_driven.startPCA(false);
 //	data_driven.startPCA(10);
 	MatrixXf transmat = data_driven.getTransMatrix();
 	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
@@ -247,29 +251,33 @@ int main(int argc, char **argv)
 	}/**/
 /*	handpose.applyPose(handmodel);*/
 
-	// ICP-PSO Optimization
-/*	PSO pso = PSO(15, 24, -10, 1);
-	pso.generateParticles(handpose);
-	cout << "PSO initial done..." << endl;
-	pso.goGeneration_mp(cloud, handmodel, false, false);
-//	pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
-	cout << "PSO optimizaiton done..." << endl;
-	HandPose bestpose = pso.getBestPose();
-	bestpose.applyPose(handmodel);
-	cout << "show point: " << pso.getBestPoint() << endl;*/
+	// ICP Optimization
+	clock_t sect_1 = clock();
+	AICP aicp = AICP(10, 5, handpose);
+	aicp.run_randomPara(cloud);
+	HandPose bestpose1 = aicp.getBestPose();
+	cout << "AICP done" << endl;/**/
 
+	// PCA trans testing
+/*	int length, index = 450;
+	cout << "enter length and index: ";
+	cin >> length >> index;
+	handpose.setAllParameters(data_driven.getSpecData(index), false);*/
 
+	cout << "current length = " << data_driven.getPCSpaceSize() << endl;
 	// ICPPCA Optimization
-	ICPPCA icppca = ICPPCA(6, 10, handpose, data_driven.getTransMatrix(), data_driven.getMeanVector());
-/*	icppca.run(cloud);
-	HandPose bestpose = icppca.getBestPose();
-	bestpose.applyPose(handmodel);*/
+	clock_t sect_2 = clock();
+	ICPPCA icppca = ICPPCA(2, 5, data_driven.getPCSpaceSize(), handpose, data_driven.getTransMatrix(), 
+						   data_driven.getMeanVector(), data_driven.getMaxVector(), data_driven.getMinVector());
+	icppca.run(cloud);
+	HandPose bestpose2 = icppca.getBestPose();
+	cout << "ICPPCA done" << endl;/**/
 
-	int length;
-	cout << "enter length = ";
-	cin >> length;
-	HandPose tmppose = icppca.pureTrans(length);
-	showParameter(handpose, tmppose);
+	// PCA trans testing
+/*	HandPose tmppose = icppca.pureTrans(length);
+	showParameter(handpose, tmppose);*/
+	clock_t end = clock();
+	cout << "section 1 = " << double(sect_2 - sect_1) << " ms, section 2 = " << double(end - sect_2) << " ms\n";
 
 	// Show the model
 	addHandModel(handmodel, skel);
@@ -280,13 +288,14 @@ int main(int argc, char **argv)
 	while(!viewer->wasStopped())
 	{
 		handmodel = HandModel();
-		if(frame % 2 == 0)	handpose.applyPose(handmodel);
-		else				tmppose.applyPose(handmodel);
+		if(frame % 3 == 0)		handpose.applyPose(handmodel);
+		else if(frame % 3 == 1)	bestpose1.applyPose(handmodel);
+		else					bestpose2.applyPose(handmodel);
 
 		updateHandModel(handmodel, skel);
 		if(skel)	updateHandSkeleton(handmodel);
 
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
+//		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
 		viewer->spinOnce(100);
 		rviewer->spinOnce(100);
 		frame++;
