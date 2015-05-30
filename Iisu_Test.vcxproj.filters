@@ -37,7 +37,7 @@
     <ClCompile Include="ICPPCA.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="DDTest.cpp">
+    <ClCompile Include="SequenceReader.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>

@@ -354,4 +354,26 @@ direct to : Vector3(43.7297, 357.681, -19.1057)
 finger 4 tips : Vector3(55.0884, 324.91, 52.0279)
 direct to : Vector3(47.866, 277.011, 139.512)
 Plam ori: Vector3(12.159, 359.584, 1.4802) -> Vector3(20.2947, 262.236, -19.9018)
+
+<--------------------SequenceReader(test 1)--------------------->
+order: 4 3 1 0 2
+finger num = 5
+finger 0 tips : Vector3(21.0352, 343.565, 79.2866)
+finger 0 direction : Vector3(3.94614, -7.9243, -99.6074)
+direct to : Vector3(24.9814, 335.641, -20.3208)
+finger 1 tips : Vector3(-16.2998, 346.089, 89.6488)
+finger 1 direction : Vector3(1.69563, 6.57322, -99.7693)
+direct to : Vector3(-14.6042, 352.662, -10.1205)
+finger 2 tips : Vector3(66.7937, 329.816, 40.3869)
+finger 2 direction : Vector3(-70.7422, 17.9615, -68.3588)
+direct to : Vector3(-3.94855, 347.778, -27.972)
+finger 3 tips : Vector3(-60.8799, 340.17, 68.8904)
+finger 3 direction : Vector3(23.2782, 8.0039, -96.923)
+direct to : Vector3(-37.6017, 348.174, -28.0326)
+finger 4 tips : Vector3(-93.4081, 336.154, -22.1646)
+finger 4 direction : Vector3(66.3913, 23.308, -71.0558)
+direct to : Vector3(-27.0168, 359.462, -93.2204)
+Plam ori: Vector3(-1.64406, 357.054, -32.2172) -> Vector3(4.56499, 258.474, -47.8225)
+
+
 														

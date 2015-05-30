@@ -208,31 +208,31 @@ int main(int argc, char **argv)
 	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
 
-	viewer->addPointCloud(cloudptr, "mycloud");
+//	viewer->addPointCloud(cloudptr, "mycloud");
 	
 	// get dataset
-	int file_num;
-	cout << "choose one trail: ";
-	cin >> file_num;
+	int file_num, length;
+	cout << "choose one trail and pc space size: ";
+	cin >> file_num >> length;
 	DataDriven data_driven = (file_num >= 0 && file_num < 17)? DataDriven(file_num) : DataDriven();
 	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
 	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
-	data_driven.startPCA(false);
-//	data_driven.startPCA(10);
+	if(length < 0)	data_driven.startPCA(false);
+	else	data_driven.startPCA(length, false);
 	MatrixXf transmat = data_driven.getTransMatrix();
 	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
 
 	// Get tips and plam normal (hand feature)
-	SK::Array<Vector3> pc_tips, pc_dirs;
+/*	SK::Array<Vector3> pc_tips, pc_dirs;
 	SK::Array<int> finger_match;			// Special case!!!
 	finger_match.pushBack(3);finger_match.pushBack(2);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
-	addNPCFeature(pc_tips, pc_dirs, finger_match);/**/
+	addNPCFeature(pc_tips, pc_dirs, finger_match);*/
 
 	// Hand Model & pose initialization
 	HandModel handmodel = HandModel();
 	HandPose handpose = HandPose();
 	
-	SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(5);
+/*	SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(5);
 	double bestcost = 1000000;
 	for(size_t i = 0; i < permlist.size(); i++)
 	{
@@ -248,36 +248,36 @@ int main(int argc, char **argv)
 			bestcost = in.getCost();
 			in.setFullResultPose(handpose);
 		}
-	}/**/
+	}*/
 /*	handpose.applyPose(handmodel);*/
 
 	// ICP Optimization
-	clock_t sect_1 = clock();
+/*	clock_t sect_1 = clock();
 	AICP aicp = AICP(10, 5, handpose);
 	aicp.run_randomPara(cloud);
 	HandPose bestpose1 = aicp.getBestPose();
-	cout << "AICP done" << endl;/**/
+	cout << "AICP done" << endl;*/
 
 	// PCA trans testing
-/*	int length, index = 450;
-	cout << "enter length and index: ";
-	cin >> length >> index;
-	handpose.setAllParameters(data_driven.getSpecData(index), false);*/
+	int index = 450;
+	cout << "enter index: ";
+	cin >> index;
+	handpose.setAllParameters(data_driven.getSpecData(index), false);/**/
 
 	cout << "current length = " << data_driven.getPCSpaceSize() << endl;
 	// ICPPCA Optimization
 	clock_t sect_2 = clock();
-	ICPPCA icppca = ICPPCA(2, 5, data_driven.getPCSpaceSize(), handpose, data_driven.getTransMatrix(), 
+	ICPPCA icppca = ICPPCA(4, 5, data_driven.getPCSpaceSize(), handpose, data_driven.getTransMatrix(), 
 						   data_driven.getMeanVector(), data_driven.getMaxVector(), data_driven.getMinVector());
-	icppca.run(cloud);
+/*	icppca.run(cloud);
 	HandPose bestpose2 = icppca.getBestPose();
-	cout << "ICPPCA done" << endl;/**/
+	cout << "ICPPCA done" << endl;*/
 
 	// PCA trans testing
-/*	HandPose tmppose = icppca.pureTrans(length);
-	showParameter(handpose, tmppose);*/
-	clock_t end = clock();
-	cout << "section 1 = " << double(sect_2 - sect_1) << " ms, section 2 = " << double(end - sect_2) << " ms\n";
+	HandPose tmppose = icppca.pureTrans(length);
+	showParameter(handpose, tmppose);
+/*	clock_t end = clock();
+	cout << "section 1 = " << double(sect_2 - sect_1) << " ms, section 2 = " << double(end - sect_2) << " ms\n";*/
 
 	// Show the model
 	addHandModel(handmodel, skel);
@@ -288,9 +288,11 @@ int main(int argc, char **argv)
 	while(!viewer->wasStopped())
 	{
 		handmodel = HandModel();
-		if(frame % 3 == 0)		handpose.applyPose(handmodel);
+/*		if(frame % 3 == 0)		handpose.applyPose(handmodel);
 		else if(frame % 3 == 1)	bestpose1.applyPose(handmodel);
-		else					bestpose2.applyPose(handmodel);
+		else					bestpose2.applyPose(handmodel);*/
+		if(frame % 2 == 0)		handpose.applyPose(handmodel);
+		else if(frame % 2 == 1)	tmppose.applyPose(handmodel);
 
 		updateHandModel(handmodel, skel);
 		if(skel)	updateHandSkeleton(handmodel);

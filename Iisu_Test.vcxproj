@@ -202,7 +202,6 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClCompile Include="AICP.cxx" />
     <ClCompile Include="CostFunction.cxx" />
     <ClCompile Include="DataDriven.cpp" />
-    <ClCompile Include="DDTest.cpp" />
     <ClCompile Include="Finger.cxx" />
     <ClCompile Include="HandInfo.cxx" />
     <ClCompile Include="HandPose.cxx" />
@@ -211,6 +210,7 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClCompile Include="Initialization.cxx" />
     <ClCompile Include="MyTools.cxx" />
     <ClCompile Include="PSO.cxx" />
+    <ClCompile Include="SequenceReader.cpp" />
     <ClCompile Include="Sphere.cxx" />
   </ItemGroup>
   <ItemGroup>
