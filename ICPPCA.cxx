@@ -59,6 +59,7 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 	
 			Problem problem;
 			ceres::CostFunction* cf_curr = new NumericDiffCostFunction<CF_PCA_Global, CENTRAL, 1, 1, 1, 1, 1, 1, 1> (new CF_PCA_Global(cloud, bestpose));
+//			ceres::CostFunction* cf_curr = new AutoDiffCostFunction<CF_PCA_Global, NULL, 1, 1, 1, 1, 1, 1, 1> (new CF_PCA_Global(cloud, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &global_para[0], &global_para[1], &global_para[2], &global_para[3], &global_para[4], &global_para[5]);
 			
 			// Set the solver
@@ -73,6 +74,7 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 
 			// Update the parameter
 			updateGlobal(global_para);
+			cost = std::sqrt(summary.final_cost);
 		}
 		else
 		{
@@ -131,7 +133,7 @@ void ICPPCA::run(const PointCloud<PointXYZRGB> &cloud)
 
 			// Update the parameter
 			updatePose(pose_para);
-
+			cost = std::sqrt(summary.final_cost);
 		}
 
 

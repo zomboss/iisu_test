@@ -119,11 +119,13 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 		if(finger == -1)
 		{
 			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
+//			cf_curr = new AutoDiffCostFunction<CF_Global, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 		}
 		else
 		{
 			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
+//			cf_curr = new AutoDiffCostFunction<CF_Finger, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 			problem.SetParameterUpperBound(&theta, 0, upper);
 			problem.SetParameterLowerBound(&theta, 0, lower);
@@ -143,6 +145,7 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 		// Recover the theta
 //		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(seed, theta);
+		cost = std::sqrt(summary.final_cost);
 	}
 }
 
@@ -186,6 +189,7 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 		// Recover the theta
 		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(seed, theta);
+		cost = std::sqrt(summary.final_cost);
 		cout << "next" << endl;
 	}
 }
@@ -226,6 +230,8 @@ void AICP::run_specPara(const PointCloud<PointXYZRGB> &cloud, int spec_para)
 	// Recover the theta
 //		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 	updatePose(spec_para, theta);
+	cost = std::sqrt(summary.final_cost);
+
 }
 
 void AICP::run_cyclePara(const PointCloud<PointXYZRGB> &cloud)
@@ -268,6 +274,7 @@ void AICP::run_cyclePara(const PointCloud<PointXYZRGB> &cloud)
 		// Recover the theta
 //		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(curr_para, theta);
+		cost = std::sqrt(summary.final_cost);
 	}
 }
 
@@ -326,6 +333,7 @@ void AICP::run_randomJoint(const PointCloud<PointXYZRGB> &cloud)
 			cout << ", theta = (" << theta[0] << ", " << theta[1] << ", " << theta[2] << ", " << theta[3] << ")" << endl;
 		else
 			cout << ", theta = (" << theta[0] << ", " << theta[1] << ", " << theta[2] << ")" << endl;
-/*		updatePose(seed, theta);*/
+/*		updatePose(seed, theta);
+		cost = std::sqrt(summary.final_cost);*/
 	}
 }

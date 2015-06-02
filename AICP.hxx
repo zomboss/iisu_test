@@ -31,6 +31,7 @@ public:
 	int getTimes() {return times;}
 	void setIterations(int it) {iter = it;}
 	int getIterations() {return iter;}
+	double getBestCost() {return cost;}
 	HandPose getBestPose() {return bestpose;}
 
 	void run_randomPara(const PointCloud<PointXYZRGB> &);
@@ -43,6 +44,7 @@ private:
 	int times;
 	int iter;
 	HandPose bestpose;
+	double cost;
 
 	int getRandomJoint(int &, int &, double &, double &, double &);
 	int getRandomPart(int &, double **, double **, double **);
@@ -58,7 +60,8 @@ public:
 		cloud(pc), finger(f), joint(j), handpose(p){isfull = false;}
 	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
 		cloud(pc), finger(f), joint(j), handpose(p), pix_meter(pm), pure_vec(pv), index(in){isfull = false;}
-	bool operator()(const double* const theta, double* residual) const
+	template <typename T>	
+	bool operator()(const double* const theta, T* residual) const
 	{
 		// Set up the pose
 		HandModel model = HandModel();
@@ -71,7 +74,7 @@ public:
 		{
 			MyCostFunction costf = MyCostFunction(cloud, model);
 			costf.calculate();
-			residual[0] = costf.getCost();
+			residual[0] = T(costf.getCost());
 		}
 /*		else
 		{
@@ -104,10 +107,12 @@ public:
 		cloud(pc), para(p), handpose(po), index(flann::Matrix<float>((new float[1]), 1, 1), KDTreeIndexParams(4)){isfull = false;}
 	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po, float pm, vector<float> &pv, Index<flann::L2<float>> &in): 
 		cloud(pc), para(p), handpose(po), pix_meter(pm), pure_vec(pv), index(in){isfull = false;}
-	bool operator()(const double* const theta, double* residual) const
+	template <typename T>
+	bool operator()(const double* const theta, T* residual) const
 	{
 		HandModel model = HandModel();
 		HandPose pose = handpose;
+		T tmp_theta = *theta;
 		pose.setGlobalParameter(para, (float)*theta);
 		pose.applyPose(model);
 
@@ -116,7 +121,7 @@ public:
 		{
 			MyCostFunction costf = MyCostFunction(cloud, model);
 			costf.calculate();
-			residual[0] = costf.getCost();
+			residual[0] = T(costf.getCost());
 		}
 /*		else
 		{

@@ -14,11 +14,11 @@ class Finger
 {
 public:
 	Finger();
-	Finger(int, const Vector3 &, const Array<Vector3> &,  const Array<int> &);
+	Finger(int, const Vector3 &, const SK::Array<Vector3> &,  const SK::Array<int> &);
 	
-	void addPointCloud( const Array<Vector3>&, const Array<int> &);
+	void addPointCloud( const SK::Array<Vector3>&, const SK::Array<int> &);
 	void addPoint(Vector3);
-	Array<Vector3> getPointCloud(){return pointCloud;}
+	SK::Array<Vector3> getPointCloud(){return pointCloud;}
 	Vector3 getmaxPoint(){return maxPoint;}
 	int getmaxIndex(){return maxIndex;}
 	int getSize(){return pointCloud.size();}
@@ -28,8 +28,8 @@ public:
 	Eigen::Matrix3f getDirection_f();
 
 private:
-	Array<Vector3> pointCloud;
-	Array<int> pointCloudIndex;
+	SK::Array<Vector3> pointCloud;
+	SK::Array<int> pointCloudIndex;
 	Vector3 maxPoint;
 	Vector3 meanPoint;
 	Vector3 tipPoint;

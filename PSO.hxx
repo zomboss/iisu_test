@@ -13,6 +13,7 @@
 #include "MyTools.hxx"
 #include "HandPose.hxx"
 #include "HandModel.hxx"
+#include "DataDriven.hxx"
 
 using namespace std;
 using namespace pcl;
@@ -45,7 +46,9 @@ public:
 	void generateParticles(HandPose &, HandPose &);
 	void goGeneration(const PointCloud<PointXYZRGB> &, const HandModel &, bool );
 	void goGeneration_mp(const PointCloud<PointXYZRGB> &, const HandModel &, bool, bool );
+	void goGeneration_data(const PointCloud<PointXYZRGB> &, const HandModel &, DataDriven &, bool, bool );
 	void goGeneration_full(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, bool, bool );
+	void goGeneration_datafull(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, DataDriven &, bool, bool );
 
 private:
 	int generation_num;

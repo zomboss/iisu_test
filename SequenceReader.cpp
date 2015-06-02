@@ -10,6 +10,7 @@
 
 #include <math.h> 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -17,6 +18,7 @@
 #include "glog/logging.h"
 
 #include "MyTools.hxx"
+#include "DataDriven.hxx"
 #include "Sphere.hxx"
 #include "HandInfo.hxx"
 #include "HandModel.hxx"
@@ -31,23 +33,31 @@ using namespace pcl;
 using namespace SK;
 using namespace SK::Easii;
 
+// for testing
+const bool opti = true;
+const bool skel = true;
+const bool show = true;
+
 const int HEIGHT = 240;
 const int WIDTH = 320;
-const int FILENUM = 137;
+
+const char *name = "Sequences/Seq_test2/pcd_seq";
+const char *type = ".pcd";
+const int FILENUM = 39;
 
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
 boost::shared_ptr<visualization::PCLVisualizer> viewer (new visualization::PCLVisualizer ("3D Viewer"));
-boost::shared_ptr<visualization::RangeImageVisualizer > rviewer (new visualization::RangeImageVisualizer  ("range Viewer"));
+boost::shared_ptr<visualization::RangeImageVisualizer > rviewer (new visualization::RangeImageVisualizer  ("Range Viewer"));
 boost::shared_ptr<RangeImagePlanar> planar (new RangeImagePlanar());
 
-void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<Vector3> &pc_plam)
+void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<Vector3> &pc_palm)
 {
 	// We have to get HandInfo data first!!!
 	fin_num = 5;
-	float tips[5][3] = {{21.0352, 343.565, 79.2866}, {-16.2998, 346.089, 89.6488}, {66.7937, 329.816, 40.3869}, {-60.8799, 340.17, 68.8904}, {-93.4081, 336.154, -22.1646}};
-	float dirs[5][3] = {{3.94614, -7.9243, -99.6074}, {1.69563, 6.57322, -99.7693}, {-70.7422, 17.9615, -68.3588}, {23.2782, 8.0039, -96.923}, {66.3913, 23.308, -71.0558}};
-	int order[5] = {4, 3, 1, 0, 2};
+	float tips[5][3] = {{-81.0574, 277.591, -14.3811}, {-55.8929, 275.99, 63.6919}, {23.4599, 276.732, 69.0764}, {63.1899, 268.339, 35.3864}, {-12.0831, 285.064, 77.8692}};
+	float dirs[5][3] = {{92.1676, 19.9668, -33.2635}, {22.5134, 14.1087, -96.4059}, {-16.6813, 1.26924, -98.5907}, {-36.5852, 16.8662, -91.5262}, {16.0987, -3.80375, -98.6223}};
+	int order[5] = {0, 1, 4, 2, 3};
 	pc_tips.resize(5);
 	pc_dirs.resize(5);
 	for(int i = 0; i < 5; i++)
@@ -56,9 +66,9 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 		pc_dirs[i] = Vector3(dirs[order[i]][0], dirs[order[i]][1], dirs[order[i]][2]);
 
 	}
-	pc_plam.resize(2);
-	pc_plam[0] = Vector3(-1.64406, 357.054, -32.2172);
-	pc_plam[0] = Vector3(4.56499, 258.474, -47.8225);
+	pc_palm.resize(2);
+	pc_palm[0] = Vector3(-2.75772, 290.758, -43.5515);
+	pc_palm[1] = Vector3(-1.43232, 191.263, -53.5044);
 
 }
 
@@ -152,6 +162,16 @@ void updateHandSkeleton(HandModel &handmodel)
 	}
 }
 
+void setDepthImage()
+{
+	int image_x = 320, image_y = 240;
+	float center_x = 160.0, center_y = 120.0;
+	float focal_x = 224.502, focal_y = 230.494;
+	Affine3f sensorpose = Affine3f(Eigen::Translation3f(-14.4617, -171.208, 5.5311) * AngleAxisf(-0.5 * M_PI, Vector3f::UnitX()));
+	planar->createFromPointCloudWithFixedSize(*cloudptr, image_x, image_y, center_x, center_y, focal_x, focal_y, sensorpose);
+}
+
+
 int main(int argc, char** argv)
 {
 	google::InitGoogleLogging(argv[0]);
@@ -168,15 +188,93 @@ int main(int argc, char** argv)
 	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
 	
-	// Point cloud Loading and random sampling
+	// Dataset initialization
+	int file_num, length;
+	cout << "choose one trail and pc space size: ";
+	cin >> file_num >> length;
+	DataDriven data_driven = (file_num >= 0 && file_num < 17)? DataDriven(file_num) : DataDriven();
+	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
+	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
+	if(length < 0 || length > 6)	data_driven.startPCA(false);
+	else							data_driven.startPCA(length, false);
+	MatrixXf transmat = data_driven.getTransMatrix();
+	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
+	
+	// Point cloud Loading and random sampling (not yet now)
 	viewer->addPointCloud(cloudptr, "mycloud");
+
+	// Hand Model & Pose initialization
+	HandModel handmodel = HandModel();
+	HandPose poselist[FILENUM];
+
+	if(show)	addHandModel(handmodel, skel);
+	if(show && skel)	addHandSkeleton(handmodel);
 
 	// For loop for computing
 	for(int curr_data = 0; curr_data < FILENUM; curr_data++)
 	{
+		// Load the point cloud
+		stringstream ss;
+		ss << name << curr_data << type;
+		if (io::loadPCDFile<PointXYZRGB>(ss.str(), *cloudptr) == -1) // load the file
+		{
+			PCL_ERROR ("Couldn't read file");
+			break;
+		}
+		cout << "In computing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
 
+		// Time stamp
+		clock_t start = clock();
 
+		// Set depth image
+		setDepthImage();
 
+		// Reset the Pose
+		handmodel = HandModel();
+		if(curr_data > 0)	poselist[curr_data] = poselist[curr_data - 1];
+		
+		if(curr_data == 0)	// Initialization
+		{
+			// get data from HandInfo(fake)
+			int finger_num;
+			SK::Array<Vector3> pc_tips, pc_dirs, pc_palm;
+			featurefromHandInfo(finger_num, pc_tips, pc_dirs, pc_palm);
+
+			poselist[curr_data] = HandPose();
+			SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(finger_num);
+			double bestcost = 1000000;
+			for(size_t i = 0; i < permlist.size(); i++)
+			{
+				Initialization in = Initialization(finger_num, pc_tips, pc_dirs, handmodel);
+				poselist[curr_data].setPosition(pc_palm[0]);
+				poselist[curr_data].setOrientation(pc_palm[1] - pc_palm[0]);
+				in.fingerExist(permlist[i]);
+				in.goFullInitail(poselist[curr_data], false);
+				if(bestcost > in.getCost())
+				{
+					bestcost = in.getCost();
+					in.setFullResultPose(poselist[curr_data]);
+				}
+			}
+			poselist[curr_data].applyPose(handmodel);/**/
+			cout << "Initialization done" << endl;
+		}
+		
+		// PSO Optimization
+		PSO pso = PSO(15, 20, 10, 1);
+		if(curr_data > 0)
+			pso.generateParticles(poselist[curr_data - 1]);
+		else
+			pso.generateParticles(poselist[curr_data]);
+//		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
+		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
+		HandPose bestpose = pso.getBestPose();
+		bestpose.applyPose(handmodel);
+		poselist[curr_data] = bestpose;/**/
+		
+		// Time stamp
+		clock_t end = clock();
+		cout << "time comsumption in frame " << curr_data << ", time = " << double(end - start) << " ms\n";
 
 	}
 	cout << "all frame computation done" << endl;
@@ -186,7 +284,6 @@ int main(int argc, char** argv)
 	while(!viewer->wasStopped())
 	{
 		// Load the point cloud
-		char *name = "Sequences/Seq_test1/pcd_seq", *type = ".pcd";
 		stringstream ss;
 		ss << name << frame << type;
 		if (io::loadPCDFile<PointXYZRGB>(ss.str(), *cloudptr) == -1) // load the file
@@ -194,8 +291,16 @@ int main(int argc, char** argv)
 			PCL_ERROR ("Couldn't read file");
 			break;
 		}
-		cout << "Loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
+		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
 
+		// Update hand model
+		handmodel = HandModel();
+		poselist[frame].applyPose(handmodel);
+		if(show)	updateHandModel(handmodel, skel);
+		if(show && skel)	updateHandSkeleton(handmodel);
+
+
+		// Update viewer
 		viewer->updatePointCloud(cloudptr, "mycloud");
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
 		viewer->spinOnce(100);

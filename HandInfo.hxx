@@ -19,12 +19,12 @@ class HandInfo
 {
 public:
 	HandInfo();
-	HandInfo(int , Array<Vector3> , Array<Vector3> , Vector3 &, Vector3 &);
-	Array<Finger> getAllFingers() {return fingers;}
-	Array<Vector3> getpalmOri() {return palm_ori;}
-	Array<Vector3> getAllFingerTips();
-	Array<Vector3> getAllFingerDirs();
-	Array<int> getOrderedFingers();
+	HandInfo(int , SK::Array<Vector3> , SK::Array<Vector3> , Vector3 &, Vector3 &);
+	SK::Array<Finger> getAllFingers() {return fingers;}
+	SK::Array<Vector3> getpalmOri() {return palm_ori;}
+	SK::Array<Vector3> getAllFingerTips();
+	SK::Array<Vector3> getAllFingerDirs();
+	SK::Array<int> getOrderedFingers();
 	int getFingerNum();
 	
 	// old version
@@ -49,10 +49,10 @@ public:
 
 private:
 	int finger_num;
-	Array<Vector3> handpoints;
-	Array<Vector3> fingerspoints;
-	Array<Finger> fingers;
-	Array<Vector3> palm_ori;
+	SK::Array<Vector3> handpoints;
+	SK::Array<Vector3> fingerspoints;
+	SK::Array<Finger> fingers;
+	SK::Array<Vector3> palm_ori;
 	Vector3 palm_vec;
 	Vector3 zero_point;
 	

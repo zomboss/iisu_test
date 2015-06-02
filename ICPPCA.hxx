@@ -34,6 +34,7 @@ public:
 	int getTimes() {return times;}
 	void setIterations(int it) {iter = it;}
 	int getIterations() {return iter;}
+	double getBestCost() {return cost;}
 	void setTransMatrix(MatrixXf mat) {trans_matrix = mat;}
 	MatrixXf getTransMatrix() {return trans_matrix;}
 	HandPose getBestPose() {return bestpose;}
@@ -49,6 +50,7 @@ private:
 	int times;
 	int iter;
 	int length;
+	double cost;
 	HandPose bestpose;
 	MatrixXf trans_matrix;
 	VectorXf mean_vector;

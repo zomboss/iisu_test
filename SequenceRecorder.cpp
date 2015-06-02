@@ -19,6 +19,7 @@ using namespace SK::Easii;
 using namespace pcl;
 
 bool isrecord = false;
+bool start_time = false;
 int rec_index = 0;
 
 PointCloud<PointXYZRGB> cloud;
@@ -70,6 +71,7 @@ void savePCDSequence (const pcl::visualization::KeyboardEvent &event, void* view
 		{
 			cout << "Press r again, total " << rec_index << " frames, stop..." << endl;
 			isrecord = false;
+			start_time = false;
 			system("pause");
 		}
 	}
@@ -110,7 +112,6 @@ int main(int argc, char **argv)
 	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
 
-	bool start_time = false;
 	int frame = 0;
     while (iisu.update() && !viewer->wasStopped())
     {
