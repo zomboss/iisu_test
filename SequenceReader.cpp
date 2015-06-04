@@ -41,9 +41,9 @@ const bool show = true;
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
-const char *name = "Sequences/Seq_test2/pcd_seq";
+const char *name = "Sequences/Seq_test4/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 39;
+const int FILENUM = 58;
 
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
@@ -55,9 +55,9 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 {
 	// We have to get HandInfo data first!!!
 	fin_num = 5;
-	float tips[5][3] = {{-81.0574, 277.591, -14.3811}, {-55.8929, 275.99, 63.6919}, {23.4599, 276.732, 69.0764}, {63.1899, 268.339, 35.3864}, {-12.0831, 285.064, 77.8692}};
-	float dirs[5][3] = {{92.1676, 19.9668, -33.2635}, {22.5134, 14.1087, -96.4059}, {-16.6813, 1.26924, -98.5907}, {-36.5852, 16.8662, -91.5262}, {16.0987, -3.80375, -98.6223}};
-	int order[5] = {0, 1, 4, 2, 3};
+	float tips[5][3] = {{48.2747, 277.028, 41.7511}, {4.00454, 283.424, 81.4256}, {-32.2563, 285.37, 90.0489}, {-107.844, 279.245, -17.0972}, {-75.5988, 281.608, 70.2936}};
+	float dirs[5][3] = {{-54.7152, 21.2096, -80.9716}, {-22.6027, 5.18344, -97.2741}, {15.6026, 12.9124, -97.9277}, {88.1873, 19.9759, -42.7078}, {54.9201, 30.5877, -77.77}};
+	int order[5] = {3, 4, 2, 1, 0};
 	pc_tips.resize(5);
 	pc_dirs.resize(5);
 	for(int i = 0; i < 5; i++)
@@ -67,8 +67,8 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 
 	}
 	pc_palm.resize(2);
-	pc_palm[0] = Vector3(-2.75772, 290.758, -43.5515);
-	pc_palm[1] = Vector3(-1.43232, 191.263, -53.5044);
+	pc_palm[0] = Vector3(-20.546, 305.868, -28.0197);
+	pc_palm[1] = Vector3(-7.59871, 209.616, -51.8505);
 
 }
 
@@ -261,17 +261,18 @@ int main(int argc, char** argv)
 		}
 		
 		// PSO Optimization
-		PSO pso = PSO(15, 20, 10, 1);
+		PSO pso = PSO(30, 24, -3, 1);
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else
 			pso.generateParticles(poselist[curr_data]);
-//		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
-		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
+		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
+//		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
 		HandPose bestpose = pso.getBestPose();
 		bestpose.applyPose(handmodel);
 		poselist[curr_data] = bestpose;/**/
-		
+		cout << "best cost = " << pso.getBestPoint() << endl;
+
 		// Time stamp
 		clock_t end = clock();
 		cout << "time comsumption in frame " << curr_data << ", time = " << double(end - start) << " ms\n";

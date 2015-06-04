@@ -197,7 +197,7 @@ void PSO::goGeneration_full(const PointCloud<PointXYZRGB> &cloud, const RangeIma
 		
 		clock_t begin_t = clock();
 		// Stop if point change a little
-		if(abs(prepoint - gk_point) < 0.001)	break;
+//		if(abs(prepoint - gk_point) < 0.001)	break;
 		prepoint = gk_point;
 
 		int iCPU = omp_get_num_procs();
@@ -321,7 +321,7 @@ void PSO::goGeneration_datafull(const PointCloud<PointXYZRGB> &cloud, const Rang
 		
 		clock_t begin_t = clock();
 		// Stop if point change a little
-		if(abs(prepoint - gk_point) < 0.001)	break;
+//		if(abs(prepoint - gk_point) < 0.001)	break;
 		prepoint = gk_point;
 
 		int iCPU = omp_get_num_procs();
