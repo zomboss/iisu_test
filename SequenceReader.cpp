@@ -261,7 +261,7 @@ int main(int argc, char** argv)
 		}
 		
 		// PSO Optimization
-		PSO pso = PSO(30, 24, -3, 1);
+		PSO pso = PSO(20, 24, 4, 1);
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else

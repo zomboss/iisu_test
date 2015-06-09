@@ -208,9 +208,9 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClCompile Include="HandModel.cxx" />
     <ClCompile Include="ICPPCA.cxx" />
     <ClCompile Include="Initialization.cxx" />
+    <ClCompile Include="LoadMAT.cpp" />
     <ClCompile Include="MyTools.cxx" />
     <ClCompile Include="PSO.cxx" />
-    <ClCompile Include="SequenceReader.cpp" />
     <ClCompile Include="Sphere.cxx" />
   </ItemGroup>
   <ItemGroup>

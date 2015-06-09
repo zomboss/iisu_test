@@ -90,8 +90,8 @@ int main(int argc, char **argv)
 	DataDriven data_driven = (file_num >= 0 && file_num < 17)? DataDriven(file_num) : DataDriven();
 	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
 	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
-	data_driven.startPCA();
-//	data_driven.startPCA(10);
+	data_driven.startPCA(false);
+//	data_driven.startPCA(10, false);
 	MatrixXf transmat = data_driven.getTransMatrix();
 	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
 	cout << endl << "min vector: " << endl << data_driven.getMinVector() << endl;
@@ -117,8 +117,13 @@ int main(int argc, char **argv)
 
 		updateHandModel(handmodel, skel);
 		if(skel)	updateHandSkeleton(handmodel);
+
+		//test: transformT
+		SK::Array<Eigen::Matrix<float, 3, 1>> transT = handmodel.transformT(curr_para);
+		for(size_t i = 0; i < transT.size(); i++)
+			cout << transT[i] << endl;
 		
-		viewer->spinOnce(1);
+		viewer->spinOnce(10);
 		frame = (frame + 1) % dataset.size();
 	}
 

@@ -37,7 +37,7 @@
     <ClCompile Include="ICPPCA.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="SequenceReader.cpp">
+    <ClCompile Include="LoadMAT.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>
