@@ -26,10 +26,10 @@ SK::Array<T> getQuaternionfromVec(Eigen::Matrix<T, 3, 1> &vec)
 	
 	if (abs(angle) < T(0.00001))
 	{
-		para.pushBack(T(1.0));
-		para.pushBack(T(0.0));
-		para.pushBack(T(0.0));
-		para.pushBack(T(0.0));
+		para.pushBack(T(1.0f));
+		para.pushBack(T(0.0f));
+		para.pushBack(T(0.0f));
+		para.pushBack(T(0.0f));
 	}
 	else
 	{
@@ -73,6 +73,7 @@ public:
 	int getSphereSize(){return models.size();}
 	int getRelated(int index){return relatedmap[index];}
 
+
 	SK::Array<ModelCoefficients> getSkeleton();
 
 	template <typename T>
@@ -81,9 +82,10 @@ public:
 		// return 48 new point positions
 		SK::Array<Eigen::Matrix<T, 3, 1>> t_point_list;
 		t_point_list.resize(SPHERE_NUM);
-		Eigen::Transform<T, 3, Affine> global_trans = Eigen::Translation<T, 3>(para[20], para[21], para[22]);
+		Eigen::Translation<T, 3> global_trans = Eigen::Translation<T, 3>(para[20], para[21], para[22]);
 		SK::Array<T> q_para = getQuaternionfromVec(Eigen::Matrix<T, 3, 1>(para[23], para[24], para[25]));
-		Eigen::Transform<T, 3, Affine> global_rot = Eigen::Quaternion<T, 3>(q_para[0], q_para[1], q_para[2], q_para[3]);
+		Eigen::Quaternion<T> global_rot = Eigen::Quaternion<T>(q_para[0], q_para[1], q_para[2], q_para[3]);
+		Eigen::Transform<T, 3, Affine> global_move = global_trans * global_rot;
 
 		// finger without thumb
 		for(int fin = 0; fin < 4; fin++)
@@ -135,11 +137,11 @@ public:
 			{
 				// T and -T
 				Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray[t]].getCenter()[0]), T(models[rootarray[t]].getCenter()[1]), T(models[rootarray[t]].getCenter()[2])); 
-				Eigen::Transform<T, 3, Affine> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
-				Eigen::Transform<T, 3, Affine> re_trans = Eigen::Translation<T, 3>(tmp_root);
+				Eigen::Translation<T, 3> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
+				Eigen::Translation<T, 3> re_trans = Eigen::Translation<T, 3>(tmp_root);
 				// R
 				SK::Array<T> q_para_fin = getQuaternionfromVec(angle[t]);
-				Eigen::Transform<T, 3, Affine> rot = Eigen::Quaternion<T, 3>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
+				Eigen::Quaternion<T> rot = Eigen::Quaternion<T>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
 			
 				// transform
 				for(int i = rootarray[t]; i <= tips; i++)
@@ -154,36 +156,42 @@ public:
 			// angle form: (below), (theta1, 0, 0), (theta2, 0, 0)
 			// thumb spheres: 40~47, 40: first joint, 44: mid joint, 47: last joint, 47:tips
 			T theta[3] = {T(0), T(para[2]), T(para[3])};
-			int rootarray[3] = {40, 44, 46}, tips = 47;
+			int rootarray_st[3] = {40, 44, 46}, tips = 47;
+
+			// initial spheres
+			for(int i = rootarray_st[0]; i <= tips; i++)
+				t_point_list[i] = Eigen::Matrix<T, 3, 1>(T(models[i].getCenter()[0]), T(models[i].getCenter()[1]), T(models[i].getCenter()[2]));
+
+
 			for(int t = 2; t >= 1; t--)		// 1!!!!
 			{
 				// T and -T
-				Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray[t]].getCenter()[0]), T(models[rootarray[t]].getCenter()[1]), T(models[rootarray[t]].getCenter()[2])); 
-				Eigen::Transform<T, 3, Affine> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
-				Eigen::Transform<T, 3, Affine> re_trans = Eigen::Translation<T, 3>(tmp_root);
+				Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray_st[t]].getCenter()[0]), T(models[rootarray_st[t]].getCenter()[1]), T(models[rootarray_st[t]].getCenter()[2])); 
+				Eigen::Translation<T, 3> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
+				Eigen::Translation<T, 3> re_trans = Eigen::Translation<T, 3>(tmp_root);
 				// R (Quaternion building)
 				T s = sin(theta[t] / T(2.0)), w = cos(theta[t] / T(2.0));
 				T x =  s * T(2) / T(3), y = s / T(3), z =  s * T(2) / T(-3);
-				Eigen::Transform<T, 3, Affine> rot = Eigen::Quaternion<T, 3>(w, x, y, z);
+				Eigen::Quaternion<T> rot = Eigen::Quaternion<T>(w, x, y, z);
 			
 				// transform
-				for(int i = rootarray[t]; i <= tips; i++)
+				for(int i = rootarray_st[t]; i <= tips; i++)
 					t_point_list[i] = re_trans * rot * pre_trans * t_point_list[i];
 			}
 		
 			//the first joint rotatation axis: y and z (0, phi1, phi2)
 			// T and -T
-			Eigen::Matrix<T, 3, 1> tmp_root_st(T(models[rootarray[0]].getCenter()[0]), T(models[rootarray[0]].getCenter()[1]), T(models[rootarray[0]].getCenter()[2])); 
-			Eigen::Transform<T, 3, Affine> pre_trans_st = Eigen::Translation<T, 3>(-tmp_root_st);
-			Eigen::Transform<T, 3, Affine> re_trans_st = Eigen::Translation<T, 3>(tmp_root_st);
+			Eigen::Matrix<T, 3, 1> tmp_root_st(T(models[rootarray_st[0]].getCenter()[0]), T(models[rootarray_st[0]].getCenter()[1]), T(models[rootarray_st[0]].getCenter()[2])); 
+			Eigen::Translation<T, 3> pre_trans_st = Eigen::Translation<T, 3>(-tmp_root_st);
+			Eigen::Translation<T, 3> re_trans_st = Eigen::Translation<T, 3>(tmp_root_st);
 			// R
-			Eigen::Matrix<T, 3, 1> root_angle((T(0), para[0], para[1]));
+			Eigen::Matrix<T, 3, 1> root_angle(T(0), para[0], para[1]);
 			SK::Array<T> q_para_fin = getQuaternionfromVec(root_angle);
-			Eigen::Transform<T, 3, Affine> rot_st = Eigen::Quaternion<T, 3>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
+			Eigen::Quaternion<T> rot_st = Eigen::Quaternion<T>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
 
 			// transform
-			for(int i = rootarray[0]; i <= tips; i++)
-				t_point_list[i] = re_trans_st * rot_st * pre_trans_st * t_point_list[i];
+			for(int i = rootarray_st[0]; i <= tips; i++)
+				t_point_list[i] = re_trans_st * rot_st * pre_trans_st * t_point_list[i];/**/
 		}
 
 		// palm and global transform
@@ -192,10 +200,17 @@ public:
 			// rotation first and the move
 			if(i < 16)
 				t_point_list[i] = Eigen::Matrix<T, 3, 1>(T(models[i].getCenter()[0]), T(models[i].getCenter()[1]), T(models[i].getCenter()[2])); 
-			t_point_list[i] = global_trans * global_rot * t_point_list[i];
+			t_point_list[i] = global_move * t_point_list[i];
 		}
 
 		return t_point_list;
+	}
+
+	template <typename T>
+	void setAllCenter(SK::Array<Eigen::Matrix<T, 3, 1>> new_center)
+	{
+		for(int i = 0; i < SPHERE_NUM; i++)
+			models[i].setCenter(SK::Vector3(new_center[i].x(), new_center[i].y(), new_center[i].z()));
 	}
 
 private:

@@ -101,6 +101,14 @@ int main(int argc, char **argv)
 	addHandModel(handmodel, skel);
 	if(skel)	addHandSkeleton(handmodel);
 
+	//test: transformT
+/*	SK::Array<float> zero_para;
+	for(int i = 0; i < 26; i++)	zero_para.pushBack(0.0f);
+	SK::Array<Eigen::Matrix<float, 3, 1>> transT = handmodel.transformT(zero_para);
+	for(size_t i = 0; i < transT.size(); i++)
+		cout << "points " << (i + 1) << ": (" << transT[i].x() << ", "  << transT[i].y() << ", " << transT[i].z() << ")\n";
+	cout << endl;*/
+
 	// Main while
 	int frame = 0;
 	while(!viewer->wasStopped())
@@ -110,18 +118,17 @@ int main(int argc, char **argv)
 		handmodel = HandModel();
 		HandPose handpose = HandPose();
 
-		// Apply the new parameters (Animation)
+		// Apply the new parameters handpose (Animation)
 		SK::Array<float> curr_para = dataset[frame];
-		handpose.setAllParameters(curr_para, false);
-		handpose.applyPose(handmodel);
+/*		handpose.setAllParameters(curr_para, false);
+		handpose.applyPose(handmodel);*/
+
+		// Apply the new parameters by transformT (Animation)
+		SK::Array<Eigen::Matrix<float, 3, 1>> transT = handmodel.transformT(curr_para);
+		handmodel.setAllCenter(transT);
 
 		updateHandModel(handmodel, skel);
 		if(skel)	updateHandSkeleton(handmodel);
-
-		//test: transformT
-		SK::Array<Eigen::Matrix<float, 3, 1>> transT = handmodel.transformT(curr_para);
-		for(size_t i = 0; i < transT.size(); i++)
-			cout << transT[i] << endl;
 		
 		viewer->spinOnce(10);
 		frame = (frame + 1) % dataset.size();
