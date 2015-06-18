@@ -34,6 +34,7 @@ public:
 	void resetTerm(){d_term_value = 0.0; f_term_value = 0.0; l_term_value = 0.0;}
 	void setDTerm();
 	void setDTerm_KD();
+	void setDTerm_f();
 	void setFTerm(flann::Index<flann::L2<float> > &);
 	void setLTerm();
 	void calculate();

@@ -337,3 +337,39 @@ void AICP::run_randomJoint(const PointCloud<PointXYZRGB> &cloud)
 		cost = std::sqrt(summary.final_cost);*/
 	}
 }
+
+void AICP::run_randomPara(const Eigen::Matrix<float, 3, Eigen::Dynamic> &cloud_mat)
+{
+	srand(time(NULL));
+	for(int t = 0; t < times; t++)
+	{
+		int seed = rand() % 26;
+		Eigen::Matrix<float, 1, 26> para_mat = bestpose.getAllParametersT(float(0.0));
+		double theta = double(para_mat(0, seed));
+		
+		Problem problem;
+		ceres::CostFunction* cf_curr;
+		cf_curr = new AutoDiffCostFunction<CF_T, 1, 1> (new CF_T(cloud_mat, para_mat, seed));
+		problem.AddResidualBlock(cf_curr, NULL, &theta);
+		if(seed < 20)
+		{
+			problem.SetParameterUpperBound(&theta, 0, HandPose::getBound(seed, true));
+			problem.SetParameterLowerBound(&theta, 0, HandPose::getBound(seed, false));
+		}
+
+		// Set the solver
+		Solver::Options options;
+		options.max_num_iterations = iter;
+		options.linear_solver_type = ceres::DENSE_QR;
+		options.minimizer_progress_to_stdout = false;
+
+		// Run the solver
+		Solver::Summary summary;
+		Solve(options, &problem, &summary);
+
+		// Recover the theta
+//		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
+		updatePose(seed, theta);
+		cost = std::sqrt(summary.final_cost);
+	}
+}

@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 		handpose.applyPose(handmodel);*/
 
 		// Apply the new parameters by transformT (Animation)
-		SK::Array<Eigen::Matrix<float, 3, 1>> transT = handmodel.transformT(curr_para);
+		Eigen::Matrix<float, 3, SPHERE_NUM> transT = handmodel.transformT(curr_para);
 		handmodel.setAllCenter(transT);
 
 		updateHandModel(handmodel, skel);

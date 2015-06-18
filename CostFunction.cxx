@@ -45,6 +45,36 @@ void MyCostFunction::setDTerm()
 	d_term_value *= (double)sgroup.size() / (double)cloud.size();
 }
 
+void MyCostFunction::setDTerm_f()
+{
+	Array<Sphere> sgroup = model.getFullHand();
+	SK::Array<size_t> min_list;
+	for(size_t p = 0; p < cloud.size(); p++)
+	{
+		size_t min_index = 0;
+		double min_dis = 1000000;
+		for(size_t c = 0; c < sgroup.size(); c++)
+		{
+			Vector3 tmppoint = Vector3(cloud.points[p].x, cloud.points[p].y, cloud.points[p].z);
+			double dis = tmppoint.distance(sgroup[c].getCenter());
+			dis = (dis - sgroup[c].getRadius() >= 0) ? (dis - sgroup[c].getRadius()) : (sgroup[c].getRadius() - dis);
+			if(min_dis > dis)
+			{
+				min_dis = dis;
+				min_index = c;
+			}
+		}
+		d_term_value += min_dis * min_dis;
+		min_list.pushBack(min_index);
+	}
+	// lamda weight
+	d_term_value *= (double)sgroup.size() / (double)cloud.size();
+	cout << "Show min list in T: " << endl;
+	for(size_t i = 0; i < min_list.size(); i++)
+		cout << min_list[i] << "\t";
+	cout << endl;
+}
+
 void MyCostFunction::setDTerm_KD()
 {
 	// Use KD-tree to find nearest point

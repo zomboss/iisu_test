@@ -16,6 +16,7 @@
 #include "HandModel.hxx"
 #include "HandPose.hxx"
 #include "CostFunction.hxx"
+#include "CostFunctionT.hxx"
 #include "PSO.hxx"
 #include "AICP.hxx"
 #include "Initialization.hxx"
@@ -66,16 +67,6 @@ Vector3 getFingerColor(int finger)
 	return Vector3(color[finger][0], color[finger][1], color[finger][2]);
 }
 
-Vector3 getHandPose(int finger)	// useless now!!!
-{
-	float pose[5][3] = {{0, -0.174533, 0.349066}, {-0.0593308, 0, -0.0362806}, {-0.104054, 0, -0.344614}, {0.0797768, 0, -0.349066}, {0.734575, 0, -0.349066}};
-	if(finger >=5)
-		return Vector3(0.0, 0.0, 0.0);
-	if(finger < 0)
-		return Vector3(1.57, 0.0, 0.0);
-	return Vector3(pose[finger][0], pose[finger][1], pose[finger][2]);
-}
-
 void showParameter(HandPose &strpose, HandPose &endpose)
 {
 	cout << "checking parameter..." << endl;
@@ -108,52 +99,6 @@ void showParameter(HandPose &pose)
 		 << "position, origin:\t" << pose.getPosition() << endl
 		 << "rotation, origin:\t" << pose.getRotation() << endl
 		 << "orientation, origin:\t" << pose.getOrientation() << endl;
-}
-
-void addModifiedPointCloud()
-{
-	SK::Array<Vector3> palm = getPalmDirection();
-	Matrix4 rot = MyTools::transVector(palm[0], (palm[1] - palm[0]), Vector3(0, 0, 0), Vector3(0, 0, 1));
-//	cout << "show rot: " << rot << endl;
-	for(size_t i = 0; i < cloudptr->points.size(); i++)
-		cloudptr->points[i] = MyTools::rotatedPoint(rot, cloudptr->points[i]);
-	viewer->addPointCloud(cloudptr, "mycloud");
-}
-
-void addMPCFeature(SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<int> &match) 
-{
-	SK::Array<Vector3> palm = getPalmDirection();
-	Matrix4 rot = MyTools::transVector(palm[0], (palm[1] - palm[0]), Vector3(0, 0, 0), Vector3(0, 0, 1));
-	// rotation term
-	palm[0] = rot.multiplyByPoint(palm[0]);
-	palm[1] = rot.multiplyByPoint(palm[1]);
-
-	viewer->addArrow(palm[0], palm[1], 200, 200, 200, false, "plam orientation");
-	pc_tips.resize(5);
-	pc_dirs.resize(5);
-	for(int f = 0; f < 5; f++)
-	{
-		Vector3 tips = getTipVector(f);
-		Vector3 color = getFingerColor(f);
-		SK::Array<Vector3> fdir = getFingerDirection(f);
-		// no finger condition
-		if(tips == Vector3(0, 0, 0))	continue;
-		
-		// rotation term
-		tips = rot.multiplyByPoint(tips);
-		fdir[0] = rot.multiplyByPoint(fdir[0]);
-		fdir[1] = rot.multiplyByPoint(fdir[1]);
-		cout  << match[f] << " fingers, tips = " << tips << ", ori = " << (fdir[1] - fdir[0]) << endl;
-		pc_tips[match[f]] = tips;
-		pc_dirs[match[f]] = (fdir[1] - fdir[0]);
-
-		string sname = "tips ";
-		sname = sname + to_string(static_cast<long long>(match[f]));
-		string dname = "finger direction ";
-		dname = dname + to_string(static_cast<long long>(match[f]));
-		viewer->addSphere(tips, 5.0, (int)color[0], (int)color[1], (int)color[2], sname);
-		viewer->addArrow(fdir[0], fdir[1], 200, 200, 200, false, dname);
-	}
 }
 
 void addNPCFeature(SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<int> &match) 
@@ -267,14 +212,15 @@ int main(int argc, char** argv)
 	// Point cloud Loading and random sampling
 //	cloud = MyTools::downsampling(cloud);
 	clock_t begin = clock();
-//	addModifiedPointCloud();
 	viewer->addPointCloud(cloudptr, "mycloud");
+
+	Eigen::Matrix<float, 3, Eigen::Dynamic> cloud_mat = MyTools::PointCloudtoMatrix(cloud, 0.0f);
+	cout << "cloud mat size = " << cloud_mat.rows() << " * " << cloud_mat.cols() << endl;
 
 	// Get tips and plam normal (hand feature)
 	SK::Array<Vector3> pc_tips, pc_dirs;
 	SK::Array<int> finger_match;			// Special case!!!
 	finger_match.pushBack(3);finger_match.pushBack(2);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
-//	addMPCFeature(pc_tips, pc_dirs, finger_match);
 	addNPCFeature(pc_tips, pc_dirs, finger_match);
 
 	// Depth map setting
@@ -285,18 +231,6 @@ int main(int argc, char** argv)
 
 	// Hand Pose initialization
 	HandPose handpose = HandPose();
-
-/*	Initialization in = Initialization(5, pc_tips, pc_dirs, handmodel);
-	SK::Array<bool> isfinger;				// Special case!!!
-	isfinger.pushBack(true);isfinger.pushBack(true);isfinger.pushBack(true);isfinger.pushBack(true);isfinger.pushBack(true);
-	in.fingerExist(isfinger);
-	in.goFullInitail(handpose, false);
-	in.setFullResultPose(handpose);
-	in.goInitail(handpose);
-	in.goInitail();
-	in.setResultPose(handpose);*/
-/*	handpose.applyPose(handmodel);
-	cout << "Initialzation done." << endl;*/
 
 	SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(5);
 	double bestcost = 1000000;
@@ -316,37 +250,64 @@ int main(int argc, char** argv)
 			in.setFullResultPose(handpose);
 		}/**/
 	}
-	handpose.applyPose(handmodel);/**/
+/*	handpose.applyPose(handmodel);*/
 	cout << "Initialzation done." << endl;
 	clock_t mid = clock();
 //	showParameter(handpose);
 
-	MyCostFunction costf = MyCostFunction(cloud, handmodel);
+/*	MyCostFunction costf = MyCostFunction(cloud, handmodel);
 	costf.calculate();
 	cout << "before point = " << costf.getCost() << endl;
 
-	handmodel = HandModel();
+	handmodel = HandModel();*/
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(40, 24, -10, 1);
-/*	pso.generateParticles(handpose);
+/*	PSO pso = PSO(40, 24, -10, 1);
+	pso.generateParticles(handpose);
 	cout << "PSO initial done..." << endl;
 //	pso.goGeneration_mp(cloud, handmodel, false, true);
 	pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
 	bestpose.applyPose(handmodel);
-	cout << "show point: " << pso.getBestPoint() << endl;*/
+	cout << "show cost = " << pso.getBestPoint() << endl;*/
+
+/*	SK::Array<Sphere> s_g = handmodel.getFullHand();
+	Eigen::Matrix<float, 3, 48> m_g = handmodel.getAllCenterMat(0.0f);
+	for(int i = 0; i < 48; i++)
+		cout << "compare " << i << ": sphere ( " << s_g[i].getCenter()[0] << ", " << s_g[i].getCenter()[1] << ", " << s_g[i].getCenter()[2] << " ) <---> "
+			 << "matrix ( " << m_g(0, i) << ", " << m_g(1, i) << ", " << m_g(2, i) << " )" << endl;*/
+
+
+	// CostFunctionT test
+/*	cout << "\n\n\n";
+	clock_t time_1 = clock();
+	for(int i = 0; i < 100; i++)
+	{
+		MyCostFunction costf = MyCostFunction(cloud, handmodel);
+		costf.calculate();
+//		cout << "normal cost in D = " << costf.getDTerm() << ", in L = " << costf.getLTerm() << endl;
+	}
+	clock_t time_2 = clock();
+	for(int i = 0; i < 100; i++)
+	{
+		CostFunctionT<float> costtf = CostFunctionT<float>(cloud_mat, handmodel.getAllCenterMat(0.0f), handmodel.getRadiusMat(0.0f));
+		costtf.calculate();
+//		cout << "T cost in D = " << costtf.getDTerm() << ", in L = " << costtf.getLTerm() << endl;
+	}
+	clock_t time_3 = clock();
+	cout << "ori comsume =  " << double(time_2 - time_1) << " ms, new comsume = " << double(time_3 - time_2) << " ms\n";*/
 
 	// F-term information
-	float pix_meter = pso.getPixmeter();
+/*	float pix_meter = pso.getPixmeter();
 	vector<float> pure_vector;
-	Index<flann::L2<float>> index = pso.buildDatasetIndex(*planar.get(), pure_vector);
+	Index<flann::L2<float>> index = pso.buildDatasetIndex(*planar.get(), pure_vector);*/
 
 
 	// ICP Optimization
 	AICP aicp = AICP(10, 5, handpose);
-	aicp.run_randomPara(cloud);
+	aicp.run_randomPara(cloud_mat);
+//	aicp.run_randomPara(cloud);
 //	aicp.run_randomJoint(cloud);
 //	aicp.run_randomPara(cloud, *planar.get(), pix_meter, pure_vector, index);
 //	aicp.run_specPara(cloud, 24);
@@ -354,20 +315,13 @@ int main(int argc, char** argv)
 	HandPose bestpose = aicp.getBestPose();
 	bestpose.applyPose(handmodel);/**/
 	
-	costf = MyCostFunction(cloud, handmodel);
-	costf.calculate();
-	cout << "after point = " << costf.getCost() << endl;
-
-	// For better recognition
-//	handmodel.moveHand(Vector3(200, 0, 0));
-	
 	// Time consumption
-	clock_t end = clock();
+/*	clock_t end = clock();
 	double init_t = double(mid - begin);
 	double opt_t = double(end - mid);
 	double total_t = double(end - begin);
-	cout << "init comsume =  " << init_t << " ms, opt comsume = " << opt_t << " ms, total comsume = " << total_t  << " ms" << endl;/**/
-	showParameter(handpose, bestpose);/**/
+	cout << "init comsume =  " << init_t << " ms, opt comsume = " << opt_t << " ms, total comsume = " << total_t  << " ms" << endl;*/
+/*	showParameter(handpose, bestpose);*/
 
 	addHandModel(handmodel);
 	addHandSkeleton(handmodel);

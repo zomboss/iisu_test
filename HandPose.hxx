@@ -86,6 +86,30 @@ public:
 	static float validFingers(int, int, float);
 	static double getBound(int, bool);
 
+	template <typename T>
+	Eigen::Matrix<T, 1, 26> getAllParametersT(T typevar)
+	{
+		Eigen::Matrix<T, 1, 26> parameter;
+		parameter(0, 0) = T(j_thumb_base[1]);parameter(0, 1) = T(j_thumb_base[2]);
+		parameter(0, 2) = T(j_thumb_mid[0]);
+		parameter(0, 3) = T(j_thumb_top[0]);
+		parameter(0, 4) = T(j_index_base[0]);parameter(0, 5) = T(j_index_base[2]);
+		parameter(0, 6) = T(j_index_mid[0]);
+		parameter(0, 7) = T(j_index_top[0]);
+		parameter(0, 8) = T(j_middle_base[0]);parameter(0, 9) = T(j_middle_base[2]);
+		parameter(0, 10) = T(j_middle_mid[0]);
+		parameter(0, 11) = T(j_middle_top[0]);
+		parameter(0, 12) = T(j_ring_base[0]);parameter(0, 13) = T(j_ring_base[2]);
+		parameter(0, 14) = T(j_ring_mid[0]);
+		parameter(0, 15) = T(j_ring_top[0]);
+		parameter(0, 16) = T(j_little_base[0]);parameter(0, 17) = T(j_little_base[2]);
+		parameter(0, 18) = T(j_little_mid[0]);
+		parameter(0, 19) = T(j_little_top[0]);
+		parameter(0, 20) = T(global_pos[0]);parameter(0, 21) = T(global_pos[1]);parameter(0, 22) = T(global_pos[2]);
+		parameter(0, 23) = T(global_rot[0]);parameter(0, 24) = T(global_rot[1]);parameter(0, 25) = T(global_rot[2]);
+		return parameter;
+	}
+
 private:
 	Vector3 j_thumb_base;	// 2 degrees
 	Vector3 j_thumb_mid;	// 1 degree

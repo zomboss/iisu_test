@@ -201,21 +201,23 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
   <ItemGroup>
     <ClCompile Include="AICP.cxx" />
     <ClCompile Include="CostFunction.cxx" />
-    <ClCompile Include="DataDriven.cpp" />
+    <ClCompile Include="CostFunctionT.cxx" />
+    <ClCompile Include="DataDriven.cxx" />
     <ClCompile Include="Finger.cxx" />
     <ClCompile Include="HandInfo.cxx" />
     <ClCompile Include="HandPose.cxx" />
     <ClCompile Include="HandModel.cxx" />
     <ClCompile Include="ICPPCA.cxx" />
     <ClCompile Include="Initialization.cxx" />
-    <ClCompile Include="LoadMAT.cpp" />
     <ClCompile Include="MyTools.cxx" />
+    <ClCompile Include="PCDReader.cpp" />
     <ClCompile Include="PSO.cxx" />
     <ClCompile Include="Sphere.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AICP.hxx" />
     <ClInclude Include="CostFunction.hxx" />
+    <ClInclude Include="CostFunctionT.hxx" />
     <ClInclude Include="DataDriven.hxx" />
     <ClInclude Include="Finger.hxx" />
     <ClInclude Include="HandInfo.hxx" />

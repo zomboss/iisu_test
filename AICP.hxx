@@ -14,6 +14,7 @@
 #include "HandPose.hxx"
 #include "HandModel.hxx"
 #include "CostFunction.hxx"
+#include "CostFunctionT.hxx"
 
 using namespace std;
 using namespace pcl;
@@ -36,6 +37,7 @@ public:
 
 	void run_randomPara(const PointCloud<PointXYZRGB> &);
 	void run_randomPara(PointCloud<PointXYZRGB> &, RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
+	void run_randomPara(const Eigen::Matrix<float, 3, Eigen::Dynamic> &);
 	void run_specPara(const PointCloud<PointXYZRGB> &, int );
 	void run_cyclePara(const PointCloud<PointXYZRGB> &);
 	void run_randomJoint(const PointCloud<PointXYZRGB> &);
@@ -212,4 +214,45 @@ private:
 	bool isfull;
 
 
+};
+
+
+class CF_T
+{
+public:
+	CF_T(const Eigen::Matrix<float, 3, Eigen::Dynamic> &cm, Eigen::Matrix<float, 1, 26> p, int i): 
+		cloud_mat(cm), para_mat(p), index(i)
+	{
+		
+	}
+	template <typename T>
+	bool operator()(const T* const theta, T* residual) const
+	{
+		HandModel handmodel = HandModel();
+		Eigen::Matrix<float, 1, SPHERE_NUM> radius_mat = handmodel.getRadiusMat(0.0f);
+		
+		// Cast to T type
+		Eigen::Matrix<T, 3, Eigen::Dynamic> cloud_mat_t = cloud_mat.cast<T>();
+		Eigen::Matrix<T, 1, SPHERE_NUM> radius_mat_t = radius_mat.cast<T>();
+		Eigen::Matrix<T, 1, 26> para_mat_t = para_mat.cast<T>();
+
+		// Set up the pose
+		para_mat_t(0, index) = *theta;
+		Eigen::Matrix<T, 1, SPHERE_NUM> model_mat_t = handmodel.transformT(para_mat_t);
+
+		// Use Cost Function to compute residual
+		CostFunctionT<T> costtf = CostFunctionT<T>(cloud_mat_t, model_mat_t, radius_mat_t);
+		costtf.calculate();
+		residual[0] = costtf.getCost();
+		
+		return true;
+	}
+
+private:
+	Eigen::Matrix<float, 3, Eigen::Dynamic> cloud_mat;
+//	Eigen::Matrix<float, 1, SPHERE_NUM> radius_mat;
+//	HandModel handmodel;
+	Eigen::Matrix<float, 1, 26> para_mat;
+
+	int index;
 };

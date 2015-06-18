@@ -31,13 +31,16 @@
     <ClCompile Include="HandInfo.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="DataDriven.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="ICPPCA.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="LoadMAT.cpp">
+    <ClCompile Include="CostFunctionT.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="DataDriven.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="PCDReader.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -76,6 +79,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="ICPPCA.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="CostFunctionT.hxx">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

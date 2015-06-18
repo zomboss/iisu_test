@@ -37,6 +37,15 @@ public:
 	static SK::Matrix4 translation(SK::Vector3 pos);
 	static SK::Matrix4 transVector(SK::Vector3 pos1, SK::Vector3 ori1, SK::Vector3 pos2, SK::Vector3 ori2);
 	static PointXYZRGB rotatedPoint(Matrix4 rot, const PointXYZRGB &oldpoint);
+	template <typename T>
+	static Eigen::Matrix<T, 3, Eigen::Dynamic> PointCloudtoMatrix(const PointCloud<PointXYZRGB> &cloud, T typevar)
+	{
+		static Eigen::Matrix<T, 3, Eigen::Dynamic> mat;
+		mat.resize(3, cloud.size());
+		for(int i = 0; i < cloud.size(); i++)
+			mat.col(i) = Eigen::Matrix<T, 3, 1>(T(cloud[i].x), T(cloud[i].y), T(cloud[i].z));
+		return mat;
+	}
 	
 	// Permutaion with order fixed
 	static SK::Array<SK::Array<bool>> fingerChoosing(int num);
