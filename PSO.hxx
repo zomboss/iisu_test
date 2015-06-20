@@ -50,6 +50,8 @@ public:
 	void goGeneration_full(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, bool, bool );
 	void goGeneration_datafull(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, DataDriven &, bool, bool );
 
+	SK::Array<HandPose> goGeneration_test(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, bool, bool );
+
 private:
 	int generation_num;
 	int particles_num;

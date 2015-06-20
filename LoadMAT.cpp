@@ -24,7 +24,7 @@ void addHandModel(HandModel &handmodel, bool isdot)
 	SK::Array<Sphere> sgroup = handmodel.getFullHand();
 	if(isdot)
 	{
-		int jointspot[] = {16, 18, 20, 21, 22, 24, 26, 27, 28, 30, 32, 33, 34, 36, 38, 39, 40, 44, 46, 47};
+		int jointspot[] = {12, 18, 20, 21, 13, 24, 26, 27, 14, 30, 32, 33, 15, 36, 38, 39, 40, 44, 46, 47};
 		for(size_t i = 0; i < 20; i++)
 			viewer->addSphere(MyTools::vectortoPointXYZ(sgroup[jointspot[i]].getCenter()), 3, 
 							  sgroup[jointspot[i]].getColor()[0], sgroup[jointspot[i]].getColor()[1], sgroup[jointspot[i]].getColor()[2], 
@@ -40,7 +40,7 @@ void updateHandModel(HandModel &handmodel, bool isdot)
 	SK::Array<Sphere> sgroup = handmodel.getFullHand();
 	if(isdot)
 	{
-		int jointspot[] = {16, 18, 20, 21, 22, 24, 26, 27, 28, 30, 32, 33, 34, 36, 38, 39, 40, 44, 46, 47};
+		int jointspot[] = {12, 18, 20, 21, 13, 24, 26, 27, 14, 30, 32, 33, 15, 36, 38, 39, 40, 44, 46, 47};
 		for(size_t i = 0; i < 20; i++)
 			viewer->updateSphere(MyTools::vectortoPointXYZ(sgroup[jointspot[i]].getCenter()), 3, 
 								 sgroup[jointspot[i]].getColor()[0], sgroup[jointspot[i]].getColor()[1], sgroup[jointspot[i]].getColor()[2], 
@@ -124,7 +124,10 @@ int main(int argc, char **argv)
 		handpose.applyPose(handmodel);*/
 
 		// Apply the new parameters by transformT (Animation)
-		Eigen::Matrix<float, 3, SPHERE_NUM> transT = handmodel.transformT(curr_para);
+		Eigen::Matrix<float, 1, 26> curr_mat;
+		for(int i = 0; i < 26; i++)
+			curr_mat(0, i) = curr_para[i];
+		Eigen::Matrix<float, 3, SPHERE_NUM> transT = handmodel.transformT(curr_mat);
 		handmodel.setAllCenter(transT);
 
 		updateHandModel(handmodel, skel);

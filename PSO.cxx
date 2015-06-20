@@ -252,6 +252,80 @@ void PSO::goGeneration_full(const PointCloud<PointXYZRGB> &cloud, const RangeIma
 	}
 }
 
+SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud, const RangeImagePlanar &planar, const HandModel &model, bool iskmean = false, bool show = false)
+{
+	// build dataset from planar
+	vector<float> pure_vec;
+	Index<flann::L2<float>> index = buildDatasetIndex(planar, pure_vec);
+	SK::Array<HandPose> bestpose_list;
+
+	double prepoint = 0.0;
+	for(int g = 0; g < generation_num; g++)
+	{
+		if(show)	cout << "In generation " << g << ", show best point: " << gk_point << endl;
+		
+		clock_t begin_t = clock();
+		// Stop if point change a little
+//		if(abs(prepoint - gk_point) < 0.001)	break;
+		prepoint = gk_point;
+
+		int iCPU = omp_get_num_procs();
+		omp_set_dynamic(0);     // Explicitly disable dynamic teams
+		#pragma omp parallel for num_threads(iCPU)
+		for(int p = 0; p < particles_num; p++)
+		{
+			if(m <= 0)	// compute point-sphere correspondences (CostFunction)
+			{
+				HandModel testmodel = model;
+				particles[p].applyPose(testmodel);
+				MyCostFunction costf = MyCostFunction(cloud, testmodel, planar, pix_meter, pure_vec);
+				costf.calculate(index);
+				curr_points[p] = costf.getCost();
+//				cout << "show D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << endl;
+			}
+			else	// Gradient descent on a random parameter, if m < 0, PSO only
+			{
+				AICP aicp = AICP(m, 5, particles[p]);
+				aicp.run_randomPara(cloud);
+				particles[p] = aicp.getBestPose();
+				curr_points[p] = aicp.getBestCost();
+//				cout << "ICP Iteration in " << p << " done..." << endl;
+			}
+		}
+
+		clock_t main_t = clock();
+		// Update pk and Gk
+		int best_prat_num = -1;
+		for(int p = 0; p < particles_num; p++)
+		{
+			if(curr_points[p] < pk_point[p])
+			{
+				pk_point[p] = curr_points[p];	// point
+				hispose[p] = particles[p];		// position
+			}
+			if(curr_points[p] < gk_point)
+			{
+				gk_point = curr_points[p];		// point
+				bestPose = particles[p];		// position
+				best_prat_num = p;
+			}
+		}
+
+		// k-means clustering of all particles (Not yet!!!)
+
+		// Particle swarm update within each cluster (PSOupdate)
+		PSOupdate();
+		clock_t end_t = clock();
+//		if(show)	cout << "in generation " << g << ", main time = " << double(main_t - begin_t) << " ms, update time = " << double(end_t - main_t) << endl;
+		if(show)	cout << "best particle in generation " << g << " :" << best_prat_num << endl;
+
+		// add to list
+		bestpose_list.pushBack(bestPose);
+	}
+
+	return bestpose_list;
+}
+
 void PSO::goGeneration_data(const PointCloud<PointXYZRGB> &cloud, const HandModel &model, DataDriven &data_driven, bool iskmean = false, bool show = false)
 {
 	double prepoint = 0.0;
@@ -376,6 +450,7 @@ void PSO::goGeneration_datafull(const PointCloud<PointXYZRGB> &cloud, const Rang
 
 	}
 }
+
 Index<flann::L2<float>> PSO::buildDatasetIndex(const RangeImagePlanar &planar, vector<float> &data)
 {
 	// Load valid index (x,y)

@@ -22,6 +22,11 @@ bool isrecord = false;
 bool start_time = false;
 int rec_index = 0;
 
+const char *seqname = "Sequences/Seq/pcd_seq";
+const char *seqtype = ".pcd";
+const char *movname = "Movies/movie";
+const char *movtype = ".skv";
+
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
 boost::shared_ptr<visualization::PCLVisualizer> viewer (new visualization::PCLVisualizer ("3D Viewer"));
@@ -72,7 +77,7 @@ void savePCDSequence (const pcl::visualization::KeyboardEvent &event, void* view
 			cout << "Press r again, total " << rec_index << " frames, stop..." << endl;
 			isrecord = false;
 			start_time = false;
-			system("pause");
+//			system("pause");
 		}
 	}
 }
@@ -112,11 +117,15 @@ int main(int argc, char **argv)
 	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
 
+	// Recorder initialization
+	Recorder &recorder = iisu.getScene().getRecorder();
+
 	int frame = 0;
     while (iisu.update() && !viewer->wasStopped())
     {
         iisu.acquire();
         frame = iisu.getScene().getSource().getFrame();
+//		recorder = iisu.getScene().getRecorder();
 		CameraInfo &camerainfo = iisu.getScene().getSource().getCameraInfo();
 		
 		// Assume one hand here
@@ -140,6 +149,11 @@ int main(int argc, char **argv)
 				cout << endl;
 			}
 			handinfo.showInfo(viewer);
+			stringstream ss;
+			ss << movname << movtype;
+			const std::string tmp = ss.str();
+			const char *name = tmp.c_str();
+			cout << recorder.start(name) << endl;
 			start_time = true;
 		}
 
@@ -150,14 +164,15 @@ int main(int argc, char **argv)
 		// Recording
 		if(isrecord)
 		{
-			char *name = "Sequences/Seq/pcd_seq", *type = ".pcd";
 			stringstream ss;
-			ss << name << rec_index << type;
+			ss << seqname << rec_index << seqtype;
 			save(ss.str());
 			rec_index++;
 		}
+		else if(recorder.isRecording())
+			recorder.stop();
 
-		viewer->spinOnce(100);
+		viewer->spinOnce(50);
 		iisu.release();
 		
     }

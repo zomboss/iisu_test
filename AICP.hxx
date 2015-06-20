@@ -228,7 +228,7 @@ public:
 	template <typename T>
 	bool operator()(const T* const theta, T* residual) const
 	{
-		HandModel handmodel = HandModel();
+/*		HandModel handmodel = HandModel();
 		Eigen::Matrix<float, 1, SPHERE_NUM> radius_mat = handmodel.getRadiusMat(0.0f);
 		
 		// Cast to T type
@@ -243,7 +243,7 @@ public:
 		// Use Cost Function to compute residual
 		CostFunctionT<T> costtf = CostFunctionT<T>(cloud_mat_t, model_mat_t, radius_mat_t);
 		costtf.calculate();
-		residual[0] = costtf.getCost();
+		residual[0] = costtf.getCost();*/
 		
 		return true;
 	}

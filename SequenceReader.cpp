@@ -10,6 +10,7 @@
 
 #include <math.h> 
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <algorithm>
 #include <string>
@@ -33,7 +34,7 @@ using namespace pcl;
 using namespace SK;
 using namespace SK::Easii;
 
-// for testing
+// Processing & show
 const bool opti = true;
 const bool skel = true;
 const bool show = true;
@@ -41,9 +42,16 @@ const bool show = true;
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
-const char *name = "Sequences/Seq_test4/pcd_seq";
+// Data cames from
+const char *posname = "PoseData/PSOonly_seq_mov1_2.txt";
+const char *seqname = "Sequences/Seq_mov1/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 58;
+const int FILENUM = 63;
+
+// camera pose
+double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
+double camera_right[] = {662, -224, 369, -0.5, 0, 1};
+double camera_left[] = {-722, -10.8, -322, -0.5, 0, 1};
 
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
@@ -55,9 +63,9 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 {
 	// We have to get HandInfo data first!!!
 	fin_num = 5;
-	float tips[5][3] = {{48.2747, 277.028, 41.7511}, {4.00454, 283.424, 81.4256}, {-32.2563, 285.37, 90.0489}, {-107.844, 279.245, -17.0972}, {-75.5988, 281.608, 70.2936}};
-	float dirs[5][3] = {{-54.7152, 21.2096, -80.9716}, {-22.6027, 5.18344, -97.2741}, {15.6026, 12.9124, -97.9277}, {88.1873, 19.9759, -42.7078}, {54.9201, 30.5877, -77.77}};
-	int order[5] = {3, 4, 2, 1, 0};
+	float tips[5][3] = {{-31.1805, 264.819, 68.5971}, {-2.45027, 260.129, 60.0316}, {41.898, 247.113, 27.932}, {-101.447, 269.249, -46.9191}, {-67.5217, 265.494, 47.5153}};
+	float dirs[5][3] = {{23.502, 14.1849, -96.1584}, {1.37459, 7.11418, -99.7372}, {-27.5342, 32.271, -90.5564}, {95.3402, 22.3956, -20.216}, {22.4471, 14.5659, -96.3533}};
+	int order[5] = {3, 4, 0, 1, 2};
 	pc_tips.resize(5);
 	pc_dirs.resize(5);
 	for(int i = 0; i < 5; i++)
@@ -67,8 +75,8 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 
 	}
 	pc_palm.resize(2);
-	pc_palm[0] = Vector3(-20.546, 305.868, -28.0197);
-	pc_palm[1] = Vector3(-7.59871, 209.616, -51.8505);
+	pc_palm[0] = Vector3(-10.3946, 284.879, -49.4405);
+	pc_palm[1] = Vector3(-9.55535, 187.84, -73.5811);
 
 }
 
@@ -111,7 +119,7 @@ void addHandModel(HandModel &handmodel, bool isdot)
 	SK::Array<Sphere> sgroup = handmodel.getFullHand();
 	if(isdot)
 	{
-		int jointspot[] = {16, 18, 20, 21, 22, 24, 26, 27, 28, 30, 32, 33, 34, 36, 38, 39, 40, 44, 46, 47};
+		int jointspot[] = {12, 18, 20, 21, 13, 24, 26, 27, 14, 30, 32, 33, 15, 36, 38, 39, 40, 44, 46, 47};
 		for(size_t i = 0; i < 20; i++)
 			viewer->addSphere(MyTools::vectortoPointXYZ(sgroup[jointspot[i]].getCenter()), 3, 
 							  sgroup[jointspot[i]].getColor()[0], sgroup[jointspot[i]].getColor()[1], sgroup[jointspot[i]].getColor()[2], 
@@ -127,7 +135,7 @@ void updateHandModel(HandModel &handmodel, bool isdot)
 	SK::Array<Sphere> sgroup = handmodel.getFullHand();
 	if(isdot)
 	{
-		int jointspot[] = {16, 18, 20, 21, 22, 24, 26, 27, 28, 30, 32, 33, 34, 36, 38, 39, 40, 44, 46, 47};
+		int jointspot[] = {12, 18, 20, 21, 13, 24, 26, 27, 14, 30, 32, 33, 15, 36, 38, 39, 40, 44, 46, 47};
 		for(size_t i = 0; i < 20; i++)
 			viewer->updateSphere(MyTools::vectortoPointXYZ(sgroup[jointspot[i]].getCenter()), 3, 
 								 sgroup[jointspot[i]].getColor()[0], sgroup[jointspot[i]].getColor()[1], sgroup[jointspot[i]].getColor()[2], 
@@ -171,6 +179,17 @@ void setDepthImage()
 	planar->createFromPointCloudWithFixedSize(*cloudptr, image_x, image_y, center_x, center_y, focal_x, focal_y, sensorpose);
 }
 
+// change camera view point
+void chCameraViewPoint (const pcl::visualization::KeyboardEvent &event, void* viewer_void)
+{
+	boost::shared_ptr<visualization::PCLVisualizer> viewer = *static_cast<boost::shared_ptr<visualization::PCLVisualizer> *> (viewer_void);
+	if (event.getKeySym () == "a" && event.keyDown ())
+		viewer->setCameraPosition(camera_left[0], camera_left[1], camera_left[2], camera_left[3], camera_left[4], camera_left[5]);
+	if (event.getKeySym () == "s" && event.keyDown ())
+		viewer->setCameraPosition(camera_front[0], camera_front[1], camera_front[2], camera_front[3], camera_front[4], camera_front[5]);
+	if (event.getKeySym () == "d" && event.keyDown ())
+		viewer->setCameraPosition(camera_right[0], camera_right[1], camera_right[2], camera_right[3], camera_right[4], camera_right[5]);
+}
 
 int main(int argc, char** argv)
 {
@@ -180,13 +199,22 @@ int main(int argc, char** argv)
 	viewer->setBackgroundColor (0, 0, 0);
 	viewer->initCameraParameters();
 	viewer->addCoordinateSystem (1.0);
+	viewer->registerKeyboardCallback(chCameraViewPoint, (void*)&viewer);
 
 /*	rviewer->setSize(WIDTH, HEIGHT);
 	rviewer->setPosition(650, 300);*/
 
 	// Camera initialization
-	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
+	
+	// File initialization
+	fstream file;
+	file.open(posname, ios::out);
+	if(!file)
+	{
+		cout << "cannot open file " << posname << "!!!" << endl;
+		return -1;
+	}
 	
 	// Dataset initialization
 	int file_num, length;
@@ -207,15 +235,17 @@ int main(int argc, char** argv)
 	HandModel handmodel = HandModel();
 	HandPose poselist[FILENUM];
 
-	if(show)	addHandModel(handmodel, skel);
-	if(show && skel)	addHandSkeleton(handmodel);
+	if(opti && show)	addHandModel(handmodel, skel);
+	if(opti && show && skel)	addHandSkeleton(handmodel);
 
 	// For loop for computing
 	for(int curr_data = 0; curr_data < FILENUM; curr_data++)
 	{
+		if(!opti)	break;
+		
 		// Load the point cloud
 		stringstream ss;
-		ss << name << curr_data << type;
+		ss << seqname << curr_data << type;
 		if (io::loadPCDFile<PointXYZRGB>(ss.str(), *cloudptr) == -1) // load the file
 		{
 			PCL_ERROR ("Couldn't read file");
@@ -256,18 +286,19 @@ int main(int argc, char** argv)
 					in.setFullResultPose(poselist[curr_data]);
 				}
 			}
+
 			poselist[curr_data].applyPose(handmodel);/**/
 			cout << "Initialization done" << endl;
 		}
 		
 		// PSO Optimization
-		PSO pso = PSO(20, 24, 4, 1);
+		PSO pso = PSO(30, 24, -4, 1);
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else
 			pso.generateParticles(poselist[curr_data]);
-		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
-//		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
+//		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
+		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
 		HandPose bestpose = pso.getBestPose();
 		bestpose.applyPose(handmodel);
 		poselist[curr_data] = bestpose;/**/
@@ -277,8 +308,18 @@ int main(int argc, char** argv)
 		clock_t end = clock();
 		cout << "time comsumption in frame " << curr_data << ", time = " << double(end - start) << " ms\n";
 
+		// write pose into data
+		SK::Array<float> pose_para = poselist[curr_data].getAllParameters();
+		pose_para.pushBack(poselist[curr_data].getOrientation()[0]);
+		pose_para.pushBack(poselist[curr_data].getOrientation()[1]);
+		pose_para.pushBack(poselist[curr_data].getOrientation()[2]);
+		for(int i = 0; i < 29; i++)
+			file << pose_para[i] << " ";
+		file << endl;
+
 	}
 	cout << "all frame computation done" << endl;
+	file.close();
 
 	// While loop for display
 	int frame = 0;
@@ -286,7 +327,7 @@ int main(int argc, char** argv)
 	{
 		// Load the point cloud
 		stringstream ss;
-		ss << name << frame << type;
+		ss << seqname << frame << type;
 		if (io::loadPCDFile<PointXYZRGB>(ss.str(), *cloudptr) == -1) // load the file
 		{
 			PCL_ERROR ("Couldn't read file");
@@ -294,18 +335,26 @@ int main(int argc, char** argv)
 		}
 		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
 
+/*		vector<visualization::Camera> cameras;
+		viewer->getCameras(cameras);
+		cout << "camera position: (" << cameras[0].pos[0] << ", " << cameras[0].pos[1] << ", " << cameras[0].pos[2] << ")\n";
+		cout << "camera view: (" << cameras[0].view[0] << ", " << cameras[0].view[1] << ", " << cameras[0].view[2] << ")\n";*/
+
 		// Update hand model
-		handmodel = HandModel();
-		poselist[frame].applyPose(handmodel);
-		if(show)	updateHandModel(handmodel, skel);
-		if(show && skel)	updateHandSkeleton(handmodel);
+		if(opti)
+		{
+			handmodel = HandModel();
+			poselist[frame].applyPose(handmodel);
+			if(show)	updateHandModel(handmodel, skel);
+			if(show && skel)	updateHandSkeleton(handmodel);
+		}
 
 
 		// Update viewer
 		viewer->updatePointCloud(cloudptr, "mycloud");
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
-		viewer->spinOnce(100);
-//		rviewer->spinOnce(100);
+		viewer->spinOnce(50);
+//		rviewer->spinOnce(50);
 		frame = (frame + 1) % FILENUM;
 	}
 

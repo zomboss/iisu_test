@@ -562,7 +562,7 @@ void HandInfo::showInfo(boost::shared_ptr<visualization::PCLVisualizer> &viewer)
 			Vector3 pcaori = fingers[i].getDirection().normalizedCopy() * 100;
 			cout << "finger " << i << " tips : " << fingers[i].gettipPoint() << endl;
 			cout << "finger " << i << " direction : " << pcaori << endl;
-			cout << "direct to : " << (fingers[i].gettipPoint() + pcaori) << endl;
+//			cout << "direct to : " << (fingers[i].gettipPoint() + pcaori) << endl;
 
 			// Add sphere and arrow to represent tips and finger direction
 /*			string sname = "Cfinger_tip ";

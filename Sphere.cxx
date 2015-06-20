@@ -5,8 +5,9 @@ using namespace pcl;
 
 Sphere::Sphere()
 {
-	center = Vector3(-30,-28,0);
-	radius = 12;
+	//center = Vector3(-25,-28,0);	old version
+	center = Vector3(-25,-32,0);
+	radius = 10;
 	name = "root";
 	related = NULL;
 	color = Vector3(255,255,255);

@@ -306,8 +306,8 @@ int main(int argc, char** argv)
 
 	// ICP Optimization
 	AICP aicp = AICP(10, 5, handpose);
-	aicp.run_randomPara(cloud_mat);
-//	aicp.run_randomPara(cloud);
+//	aicp.run_randomPara(cloud_mat);
+	aicp.run_randomPara(cloud);
 //	aicp.run_randomJoint(cloud);
 //	aicp.run_randomPara(cloud, *planar.get(), pix_meter, pure_vector, index);
 //	aicp.run_specPara(cloud, 24);

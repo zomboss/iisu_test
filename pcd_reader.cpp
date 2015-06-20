@@ -329,30 +329,30 @@ int main(int argc, char** argv)
 
 	// ICP-PSO Optimization
 	PSO pso = PSO(40, 24, -10, 1);
-/*	pso.generateParticles(handpose);
+	pso.generateParticles(handpose);
 	cout << "PSO initial done..." << endl;
 //	pso.goGeneration_mp(cloud, handmodel, false, true);
 	pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
 	bestpose.applyPose(handmodel);
-	cout << "show point: " << pso.getBestPoint() << endl;*/
+	cout << "show point: " << pso.getBestPoint() << endl;/**/
 
 	// F-term information
-	float pix_meter = pso.getPixmeter();
+/*	float pix_meter = pso.getPixmeter();
 	vector<float> pure_vector;
-	Index<flann::L2<float>> index = pso.buildDatasetIndex(*planar.get(), pure_vector);
+	Index<flann::L2<float>> index = pso.buildDatasetIndex(*planar.get(), pure_vector);*/
 
 
 	// ICP Optimization
-	AICP aicp = AICP(10, 5, handpose);
+/*	AICP aicp = AICP(10, 5, handpose);
 	aicp.run_randomPara(cloud);
 //	aicp.run_randomJoint(cloud);
 //	aicp.run_randomPara(cloud, *planar.get(), pix_meter, pure_vector, index);
 //	aicp.run_specPara(cloud, 24);
 //	aicp.run_cyclePara(cloud);
 	HandPose bestpose = aicp.getBestPose();
-	bestpose.applyPose(handmodel);/**/
+	bestpose.applyPose(handmodel);*/
 	
 	costf = MyCostFunction(cloud, handmodel);
 	costf.calculate();
@@ -362,12 +362,12 @@ int main(int argc, char** argv)
 //	handmodel.moveHand(Vector3(200, 0, 0));
 	
 	// Time consumption
-	clock_t end = clock();
+/*	clock_t end = clock();
 	double init_t = double(mid - begin);
 	double opt_t = double(end - mid);
 	double total_t = double(end - begin);
-	cout << "init comsume =  " << init_t << " ms, opt comsume = " << opt_t << " ms, total comsume = " << total_t  << " ms" << endl;/**/
-	showParameter(handpose, bestpose);/**/
+	cout << "init comsume =  " << init_t << " ms, opt comsume = " << opt_t << " ms, total comsume = " << total_t  << " ms" << endl;
+	showParameter(handpose, bestpose);*/
 
 	addHandModel(handmodel);
 	addHandSkeleton(handmodel);

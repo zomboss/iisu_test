@@ -7,9 +7,8 @@
 #include <iostream>
 #include <algorithm>
 #include <windows.h>
+#include <Eigen/src/StlSupport/StdVector.h>
 #include "ceres/jet.h"
-//#include "MyTools.hxx"
-//#include "HandPose.hxx"
 #include "Sphere.hxx"
 
 #define SPHERE_NUM 48
@@ -20,28 +19,28 @@ using namespace SK::Easii;
 using namespace pcl;
 
 template <typename T>
-SK::Array<T> getQuaternionfromVec(Eigen::Matrix<T, 3, 1> &vec)
+Eigen::Matrix<T, 1, 4> getQuaternionfromVec(Eigen::Matrix<T, 3, 1> &vec)
 {
 	T sqrAngle = vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
 	T angle = sqrt(sqrAngle);
-	SK::Array<T> para;
+	Eigen::Matrix<T, 1, 4> para;
 	
 	if (abs(angle) < T(0.00001))
 	{
-		para.pushBack(T(1.0f));
-		para.pushBack(T(0.0f));
-		para.pushBack(T(0.0f));
-		para.pushBack(T(0.0f));
+		para(0, 0) = T(1.0f);
+		para(0, 1) = T(0.0f);
+		para(0, 2) = T(0.0f);
+		para(0, 3) = T(0.0f);
 	}
 	else
 	{
 		T halfAngle = T(0.5) * angle;
-		T sinHalfAngle = sin(halfAngle);
+		T sinHalfAngle = ceres::sin(halfAngle);
 
-		para.pushBack(cos(halfAngle));
-		para.pushBack(sinHalfAngle * vec[0] / angle);
-		para.pushBack(sinHalfAngle * vec[1] / angle);
-		para.pushBack(sinHalfAngle * vec[2] / angle);
+		para(0, 0) = ceres::cos(halfAngle);
+		para(0, 1) = sinHalfAngle * vec[0] / angle;
+		para(0, 2) = sinHalfAngle * vec[1] / angle;
+		para(0, 3) = sinHalfAngle * vec[2] / angle;
 	}
 
 	return para;
@@ -84,41 +83,45 @@ public:
 		// return 48 new point positions
 		Eigen::Matrix<T, 3, SPHERE_NUM> t_point_list;
 		Eigen::Translation<T, 3> global_trans = Eigen::Translation<T, 3>(para(0, 20), para(0, 21), para(0, 22));
-		SK::Array<T> q_para = getQuaternionfromVec(Eigen::Matrix<T, 3, 1>(para(0, 23), para(0, 24), para(0, 25)));
-		Eigen::Quaternion<T> global_rot = Eigen::Quaternion<T>(q_para[0], q_para[1], q_para[2], q_para[3]);
+		Eigen::Matrix<T, 1, 4> q_para = getQuaternionfromVec(Eigen::Matrix<T, 3, 1>(para(0, 23), para(0, 24), para(0, 25)));
+		Eigen::Quaternion<T> global_rot = Eigen::Quaternion<T>(q_para(0, 0), q_para(0, 1), q_para(0, 2), q_para(0, 3));
 		Eigen::Transform<T, 3, Eigen::Affine> global_move = global_trans * global_rot;
 
 		// finger without thumb
 		for(int fin = 0; fin < 4; fin++)
 		{
-			// index spheres: 16~21, 16: first joint, 18: mid joint, 20: last joint, 21:tips
-			// middle spheres: 22~27, 22: first joint, 24: mid joint, 26: last joint, 27:tips
-			// ring spheres: 28~33, 28: first joint, 30: mid joint, 32: last joint, 33:tips
-			// little spheres: 34~39, 34: first joint, 36: mid joint, 38: last joint, 39:tips
-			int rootarray[3], tips;
+			// index spheres: 16~21, 12: first joint, 18: mid joint, 20: last joint, 21:tips
+			// middle spheres: 22~27, 13: first joint, 24: mid joint, 26: last joint, 27:tips
+			// ring spheres: 28~33, 14: first joint, 30: mid joint, 32: last joint, 33:tips
+			// little spheres: 34~39, 15: first joint, 36: mid joint, 38: last joint, 39:tips
+			int rootarray[3], tips, jointarray[3];
 			SK::Array<Eigen::Matrix<T, 3, 1>> angle;
 			switch(fin)
 			{
 			case 0:	// index
 				rootarray[0] = 16;rootarray[1] = 18;rootarray[2] = 20;tips = 21;
+				jointarray[0] = 12;jointarray[1] = 18;jointarray[2] = 20;
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 4), T(0), para(0, 5)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 6), T(0), T(0)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 7), T(0), T(0)));
 				break;
 			case 1:	// middle
 				rootarray[0] = 22;rootarray[1] = 24;rootarray[2] = 26;tips = 27;
+				jointarray[0] = 13;jointarray[1] = 24;jointarray[2] = 26;
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 8), T(0), para(0, 9)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 10), T(0), T(0)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 11), T(0), T(0)));
 				break;
 			case 2:	// ring
 				rootarray[0] = 28;rootarray[1] = 30;rootarray[2] = 32;tips = 33;
+				jointarray[0] = 14;jointarray[1] = 30;jointarray[2] = 32;
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 12), T(0), para(0, 13)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 14), T(0), T(0)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 15), T(0), T(0)));
 				break;
 			case 3:	// little
 				rootarray[0] = 34;rootarray[1] = 36;rootarray[2] = 38;tips = 39;
+				jointarray[0] = 15;jointarray[1] = 36;jointarray[2] = 38;
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 16), T(0), para(0, 17)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 18), T(0), T(0)));
 				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 19), T(0), T(0)));
@@ -137,12 +140,12 @@ public:
 			for(int t = 2; t >= 0; t--)
 			{
 				// T and -T
-				Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray[t]].getCenter()[0]), T(models[rootarray[t]].getCenter()[1]), T(models[rootarray[t]].getCenter()[2])); 
+				Eigen::Matrix<T, 3, 1> tmp_root(T(models[jointarray[t]].getCenter()[0]), T(models[jointarray[t]].getCenter()[1]), T(models[jointarray[t]].getCenter()[2])); 
 				Eigen::Translation<T, 3> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
 				Eigen::Translation<T, 3> re_trans = Eigen::Translation<T, 3>(tmp_root);
 				// R
-				SK::Array<T> q_para_fin = getQuaternionfromVec(angle[t]);
-				Eigen::Quaternion<T> rot = Eigen::Quaternion<T>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
+				Eigen::Matrix<T, 1, 4> q_para_fin = getQuaternionfromVec(angle[t]);
+				Eigen::Quaternion<T> rot = Eigen::Quaternion<T>(q_para_fin(0, 0), q_para_fin(0, 1), q_para_fin(0, 2), q_para_fin(0, 3));
 			
 				// transform
 				for(int i = rootarray[t]; i <= tips; i++)
@@ -157,7 +160,7 @@ public:
 			// angle form: (below), (theta1, 0, 0), (theta2, 0, 0)
 			// thumb spheres: 40~47, 40: first joint, 44: mid joint, 47: last joint, 47:tips
 			T theta[3] = {T(0), T(para(0, 3)), T(para(0, 3))};
-			int rootarray_st[3] = {40, 44, 46}, tips = 47;
+			int rootarray_st[3] = {40, 42, 45}, tips = 47;
 
 			// initial spheres
 			for(int i = rootarray_st[0]; i <= tips; i++)
@@ -187,8 +190,8 @@ public:
 			Eigen::Translation<T, 3> re_trans_st = Eigen::Translation<T, 3>(tmp_root_st);
 			// R
 			Eigen::Matrix<T, 3, 1> root_angle(T(0), para(0, 0), para(0, 1));
-			SK::Array<T> q_para_fin = getQuaternionfromVec(root_angle);
-			Eigen::Quaternion<T> rot_st = Eigen::Quaternion<T>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
+			Eigen::Matrix<T, 1, 4> q_para_fin = getQuaternionfromVec(root_angle);
+			Eigen::Quaternion<T> rot_st = Eigen::Quaternion<T>(q_para_fin(0, 0), q_para_fin(0, 1), q_para_fin(0, 2), q_para_fin(0, 3));
 
 			// transform
 			for(int i = rootarray_st[0]; i <= tips; i++)

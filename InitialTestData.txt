@@ -445,4 +445,81 @@ Plam ori: Vector3(-20.546, 305.868, -28.0197) -> Vector3(-7.59871, 209.616, -51.
 tips[5][3] = {{48.2747, 277.028, 41.7511}, {4.00454, 283.424, 81.4256}, {-32.2563, 285.37, 90.0489}, {-107.844, 279.245, -17.0972}, {-75.5988, 281.608, 70.2936}};
 dirs[5][3] = {{-54.7152, 21.2096, -80.9716}, {-22.6027, 5.18344, -97.2741}, {15.6026, 12.9124, -97.9277}, {88.1873, 19.9759, -42.7078}, {54.9201, 30.5877, -77.77}};
 
+<--------------------SequenceReader(movie 1)--------------------->
+order: 3 4 0 1 2
+finger num = 5
+finger 0 tips : Vector3(-31.1805, 264.819, 68.5971)
+finger 0 direction : Vector3(23.502, 14.1849, -96.1584)
+finger 1 tips : Vector3(-2.45027, 260.129, 60.0316)
+finger 1 direction : Vector3(1.37459, 7.11418, -99.7372)
+finger 2 tips : Vector3(41.898, 247.113, 27.932)
+finger 2 direction : Vector3(-27.5342, 32.271, -90.5564)
+finger 3 tips : Vector3(-101.447, 269.249, -46.9191)
+finger 3 direction : Vector3(95.3402, 22.3956, -20.216)
+finger 4 tips : Vector3(-67.5217, 265.494, 47.5153)
+finger 4 direction : Vector3(22.4471, 14.5659, -96.3533)
+Plam ori: Vector3(-10.3946, 284.879, -49.4405) -> Vector3(-9.55535, 187.84, -73.5811)
+
+<--------------------SequenceReader(movie 2)--------------------->
+order: 2 3 0 1 4
+finger num = 5
+finger 0 tips : Vector3(-26.4743, 330.659, 54.5059)
+finger 0 direction : Vector3(-2.88063, 10.3702, -99.4191)
+finger 1 tips : Vector3(4.68562, 331.628, 46.8562)
+finger 1 direction : Vector3(15.7522, 4.08129, -98.6672)
+finger 2 tips : Vector3(-96.2309, 314.345, -63.6604)
+finger 2 direction : Vector3(81.7696, 26.1679, -51.2735)
+finger 3 tips : Vector3(-65.507, 323.463, 35.0386)
+finger 3 direction : Vector3(24.3016, 14.3388, -95.9366)
+finger 4 tips : Vector3(50.4593, 315.114, 14.841)
+finger 4 direction : Vector3(-31.0174, 23.5538, -92.104)
+Plam ori: Vector3(-6.29805, 338.815, -66.0572) -> Vector3(5.57714, 239.97, -75.4692)
+
+<--------------------SequenceReader(movie 3)--------------------->
+order: 1 3 0 2 4
+finger num = 5
+finger 0 tips : Vector3(-20.5322, 290.636, 80.7601)
+finger 0 direction : Vector3(10.3357, -5.09727, -99.3337)
+finger 1 tips : Vector3(-103.873, 265.723, -33.7899)
+finger 1 direction : Vector3(73.4383, 36.0795, -57.49)
+finger 2 tips : Vector3(18.1643, 275.483, 66.1698)
+finger 2 direction : Vector3(-31.2238, 14.2255, -93.9293)
+finger 3 tips : Vector3(-67.2961, 291.608, 61.8025)
+finger 3 direction : Vector3(6.31468, 7.0516, -99.551)
+finger 4 tips : Vector3(56.4801, 266.495, 27.6125)
+finger 4 direction : Vector3(-43.8927, 30.1956, -84.6266)
+Plam ori: Vector3(-14.3112, 305.912, -40.3624) -> Vector3(-1.06762, 209.97, -65.2569)
+
+<--------------------SequenceReader(movie 4)--------------------->
+order: 3 0 2 1 4
+finger num = 5
+finger 0 tips : Vector3(-60.6548, 314.113, 51.7785)
+finger 0 direction : Vector3(21.9139, 25.9521, -94.0546)
+finger 1 tips : Vector3(13.7167, 323.604, 62.4874)
+finger 1 direction : Vector3(0.104358, -3.22172, -99.948)
+finger 2 tips : Vector3(-19.7866, 323.172, 73.0583)
+finger 2 direction : Vector3(23.7392, 2.73244, -97.1029)
+finger 3 tips : Vector3(-90.6266, 326.143, -32.2569)
+finger 3 direction : Vector3(91.7384, 27.3772, -28.8887)
+finger 4 tips : Vector3(55.9165, 320.88, 30.2251)
+finger 4 direction : Vector3(-28.3901, 10.4112, -95.3185)
+Plam ori: Vector3(-3.49241, 344.414, -50.9734) -> Vector3(0.834107, 247.056, -73.3944)
+
+<--------------------SequenceReader(movie 5)--------------------->
+order: 2 3 0 4 1
+finger num = 5
+finger 0 tips : Vector3(-63.7204, 322.133, 84.9606)
+finger 0 direction : Vector3(41.8561, -9.80926, -90.2876)
+finger 1 tips : Vector3(14.8198, 314.664, 44.4594)
+finger 1 direction : Vector3(-35.2321, -1.0421, -93.5821)
+finger 2 tips : Vector3(-133.554, 301.672, -15.6287)
+finger 2 direction : Vector3(54.9469, 18.3012, -81.5224)
+finger 3 tips : Vector3(-100.363, 313.378, 67.8924)
+finger 3 direction : Vector3(20.893, -2.97831, -97.7477)
+finger 4 tips : Vector3(-30.5517, 324.348, 76.3794)
+finger 4 direction : Vector3(6.71588, -16.8875, -98.3347)
+Plam ori: Vector3(-49.5865, 330.24, -35.5588) -> Vector3(-31.2459, 233.043, -50.2674)
+
+
+
 

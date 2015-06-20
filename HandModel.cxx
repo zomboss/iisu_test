@@ -5,7 +5,77 @@
 using namespace pcl;
 using namespace Eigen;
 
+const float CENTER_W = 25.0;
+const float CENTER_H = 32.0;
+
 HandModel::HandModel()
+{
+	// build sphere plam
+	models.pushBack(Sphere());													relatedmap[0] = -1;
+	models.pushBack(Sphere(Vector3(18 - CENTER_W,0 - CENTER_H,0), 12, &models[0], "plam2-1"));		relatedmap[1] = 0;
+	models.pushBack(Sphere(Vector3(35 - CENTER_W,0 - CENTER_H,0), 11, &models[1], "plam3-1"));		relatedmap[2] = 1;
+	models.pushBack(Sphere(Vector3(50 - CENTER_W,0 - CENTER_H,0), 11, &models[2], "plam4-1"));		relatedmap[3] = 2;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,24 - CENTER_H,0), 12, &models[0], "plam1-2"));		relatedmap[4] = 0;
+	models.pushBack(Sphere(Vector3(18 - CENTER_W,22 - CENTER_H,0), 11, &models[4], "plam2-2"));		relatedmap[5] = 4;
+	models.pushBack(Sphere(Vector3(35 - CENTER_W,22 - CENTER_H,0), 12, &models[5], "plam3-2"));		relatedmap[6] = 5;
+	models.pushBack(Sphere(Vector3(51 - CENTER_W,20 - CENTER_H,0), 11, &models[6], "plam4-2"));		relatedmap[7] = 6;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,44 - CENTER_H,0), 11, &models[4], "plam1-3"));		relatedmap[8] = 4;
+	models.pushBack(Sphere(Vector3(18 - CENTER_W,44 - CENTER_H,0), 12, &models[8], "plam2-3"));		relatedmap[9] = 8;
+	models.pushBack(Sphere(Vector3(37 - CENTER_W,41 - CENTER_H,0), 12, &models[9], "plam3-3"));		relatedmap[10] = 9;
+	models.pushBack(Sphere(Vector3(53 - CENTER_W,38 - CENTER_H,0), 11, &models[10], "plam4-3"));		relatedmap[11] = 10;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,65 - CENTER_H,0), 11, &models[8], "plam1-4"));		relatedmap[12] = 8;
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,66 - CENTER_H,0), 12, &models[12], "plam2-4"));		relatedmap[13] = 12;
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,62 - CENTER_H,0), 11, &models[13], "plam3-4"));		relatedmap[14] = 13;
+	models.pushBack(Sphere(Vector3(56 - CENTER_W,58 - CENTER_H,0), 11, &models[14], "plam4-4"));		relatedmap[15] = 14;
+
+	// build sphere index (assume plam 1-4 is root)
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,83 - CENTER_H,0), 8, &models[12], "index_b1"));		relatedmap[16] = 12;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,97 - CENTER_H,0), 7, &models[16], "index_b2"));		relatedmap[17] = 16;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,108 - CENTER_H,0), 8, &models[17], "index_m1"));		relatedmap[18] = 17;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,119 - CENTER_H,0), 7, &models[18], "index_m2"));	relatedmap[19] = 18;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,132 - CENTER_H,0), 7, &models[19], "index_t1"));	relatedmap[20] = 19;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,142 - CENTER_H,0), 6, &models[20], "index_t2", Vector3(255,0,0)));	relatedmap[21] = 20;
+
+	// build sphere middle (assume plam 2-4 is root)
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,85 - CENTER_H,0), 8, &models[13], "middle_b1"));	relatedmap[22] = 13;
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,100 - CENTER_H,0), 7, &models[22], "middle_b2"));	relatedmap[23] = 22;
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,114 - CENTER_H,0), 8, &models[23], "middle_m1"));	relatedmap[24] = 23;
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,129 - CENTER_H,0), 7, &models[24], "middle_m2"));	relatedmap[25] = 24;
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,143 - CENTER_H,0), 7, &models[25], "middle_t1"));	relatedmap[26] = 25;
+	models.pushBack(Sphere(Vector3(21 - CENTER_W,154 - CENTER_H,0), 6, &models[26], "middle_t2", Vector3(255,0,0)));	relatedmap[27] = 26;
+
+	// build sphere ring (assume plam 3-4 is root)
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,80 - CENTER_H,0), 8, &models[14], "ring_b1"));		relatedmap[28] = 14;
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,94 - CENTER_H,0), 7, &models[29], "ring_b2"));		relatedmap[29] = 28;
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,106 - CENTER_H,0), 8, &models[30], "ring_m1"));	relatedmap[30] = 29;
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,119 - CENTER_H,0), 7, &models[31], "ring_m2"));	relatedmap[31] = 30;
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,133 - CENTER_H,0), 7, &models[32], "ring_t1"));	relatedmap[32] = 31;
+	models.pushBack(Sphere(Vector3(40 - CENTER_W,145 - CENTER_H,0), 6, &models[33], "ring_t2", Vector3(255,0,0)));		relatedmap[33] = 32;
+
+	// build sphere little (assume plam 4-4 is root)
+	models.pushBack(Sphere(Vector3(60 - CENTER_W,70 - CENTER_H,0), 6, &models[15], "little_b1"));	relatedmap[34] = 15;
+	models.pushBack(Sphere(Vector3(60 - CENTER_W,80 - CENTER_H,0), 5, &models[34], "little_b2"));	relatedmap[35] = 34;
+	models.pushBack(Sphere(Vector3(60 - CENTER_W,88 - CENTER_H,0), 6, &models[35], "little_m1"));	relatedmap[36] = 35;
+	models.pushBack(Sphere(Vector3(60 - CENTER_W,98 - CENTER_H,0), 5, &models[36], "little_m2"));	relatedmap[37] = 36;
+	models.pushBack(Sphere(Vector3(60 - CENTER_W,107 - CENTER_H,0), 5, &models[37], "little_t1"));	relatedmap[38] = 37;
+	models.pushBack(Sphere(Vector3(60 - CENTER_W,116 - CENTER_H,0), 4, &models[38], "little_t2", Vector3(255,0,0)));	relatedmap[39] = 38;
+
+	// build sphere thumb (assume plam 1-1 is root)
+	models.pushBack(Sphere(Vector3(5 - CENTER_W,0 - CENTER_H,0), 14, &models[0], "thumb_b1"));		relatedmap[40] = 0;
+	models.pushBack(Sphere(Vector3(-7 - CENTER_W,12 - CENTER_H,0), 11, &models[40], "thumb_b2"));	relatedmap[41] = 40;
+	models.pushBack(Sphere(Vector3(-17.5 - CENTER_W,22.5 - CENTER_H,0), 11, &models[41], "thumb_b3"));	relatedmap[42] = 41;
+	models.pushBack(Sphere(Vector3(-28 - CENTER_W,33 - CENTER_H,0), 7, &models[42], "thumb_m1"));	relatedmap[43] = 42;
+	models.pushBack(Sphere(Vector3(-36 - CENTER_W,41 - CENTER_H,0), 7, &models[43], "thumb_m2"));	relatedmap[44] = 43;
+	models.pushBack(Sphere(Vector3(-43 - CENTER_W,48 - CENTER_H,0), 8, &models[44], "thumb_t1"));	relatedmap[45] = 44;
+	models.pushBack(Sphere(Vector3(-51.5 - CENTER_W,56.5 - CENTER_H,0), 6, &models[45], "thumb_t2"));	relatedmap[46] = 45;
+	models.pushBack(Sphere(Vector3(-58 - CENTER_W,63 - CENTER_H,0), 5, &models[46], "thumb_t3", Vector3(255,0,0)));	relatedmap[47] = 46;/**/
+
+	globalup = Vector3(0,1,0);
+	globalori = Vector3(0,0,1);
+	globalpos = Vector3(0,0,0);
+}
+
+/*HandModel::HandModel()
 {
 	// build sphere plam
 	models.pushBack(Sphere());													relatedmap[0] = -1;
@@ -65,12 +135,12 @@ HandModel::HandModel()
 	models.pushBack(Sphere(Vector3(-26 - 30,45 - 28,0), 12, &models[43], "thumb_m1"));	relatedmap[44] = 43;// 8 10
 	models.pushBack(Sphere(Vector3(-34 - 30,55 - 28,0), 11, &models[44], "thumb_m2"));	relatedmap[45] = 44;// 8 10
 	models.pushBack(Sphere(Vector3(-42 - 30,65 - 28,0), 12, &models[45], "thumb_t1"));	relatedmap[46] = 45;// 8 10
-	models.pushBack(Sphere(Vector3(-50 - 30,75 - 28,0), 10, &models[46], "thumb_t2", Vector3(255,0,0)));	relatedmap[47] = 46;/**/
+	models.pushBack(Sphere(Vector3(-50 - 30,75 - 28,0), 10, &models[46], "thumb_t2", Vector3(255,0,0)));	relatedmap[47] = 46;
 
 	globalup = Vector3(0,1,0);
 	globalori = Vector3(0,0,1);
 	globalpos = Vector3(0,0,0);
-}
+}*/
 
 Matrix4 HandModel::movetoGlobal(Vector3 pos, Vector3 ori)
 {
@@ -185,20 +255,24 @@ void HandModel::bentFinger(int fin, SK::Array<Vector3> angle)
 	// middle spheres: 22~27, 22: first joint, 24: mid joint, 26: last joint, 27:tips
 	// ring spheres: 28~33, 28: first joint, 30: mid joint, 32: last joint, 33:tips
 	// little spheres: 34~39, 34: first joint, 36: mid joint, 38: last joint, 39:tips
-	int rootarray[3], tips;
+	int rootarray[3], tips, jointarray[3];
 	switch(fin)
 	{
 	case 2:
 		rootarray[0] = 16;rootarray[1] = 18;rootarray[2] = 20;tips = 21;
+		jointarray[0] = 12;jointarray[1] = 18;jointarray[2] = 20;
 		break;
 	case 3:
 		rootarray[0] = 22;rootarray[1] = 24;rootarray[2] = 26;tips = 27;
+		jointarray[0] = 13;jointarray[1] = 24;jointarray[2] = 26;
 		break;
 	case 4:
 		rootarray[0] = 28;rootarray[1] = 30;rootarray[2] = 32;tips = 33;
+		jointarray[0] = 14;jointarray[1] = 30;jointarray[2] = 32;
 		break;
 	case 5:
 		rootarray[0] = 34;rootarray[1] = 36;rootarray[2] = 38;tips = 39;
+		jointarray[0] = 15;jointarray[1] = 36;jointarray[2] = 38;
 		break;
 	}
 	// Set last joint as root, rotate all spheres
@@ -206,7 +280,7 @@ void HandModel::bentFinger(int fin, SK::Array<Vector3> angle)
 	// Finally, set the first joint as root, rotate all spheres (all movements have to move back)	
 	for(int t = 2; t >= 0; t--)
 	{
-		Vector3 tmproot = models[rootarray[t]].getCenter();
+		Vector3 tmproot = models[jointarray[t]].getCenter();
 		Matrix4 pretrans = MyTools::translation(-tmproot);
 		Matrix4 rot = Matrix4::IDENTITY;
 		rot.fromRotationVector(angle[t]);
@@ -228,7 +302,7 @@ void HandModel::bentThumb(SK::Array<Vector3> angle)
 	// angle form: (below), (theta1, 0, 0), (theta2, 0, 0)
 	// thumb spheres: 40~47, 40: first joint, 44: mid joint, 47: last joint, 47:tips
 	float theta[3] = {0, angle[1][0], angle[2][0]};
-	int rootarray[3] = {40, 44, 46}, tips = 47;
+	int rootarray[3] = {40, 42, 45}, tips = 47;
 	for(int t = 2; t >= 1; t--)		// 1!!!!
 	{
 		// Quaternion building
@@ -346,13 +420,13 @@ Vector3 HandModel::getFingerBaseJoint(int index)
 	case 0:
 		return models[40].getCenter();
 	case 1:
-		return models[16].getCenter();
+		return models[12].getCenter();
 	case 2:
-		return models[22].getCenter();
+		return models[13].getCenter();
 	case 3:
-		return models[28].getCenter();
+		return models[14].getCenter();
 	case 4:
-		return models[34].getCenter();
+		return models[15].getCenter();
 	default:
 		cout << "Error occur in getFingerBaseJoint" << endl;
 		return Vector3();
@@ -365,7 +439,7 @@ Vector3 HandModel::getFingerMiddleJoint(int index)
 	switch(index)
 	{
 	case 0:
-		return models[44].getCenter();
+		return models[42].getCenter();
 	case 1:
 		return models[18].getCenter();
 	case 2:
@@ -386,7 +460,7 @@ Vector3 HandModel::getFingerTopJoint(int index)
 	switch(index)
 	{
 	case 0:
-		return models[46].getCenter();
+		return models[45].getCenter();
 	case 1:
 		return models[20].getCenter();
 	case 2:
@@ -447,153 +521,3 @@ SK::Array<ModelCoefficients> HandModel::getSkeleton()
 	return skeleton;
 }
 
-/*template <typename T>
-SK::Array<T> HandModel::getQuaternionfromVec(Eigen::Matrix<T, 3, 1> &vec)
-{
-	T sqrAngle = vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
-	T angle = sqrt(sqrAngle);
-	SK::Array<T> para;
-	
-	if (abs(angle) < T(0.00001))
-	{
-		para.pushBack(T(1.0));
-		para.pushBack(T(0.0));
-		para.pushBack(T(0.0));
-		para.pushBack(T(0.0));
-	}
-	else
-	{
-		T halfAngle = T(0.5) * angle;
-		T sinHalfAngle = sin(halfAngle);
-
-		para.pushBack(cos(halfAngle));
-		para.pushBack(sinHalfAngle * vec[0] / angle);
-		para.pushBack(sinHalfAngle * vec[1] / angle);
-		para.pushBack(sinHalfAngle * vec[2] / angle);
-	}
-
-	return para;
-}*/
-
-/*template <typename T>
-SK::Array<Eigen::Matrix<T, 3, 1>> HandModel::transformT(SK::Array<T> &para)
-{
-	// return 48 new point positions
-	SK::Array<Eigen::Matrix<T, 3, 1>> t_point_list;
-	t_point_list.resize(SPHERE_NUM);
-	Eigen::Transform global_trans = Eigen::Translation<T, 3>(para[20], para[21], para[22]);
-	SK::Array<T> q_para = getQuaternionfromVec(Eigen::Matrix<T, 3, 1>(para[23], para[24], para[25]));
-	Eigen::Transform global_rot = Eigen::Quaternion<T, 3>(q_para[0], q_para[1], q_para[2], q_para[3]);
-
-	// finger without thumb
-	for(int fin = 0; fin < 4; fin++)
-	{
-		// index spheres: 16~21, 16: first joint, 18: mid joint, 20: last joint, 21:tips
-		// middle spheres: 22~27, 22: first joint, 24: mid joint, 26: last joint, 27:tips
-		// ring spheres: 28~33, 28: first joint, 30: mid joint, 32: last joint, 33:tips
-		// little spheres: 34~39, 34: first joint, 36: mid joint, 38: last joint, 39:tips
-		int rootarray[3], tips;
-		SK::Array<Eigen::Matrix<T, 3, 1>> angle;
-		switch(fin)
-		{
-		case 0:	// index
-			rootarray[0] = 16;rootarray[1] = 18;rootarray[2] = 20;tips = 21;
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[4], T(0), para[5]));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[6], T(0), T(0)));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[7], T(0), T(0)));
-			break;
-		case 1:	// middle
-			rootarray[0] = 22;rootarray[1] = 24;rootarray[2] = 26;tips = 27;
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[8], T(0), para[9]));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[10], T(0), T(0)));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[11], T(0), T(0)));
-			break;
-		case 2:	// ring
-			rootarray[0] = 28;rootarray[1] = 30;rootarray[2] = 32;tips = 33;
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[12], T(0), para[13]));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[14], T(0), T(0)));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[15], T(0), T(0)));
-			break;
-		case 3:	// little
-			rootarray[0] = 34;rootarray[1] = 36;rootarray[2] = 38;tips = 39;
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[16], T(0), para[17]));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[18], T(0), T(0)));
-			angle.pushBack(Eigen::Matrix<T, 3, 1>(para[19], T(0), T(0)));
-			break;
-		}
-
-		// initial spheres
-		for(int i = 0; i < 6; i++)	// basic?
-			t_point_list[16 + fin * 6 + i] = Eigen::Matrix<T, 3, 1>(T(models[16 + fin * 6 + i].getCenter()[0]), 
-																	T(models[16 + fin * 6 + i].getCenter()[1]), 
-																	T(models[16 + fin * 6 + i].getCenter()[2]));
-
-		// Set last joint as root, rotate all spheres
-		// And then set mid joint as root, rotate spheres
-		// Finally, set the first joint as root, rotate all spheres (all movements have to move back)	
-		for(int t = 2; t >= 0; t--)
-		{
-			// T and -T
-			Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray[t]].getCenter()[0]), T(models[rootarray[t]].getCenter()[1]), T(models[rootarray[t]].getCenter()[2])); 
-			Eigen::Transform pre_trans = Eigen::Translation<T, 3>(-tmp_root);
-			Eigen::Transform re_trans = Eigen::Translation<T, 3>(tmp_root);
-			// R
-			SK::Array<T> q_para_fin = getQuaternionfromVec(angle[t]);
-			Eigen::Transform rot = Eigen::Quaternion<T, 3>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
-			
-			// transform
-			for(int i = rootarray[t]; i <= tips; i++)
-				t_point_list[i] = re_trans * rot * pre_trans * t_point_list[i];
-		}
-	}
-
-	// thumb
-	{
-		// the main axis = (2,1,-2)
-		// Quaternion form:, given axis A(Ax,Ay,Az) and theta, s = sin(theta/2), w = cos(theta/2), x = s*Ax, y = s*Ay, z = s*Az
-		// angle form: (below), (theta1, 0, 0), (theta2, 0, 0)
-		// thumb spheres: 40~47, 40: first joint, 44: mid joint, 47: last joint, 47:tips
-		T theta[3] = {T(0), T(para[2]), T(para[3])};
-		int rootarray[3] = {40, 44, 46}, tips = 47;
-		for(int t = 2; t >= 1; t--)		// 1!!!!
-		{
-			// T and -T
-			Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray[t]].getCenter()[0]), T(models[rootarray[t]].getCenter()[1]), T(models[rootarray[t]].getCenter()[2])); 
-			Eigen::Transform pre_trans = Eigen::Translation<T, 3>(-tmp_root);
-			Eigen::Transform re_trans = Eigen::Translation<T, 3>(tmp_root);
-			// R (Quaternion building)
-			T s = sin(theta[t] / T(2.0)), w = cos(theta[t] / T(2.0));
-			T x =  s * T(2) / T(3), y = s / T(3), z =  s * T(2) / T(-3);
-			Eigen::Transform rot = Eigen::Quaternion<T, 3>(w, x, y, z);
-			
-			// transform
-			for(int i = rootarray[t]; i <= tips; i++)
-				t_point_list[i] = re_trans * rot * pre_trans * t_point_list[i];
-		}
-		
-		//the first joint rotatation axis: y and z (0, phi1, phi2)
-		// T and -T
-		Eigen::Matrix<T, 3, 1> tmp_root_st(T(models[rootarray[0]].getCenter()[0]), T(models[rootarray[0]].getCenter()[1]), T(models[rootarray[0]].getCenter()[2])); 
-		Eigen::Transform pre_trans_st = Eigen::Translation<T, 3>(-tmp_root_st);
-		Eigen::Transform re_trans_st = Eigen::Translation<T, 3>(tmp_root_st);
-		// R
-		Eigen::Matrix<T, 3, 1> root_angle((T(0), para[0], para[1]));
-		SK::Array<T> q_para_fin = getQuaternionfromVec(root_angle);
-		Eigen::Transform rot_st = Eigen::Quaternion<T, 3>(q_para_fin[0], q_para_fin[1], q_para_fin[2], q_para_fin[3]);
-
-		// transform
-		for(int i = rootarray[0]; i <= tips; i++)
-			t_point_list[i] = retrans_st * rot_st * pretrans_st * t_point_list[i];
-	}
-
-	// palm and global transform
-	for(int i = 0; i < SPHERE_NUM; i++)
-	{
-		// rotation first and the move
-		if(i < 16)
-			t_point_list[i] = Eigen::Matrix<T, 3, 1>(T(models[i].getCenter()[0]), T(models[i].getCenter()[1]), T(models[i].getCenter()[2])); 
-		t_point_list[i] = global_trans * global_rot * t_point_list[i];
-	}
-
-	return t_point_list;
-}*/
