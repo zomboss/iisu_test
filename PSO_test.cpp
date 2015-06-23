@@ -26,8 +26,15 @@ using namespace pcl;
 using namespace SK;
 using namespace SK::Easii;
 
+bool isseq = true;
+int str_frame = 40;
+
 const int HEIGHT = 240;
 const int WIDTH = 320;
+
+const char *posname = "PoseData/PSOonly_seq_mov2_2.txt";
+const char *seqname = "Sequences/Seq_mov2/pcd_seq";
+const char *type = ".pcd";
 
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
@@ -215,14 +222,6 @@ int main(int argc, char** argv)
 {
 	google::InitGoogleLogging(argv[0]);
 	
-	// Load the point cloud
-	if (io::loadPCDFile<PointXYZRGB> ("data/test_pcd_3.pcd", *cloudptr) == -1) //* load the file
-	{
-		PCL_ERROR ("Couldn't read file test_pcd_3.pcd \n");
-		return -1;
-	}
-	cout << "Loaded " << cloudptr->width * cloudptr->height << " data points from test_pcd_3.pcd." <<  endl;
-
 	// Viewer initialization
 	viewer->setBackgroundColor (0, 0, 0);
 	viewer->initCameraParameters();
@@ -235,16 +234,38 @@ int main(int argc, char** argv)
 	// Camera initialization
 	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
-	
+
+	cout << "from sequence? ";
+	cin >> isseq;
+	if(isseq)
+	{
+		cout << "enter frame: ";
+		cin >> str_frame;
+	}
+
+	// Load the point cloud
+	if(!isseq)
+	{
+		if (io::loadPCDFile<PointXYZRGB> ("data/test_pcd_3.pcd", *cloudptr) == -1) //* load the file
+		{
+			PCL_ERROR ("Couldn't read file test_pcd_3.pcd \n");
+			return -1;
+		}
+		cout << "Loaded " << cloudptr->width * cloudptr->height << " data points from test_pcd_3.pcd." <<  endl;
+	}
+	else
+	{
+		stringstream ss;
+		ss << seqname << str_frame << type;
+		if (io::loadPCDFile<PointXYZRGB>(ss.str(), *cloudptr) == -1) // load the file
+		{
+			PCL_ERROR ("Couldn't read file");
+			return -1;
+		}
+	}
 	// Point cloud Loading and random sampling
 //	cloud = MyTools::downsampling(cloud);
 	viewer->addPointCloud(cloudptr, "mycloud");
-
-	// Get tips and plam normal (hand feature)
-	SK::Array<Vector3> pc_tips, pc_dirs;
-	SK::Array<int> finger_match;			// Special case!!!
-	finger_match.pushBack(3);finger_match.pushBack(2);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
-	addNPCFeature(pc_tips, pc_dirs, finger_match);
 
 	// Depth map setting
 	showDepthImage();
@@ -253,42 +274,84 @@ int main(int argc, char** argv)
 	HandModel handmodel = HandModel();
 	HandPose handpose = HandPose();
 
-	SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(5);
-	double bestcost = 1000000;
-	for(size_t i = 0; i < permlist.size(); i++)
+	if(!isseq)
 	{
-		Initialization in = Initialization(5, pc_tips, pc_dirs, handmodel);
-		in.fingerExist(permlist[0]);
-		// set global position & orientation
-		handpose.setPosition(getPalmDirection()[0]);
-		handpose.setOrientation(getPalmDirection()[1] - getPalmDirection()[0]);
-
-		in.goFullInitail(handpose, false);
-//		cout << "Term " << i << ", cost = " << in.getCost() << endl;
-		if(bestcost > in.getCost())
+		// Get tips and plam normal (hand feature)
+		SK::Array<Vector3> pc_tips, pc_dirs;
+		SK::Array<int> finger_match;			// Special case!!!
+		finger_match.pushBack(3);finger_match.pushBack(2);finger_match.pushBack(4);finger_match.pushBack(0);finger_match.pushBack(1);
+		addNPCFeature(pc_tips, pc_dirs, finger_match);
+		
+		// Initailization
+		SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(5);
+		double bestcost = 1000000;
+		for(size_t i = 0; i < permlist.size(); i++)
 		{
-			bestcost = in.getCost();
-			in.setFullResultPose(handpose);
-		}/**/
+			Initialization in = Initialization(5, pc_tips, pc_dirs, handmodel);
+			in.fingerExist(permlist[0]);
+			// set global position & orientation
+			handpose.setPosition(getPalmDirection()[0]);
+			handpose.setOrientation(getPalmDirection()[1] - getPalmDirection()[0]);
+
+			in.goFullInitail(handpose, false);
+	//		cout << "Term " << i << ", cost = " << in.getCost() << endl;
+			if(bestcost > in.getCost())
+			{
+				bestcost = in.getCost();
+				in.setFullResultPose(handpose);
+			}/**/
+		}
+	}
+	else
+	{
+		// File initialization
+		fstream file;
+		file.open(posname, ios::in);
+		if(!file)
+		{
+			cout << "cannot open file " << posname << "!!!" << endl;
+			return -1;
+		}
+		
+		// Load previous parameter from PoseData
+		SK::Array<float> pose_para;
+		pose_para.resize(26);
+		SK::Vector3 ori_para = SK::Vector3();
+		int count = 0;
+		while(file >> pose_para[0] >> pose_para[1] >> pose_para[2] >> pose_para[3] >> pose_para[4] >> pose_para[5] >> pose_para[6] >> pose_para[7]
+				   >> pose_para[8] >> pose_para[9] >> pose_para[10] >> pose_para[11] >> pose_para[12] >> pose_para[13] >> pose_para[14] >> pose_para[15]
+				   >> pose_para[16] >> pose_para[17] >> pose_para[18] >> pose_para[19] >> pose_para[20] >> pose_para[21] >> pose_para[22] >> pose_para[23]
+				   >> pose_para[24] >> pose_para[25] >> ori_para[0] >> ori_para[1] >> ori_para[2])
+		{
+			if(count == (str_frame - 1))
+			{
+				handpose.setAllParameters(pose_para);
+				handpose.setOrientation(ori_para);
+				break;
+			}
+			count++;
+		}
+		file.close();
 	}
 /*	handpose.applyPose(handmodel);*/
 	cout << "Initialzation done." << endl;
 //	showParameter(handpose);
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(40, 24, -10, 1);
+	PSO pso = PSO(25, 24, 8, 1);
 	pso.generateParticles(handpose);
 //	SK::Array<HandPose> particles = pso.getAllParticles();
 	cout << "PSO initial done..." << endl;
 	SK::Array<HandPose> particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
 	cout << "PSO optimizaiton done..." << endl;
-/*	HandPose bestpose = pso.getBestPose();
-	bestpose.applyPose(handmodel);
+	HandPose bestpose = pso.getBestPose();
+/*	bestpose.applyPose(handmodel);
 	cout << "show point: " << pso.getBestPoint() << endl;*/
+//	showParameter(handpose, bestpose);
 	
 
-	addHandModel(handmodel, true);
-	addHandSkeleton(handmodel);
+	addHandModel(handmodel, false);
+	//addHandSkeleton(handmodel);
 	projectDepthImage(handmodel);
 
 	// main while
@@ -298,8 +361,11 @@ int main(int argc, char** argv)
 		
 		handmodel = HandModel();
 		particles[(frame % particles.size())].applyPose(handmodel);
-		updateHandModel(handmodel, true);
-		updateHandSkeleton(handmodel);
+		updateHandModel(handmodel, false);
+		//updateHandSkeleton(handmodel);
+
+/*		showParameter(handpose, particles[(frame % particles.size())]);
+		cout << endl;*/
 
 		// info
 		stringstream ss;

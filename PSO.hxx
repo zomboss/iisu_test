@@ -36,7 +36,7 @@ public:
 	int getM() {return m;}
 	int getK() {return k;}
 	float getPixmeter() {return pix_meter;}
-	double getBestPoint() {return gk_point;}
+	double getBestPoint() {return gk_point[generation_num - 1];}
 	SK::Array<HandPose> getAllParticles() {return particles;}
 	HandPose getBestPose() {return bestPose;}
 
@@ -63,7 +63,7 @@ private:
 	
 	// Swarm information
 	HandPose bestPose;				//Gk
-	double gk_point;
+	SK::Array<double> gk_point;
 	
 	// Particles information
 	SK::Array<HandPose> particles;		// xk

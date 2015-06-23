@@ -190,7 +190,15 @@ Array<float> MyTools::perturbParameter(Array<float> curr_para)
 	Array<float> rand_para;
 	for(size_t i = 0; i < curr_para.size(); i++)
 	{
-		if(i < 20)		// joint
+		if(i < 20 && i % 4 != 1)		// x-joint
+		{
+			normal_distribution<float> randnormal(curr_para[i], 0.4);	// angle: 0.2 arc degree ~= 5 degree
+			// Check angles limitation
+			float value = HandPose::validFingers((i / 5), (i % 4), randnormal(gen));
+			// Concern not too far from original
+			rand_para.pushBack(value);
+		}
+		else if(i < 20)		// z-joint
 		{
 			normal_distribution<float> randnormal(curr_para[i], 0.2);	// angle: 0.2 arc degree ~= 5 degree
 			// Check angles limitation
@@ -213,7 +221,7 @@ Array<float> MyTools::perturbParameter(Array<float> curr_para)
 			float value = randnormal(gen);
 			// Concern not too far from original
 			rand_para.pushBack(value);
-		}/**/
+		}
 	}
 	return rand_para;
 }

@@ -36,17 +36,17 @@ using namespace SK::Easii;
 
 // Processing & show
 const bool opti = true;
-const bool skel = true;
+const bool skel = false;
 const bool show = true;
 
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/PSOonly_seq_mov1_2.txt";
-const char *seqname = "Sequences/Seq_mov1/pcd_seq";
+const char *posname = "PoseData/PSOonly_seq_mov2_2.txt";
+const char *seqname = "Sequences/Seq_mov2/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 63;
+const int FILENUM = 104;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -179,6 +179,7 @@ int main(int argc, char** argv)
 	viewer->initCameraParameters();
 	viewer->addCoordinateSystem (1.0);
 	viewer->registerKeyboardCallback(chCameraViewPoint, (void*)&viewer);
+	viewer->addText("Info...", 0, 450, "info_text");
 
 /*	rviewer->setSize(WIDTH, HEIGHT);
 	rviewer->setPosition(650, 300);*/
@@ -234,7 +235,10 @@ int main(int argc, char** argv)
 			PCL_ERROR ("Couldn't read file");
 			break;
 		}
-		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
+//		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
+		stringstream infoss;
+		infoss << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str();
+		viewer->updateText(infoss.str(), 0, 450, "info_text");
 
 		// Update hand model
 		if(opti)
@@ -248,7 +252,7 @@ int main(int argc, char** argv)
 
 		// Update viewer
 		viewer->updatePointCloud(cloudptr, "mycloud");
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "mycloud");
 		viewer->spinOnce(50);
 //		rviewer->spinOnce(50);
 		frame = (frame + 1) % FILENUM;

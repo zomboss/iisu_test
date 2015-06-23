@@ -22,6 +22,7 @@ PSO::PSO(int _g, int _p, int _m, int _k)
 	m = _m;
 	k = _k;
 	pix_meter = 0.0;
+	gk_point.assign(generation_num, 1000000.0);
 }
 
 void PSO::generateParticles(const HandPose &inipose)
@@ -36,16 +37,18 @@ void PSO::generateParticles(const HandPose &inipose)
 		SK::Array<float> new_para = MyTools::perturbParameter(curr_para);
 		tmppose.setAllParameters(new_para);
 		tmppose.setOrientation(ori_orientation);
-		particles.pushBack(tmppose);
+		if(i == 0)	particles.pushBack(bestPose);
+		else		particles.pushBack(tmppose);
 
 		//initial particle's parameters
 		SK::Array<float> v;
 		v.assign(new_para.size(), 0.0);
+		// random velocities
 		velocity.pushBack(v);
+//		velocity.pushBack(MyTools::perturbParameter(v));
 		curr_points.pushBack(0.0);
 		pk_point.pushBack(100000.0);
 	}
-	gk_point = 1000000.0;
 }
 
 void PSO::generateParticles(HandPose &inipose, HandPose &prepose)
@@ -70,25 +73,29 @@ void PSO::generateParticles(HandPose &inipose, HandPose &prepose)
 			tmppose = prepose;
 		}
 		tmppose.setAllParameters(new_para);
-		particles.pushBack(tmppose);
+		if(i == 0)		particles.pushBack(inipose);
+		else if(i == 1)	particles.pushBack(prepose);
+		else			particles.pushBack(tmppose);
 
 		//initial particle's parameters
 		SK::Array<float> v;
 		v.assign(new_para.size(), 0.0);
+		// random velocities
 		velocity.pushBack(v);
+//		velocity.pushBack(MyTools::perturbParameter(v));
 		curr_points.pushBack(0.0);
 		pk_point.pushBack(100000.0);
 	}
-	gk_point = 100000.0;
 }
 
 void PSO::goGeneration(const PointCloud<PointXYZRGB> &cloud, const HandModel &model, bool iskmean = false)
 {
+	// useless
 	double prepoint = 0.0;
 	for(int g = 0; g < generation_num; g++)
 	{
-//		cout << "In generation " << g << ", show best point: " << gk_point << endl;
-		prepoint = gk_point;
+//		cout << "In generation " << g << ", show best point: " << gk_point[g] << endl;
+		prepoint = gk_point[g];
 		for(int p = 0; p < particles_num; p++)
 		{
 			// compute point-sphere correspondences (CostFunction)
@@ -103,9 +110,9 @@ void PSO::goGeneration(const PointCloud<PointXYZRGB> &cloud, const HandModel &mo
 				pk_point[p] = curr_points[p];	// point
 				hispose[p] = particles[p];		// position
 			}
-			if(curr_points[p] < gk_point)
+			if(curr_points[p] < gk_point[g])
 			{
-				gk_point = curr_points[p];		// point
+				gk_point[g] = curr_points[p];		// point
 				bestPose = particles[p];		// position
 			}
 
@@ -125,7 +132,7 @@ void PSO::goGeneration(const PointCloud<PointXYZRGB> &cloud, const HandModel &mo
 		PSOupdate();
 
 		// Stop if point change a little
-		if(abs(prepoint - gk_point) < 0.00001)	break;
+		if(abs(prepoint - gk_point[g]) < 0.00001)	break;
 	}
 }
 
@@ -134,10 +141,10 @@ void PSO::goGeneration_mp(const PointCloud<PointXYZRGB> &cloud, const HandModel 
 	double prepoint = 0.0;
 	for(int g = 0; g < generation_num; g++)
 	{
-		if(show)	cout << "In generation " << g << ", show best point: " << gk_point << endl;
+		if(show)	cout << "In generation " << g << ", show best point: " << gk_point[g] << endl;
 		// Stop if point change a little
-		if(abs(prepoint - gk_point) < 0.00001)	break;
-		prepoint = gk_point;
+		if(abs(prepoint - gk_point[g]) < 0.00001)	break;
+		prepoint = gk_point[g];
 
 		#pragma omp parallel for
 		for(int p = 0; p < particles_num; p++)
@@ -169,9 +176,9 @@ void PSO::goGeneration_mp(const PointCloud<PointXYZRGB> &cloud, const HandModel 
 				pk_point[p] = curr_points[p];	// point
 				hispose[p] = particles[p];		// position
 			}
-			if(curr_points[p] < gk_point)
+			if(curr_points[p] < gk_point[g])
 			{
-				gk_point = curr_points[p];		// point
+				gk_point[g] = curr_points[p];		// point
 				bestPose = particles[p];		// position
 			}
 		}
@@ -193,12 +200,10 @@ void PSO::goGeneration_full(const PointCloud<PointXYZRGB> &cloud, const RangeIma
 	double prepoint = 0.0;
 	for(int g = 0; g < generation_num; g++)
 	{
-		if(show)	cout << "In generation " << g << ", show best point: " << gk_point << endl;
-		
 		clock_t begin_t = clock();
 		// Stop if point change a little
-//		if(abs(prepoint - gk_point) < 0.001)	break;
-		prepoint = gk_point;
+//		if(abs(prepoint - gk_point[g]) < 0.001)	break;
+		prepoint = gk_point[g];
 
 		int iCPU = omp_get_num_procs();
 		omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -235,9 +240,9 @@ void PSO::goGeneration_full(const PointCloud<PointXYZRGB> &cloud, const RangeIma
 				pk_point[p] = curr_points[p];	// point
 				hispose[p] = particles[p];		// position
 			}
-			if(curr_points[p] < gk_point)
+			if(curr_points[p] < gk_point[g])
 			{
-				gk_point = curr_points[p];		// point
+				gk_point[g] = curr_points[p];		// point
 				bestPose = particles[p];		// position
 			}
 		}
@@ -247,6 +252,7 @@ void PSO::goGeneration_full(const PointCloud<PointXYZRGB> &cloud, const RangeIma
 		// Particle swarm update within each cluster (PSOupdate)
 		PSOupdate();
 		clock_t end_t = clock();
+		if(show)	cout << "In generation " << g << ", show best point: " << gk_point[g] << endl;
 		if(show)	cout << "in generation " << g << ", main time = " << double(main_t - begin_t) << " ms, update time = " << double(end_t - main_t) << endl;
 
 	}
@@ -262,12 +268,10 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 	double prepoint = 0.0;
 	for(int g = 0; g < generation_num; g++)
 	{
-		if(show)	cout << "In generation " << g << ", show best point: " << gk_point << endl;
-		
 		clock_t begin_t = clock();
 		// Stop if point change a little
-//		if(abs(prepoint - gk_point) < 0.001)	break;
-		prepoint = gk_point;
+//		if(abs(prepoint - gk_point[g]) < 0.001)	break;
+		prepoint = gk_point[g];
 
 		int iCPU = omp_get_num_procs();
 		omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -285,10 +289,19 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 			}
 			else	// Gradient descent on a random parameter, if m < 0, PSO only
 			{
-				AICP aicp = AICP(m, 5, particles[p]);
+				HandModel testmodel = model;
+				particles[p].applyPose(testmodel);
+				MyCostFunction costf = MyCostFunction(cloud, testmodel, planar, pix_meter, pure_vec);
+				costf.calculate(index);
+				curr_points[p] = costf.getCost();
+				
+				// Get gradient descent
+				AICP aicp = AICP(m, 1, particles[p]);
 				aicp.run_randomPara(cloud);
-				particles[p] = aicp.getBestPose();
-				curr_points[p] = aicp.getBestCost();
+				SK::Array<float> stepvel = MyTools::subArray(aicp.getBestPose().getAllParameters(), particles[p].getAllParameters());
+				velocity[p] = MyTools::addArray(velocity[p], stepvel);
+/*				particles[p] = aicp.getBestPose();
+				curr_points[p] = aicp.getBestCost();*/
 //				cout << "ICP Iteration in " << p << " done..." << endl;
 			}
 		}
@@ -303,9 +316,9 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 				pk_point[p] = curr_points[p];	// point
 				hispose[p] = particles[p];		// position
 			}
-			if(curr_points[p] < gk_point)
+			if(curr_points[p] < gk_point[g])
 			{
-				gk_point = curr_points[p];		// point
+				gk_point[g] = curr_points[p];		// point
 				bestPose = particles[p];		// position
 				best_prat_num = p;
 			}
@@ -316,6 +329,8 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 		// Particle swarm update within each cluster (PSOupdate)
 		PSOupdate();
 		clock_t end_t = clock();
+		
+		if(show)	cout << "In generation " << g << ", show best point: " << gk_point[g] << endl;
 //		if(show)	cout << "in generation " << g << ", main time = " << double(main_t - begin_t) << " ms, update time = " << double(end_t - main_t) << endl;
 		if(show)	cout << "best particle in generation " << g << " :" << best_prat_num << endl;
 
@@ -331,10 +346,10 @@ void PSO::goGeneration_data(const PointCloud<PointXYZRGB> &cloud, const HandMode
 	double prepoint = 0.0;
 	for(int g = 0; g < generation_num; g++)
 	{
-		if(show)	cout << "In generation " << g << ", show best point: " << gk_point << endl;
+		if(show)	cout << "In generation " << g << ", show best point: " << gk_point[g] << endl;
 		// Stop if point change a little
-		if(abs(prepoint - gk_point) < 0.00001)	break;
-		prepoint = gk_point;
+		if(abs(prepoint - gk_point[g]) < 0.00001)	break;
+		prepoint = gk_point[g];
 
 		#pragma omp parallel for
 		for(int p = 0; p < particles_num; p++)
@@ -367,9 +382,9 @@ void PSO::goGeneration_data(const PointCloud<PointXYZRGB> &cloud, const HandMode
 				pk_point[p] = curr_points[p];	// point
 				hispose[p] = particles[p];		// position
 			}
-			if(curr_points[p] < gk_point)
+			if(curr_points[p] < gk_point[g])
 			{
-				gk_point = curr_points[p];		// point
+				gk_point[g] = curr_points[p];		// point
 				bestPose = particles[p];		// position
 			}
 		}
@@ -391,12 +406,12 @@ void PSO::goGeneration_datafull(const PointCloud<PointXYZRGB> &cloud, const Rang
 	double prepoint = 0.0;
 	for(int g = 0; g < generation_num; g++)
 	{
-		if(show)	cout << "In generation " << g << ", show best point: " << gk_point << endl;
+		if(show)	cout << "In generation " << g << ", show best point: " << gk_point[g] << endl;
 		
 		clock_t begin_t = clock();
 		// Stop if point change a little
-//		if(abs(prepoint - gk_point) < 0.001)	break;
-		prepoint = gk_point;
+//		if(abs(prepoint - gk_point[g]) < 0.001)	break;
+		prepoint = gk_point[g];
 
 		int iCPU = omp_get_num_procs();
 		omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -434,9 +449,9 @@ void PSO::goGeneration_datafull(const PointCloud<PointXYZRGB> &cloud, const Rang
 				pk_point[p] = curr_points[p];	// point
 				hispose[p] = particles[p];		// position
 			}
-			if(curr_points[p] < gk_point)
+			if(curr_points[p] < gk_point[g])
 			{
-				gk_point = curr_points[p];		// point
+				gk_point[g] = curr_points[p];		// point
 				bestPose = particles[p];		// position
 			}
 		}

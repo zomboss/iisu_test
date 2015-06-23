@@ -43,10 +43,10 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/PSOonly_seq_mov3_3.txt";
-const char *seqname = "Sequences/Seq_mov3/pcd_seq";
+const char *posname = "PoseData/PSOonly_seq_mov6_2.txt";
+const char *seqname = "Sequences/Seq_mov6/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 66;
+const int FILENUM = 68;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -63,9 +63,9 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 {
 	// We have to get HandInfo data first!!!
 	fin_num = 5;
-	float tips[5][3] = {{-20.5322, 290.636, 80.7601}, {-103.873, 265.723, -33.7899}, {18.1643, 275.483, 66.1698}, {-67.2961, 291.608, 61.8025}, {56.4801, 266.495, 27.6125}};
-	float dirs[5][3] = {{10.3357, -5.09727, -99.3337}, {73.4383, 36.0795, -57.49}, {-31.2238, 14.2255, -93.9293}, {6.31468, 7.0516, -99.551}, {-43.8927, 30.1956, -84.6266}};
-	int order[5] = {1, 3, 0, 2, 4};
+	float tips[5][3] = {{57.6566, 235.424, 13.3054}, {-86.4127, 251.339, -36.6958}, {-61.6907, 247.143, 41.9031}, {-20.9234, 246.811, 61.6078}, {12.4284, 239.899, 50.8434}};
+	float dirs[5][3] = {{-44.0742, 29.7824, -84.6787}, {64.0806, 17.1986, -74.819}, {20.6143, 16.0709, -96.5235}, {17.1699, 10.9513, -97.9044}, {-7.1979, 10.9608, -99.1365}};
+	int order[5] = {1, 2, 3, 4, 0};
 	pc_tips.resize(5);
 	pc_dirs.resize(5);
 	for(int i = 0; i < 5; i++)
@@ -75,8 +75,8 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 
 	}
 	pc_palm.resize(2);
-	pc_palm[0] = Vector3(-14.3112, 305.912, -40.3624);
-	pc_palm[1] = Vector3(-1.06762, 209.97, -65.2569);
+	pc_palm[0] = Vector3(-5.77849, 256.893, -56.3591);
+	pc_palm[1] = Vector3(-12.1116, 157.81, -68.2974);
 
 }
 
@@ -236,7 +236,6 @@ int main(int argc, char** argv)
 	// Hand Model & Pose initialization
 	HandModel handmodel = HandModel();
 	HandPose poselist[FILENUM];
-	SK::Array<HandPose> testlist;
 
 	if(opti && show)	addHandModel(handmodel, skel);
 	if(opti && show && skel)	addHandSkeleton(handmodel);
@@ -290,23 +289,21 @@ int main(int argc, char** argv)
 				}
 			}
 
-/*			poselist[curr_data].applyPose(handmodel);*/
+			poselist[curr_data].applyPose(handmodel);/**/
 			cout << "Initialization done" << endl;
 		}
 		
 		// PSO Optimization
-		PSO pso = PSO(30, 24, 8, 1);
+		PSO pso = PSO(25, 24, -8, 1);
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else
 			pso.generateParticles(poselist[curr_data]);
 //		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
-//		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
-		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
-//		cout << "testlist size = " << testlist.size() << endl;
+		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
+//		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
 		HandPose bestpose = pso.getBestPose();
 		bestpose.applyPose(handmodel);
-//		showParameter(poselist[curr_data], bestpose);
 		poselist[curr_data] = bestpose;/**/
 		cout << "best cost = " << pso.getBestPoint() << endl;
 
@@ -341,7 +338,6 @@ int main(int argc, char** argv)
 		}
 		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
 
-
 /*		vector<visualization::Camera> cameras;
 		viewer->getCameras(cameras);
 		cout << "camera position: (" << cameras[0].pos[0] << ", " << cameras[0].pos[1] << ", " << cameras[0].pos[2] << ")\n";
@@ -352,7 +348,6 @@ int main(int argc, char** argv)
 		{
 			handmodel = HandModel();
 			poselist[frame].applyPose(handmodel);
-//			testlist[frame].applyPose(handmodel);
 			if(show)	updateHandModel(handmodel, skel);
 			if(show && skel)	updateHandSkeleton(handmodel);
 		}
