@@ -23,6 +23,16 @@ PSO::PSO(int _g, int _p, int _m, int _k)
 	k = _k;
 	pix_meter = 0.0;
 	gk_point.assign(generation_num, 1000000.0);
+	prev_pose1 = HandPose();
+	prev_pose2 = HandPose();
+	hasprev = false;
+}
+
+void PSO::setPrevPose(HandPose prev1, HandPose prev2)
+{
+	prev_pose1 = prev1;
+	prev_pose2 = prev2;
+	hasprev = true;
 }
 
 void PSO::generateParticles(const HandPose &inipose)
@@ -283,26 +293,26 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 				HandModel testmodel = model;
 				particles[p].applyPose(testmodel);
 				MyCostFunction costf = MyCostFunction(cloud, testmodel, planar, pix_meter, pure_vec);
-				costf.calculate(index);
+				if(!hasprev)	costf.calculate(index);
+				if(hasprev)		costf.calculate(index, prev_pose1, prev_pose2);
 				curr_points[p] = costf.getCost();
-//				cout << "show D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << endl;
+//				cout << " in particle " << p << ", show D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", M-term = " << costf.getMTerm() << endl;
 			}
 			else	// Gradient descent on a random parameter, if m < 0, PSO only
 			{
 				HandModel testmodel = model;
 				particles[p].applyPose(testmodel);
 				MyCostFunction costf = MyCostFunction(cloud, testmodel, planar, pix_meter, pure_vec);
-				costf.calculate(index);
+				if(!hasprev)	costf.calculate(index);
+				if(hasprev)		costf.calculate(index, prev_pose1, prev_pose2);
 				curr_points[p] = costf.getCost();
-				
+//				cout << " in particle " << p << ", show D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", M-term = " << costf.getMTerm() << endl;
+
 				// Get gradient descent
-				AICP aicp = AICP(m, 1, particles[p]);
+				AICP aicp = AICP(m, 1, particles[p], prev_pose1, prev_pose2);
 				aicp.run_randomPara(cloud);
 				SK::Array<float> stepvel = MyTools::subArray(aicp.getBestPose().getAllParameters(), particles[p].getAllParameters());
 				velocity[p] = MyTools::addArray(velocity[p], stepvel);
-/*				particles[p] = aicp.getBestPose();
-				curr_points[p] = aicp.getBestCost();*/
-//				cout << "ICP Iteration in " << p << " done..." << endl;
 			}
 		}
 

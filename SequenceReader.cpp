@@ -43,10 +43,10 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/PSOonly_seq_mov3_3.txt";
-const char *seqname = "Sequences/Seq_mov3/pcd_seq";
+const char *posname = "PoseData/PSOonly_seq_mov2_4.txt";
+const char *seqname = "Sequences/Seq_mov2/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 66;
+const int FILENUM = 104;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -296,6 +296,8 @@ int main(int argc, char** argv)
 		
 		// PSO Optimization
 		PSO pso = PSO(30, 24, 8, 1);
+		if(curr_data > 1)
+			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else

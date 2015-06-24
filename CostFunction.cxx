@@ -11,6 +11,7 @@ MyCostFunction::MyCostFunction(const PointCloud<PointXYZRGB> &pc, const HandMode
 	d_term_value = 0.0;
 	f_term_value = 0.0;
 	l_term_value = 0.0;
+	m_term_value = 0.0;
 }
 
 MyCostFunction::MyCostFunction(const PointCloud<PointXYZRGB> &pc, const HandModel &hm, const RangeImagePlanar &pl, float pm, vector<float> &data)
@@ -23,11 +24,12 @@ MyCostFunction::MyCostFunction(const PointCloud<PointXYZRGB> &pc, const HandMode
 	d_term_value = 0.0;
 	f_term_value = 0.0;
 	l_term_value = 0.0;
+	m_term_value = 0.0;
 }
 
 void MyCostFunction::setDTerm()
 {
-	Array<Sphere> sgroup = model.getFullHand();
+	SK::Array<Sphere> sgroup = model.getFullHand();
 	for(size_t p = 0; p < cloud.size(); p++)
 	{
 		double min_dis = 1000000;
@@ -47,7 +49,7 @@ void MyCostFunction::setDTerm()
 
 void MyCostFunction::setDTerm_f()
 {
-	Array<Sphere> sgroup = model.getFullHand();
+	SK::Array<Sphere> sgroup = model.getFullHand();
 	SK::Array<size_t> min_list;
 	for(size_t p = 0; p < cloud.size(); p++)
 	{
@@ -81,7 +83,7 @@ void MyCostFunction::setDTerm_KD()
 	PointCloud<pcl::PointXYZRGB>::Ptr cloudptr(&cloud);
 	kdtree.setInputCloud(cloudptr);
 	
-	Array<Sphere> sgroup = model.getFullHand();
+	SK::Array<Sphere> sgroup = model.getFullHand();
 	for(size_t c = 0; c < sgroup.size(); c++)
 	{
 		PointXYZRGB searchpoint;
@@ -102,7 +104,7 @@ void MyCostFunction::setDTerm_KD()
 
 void MyCostFunction::setFTerm(flann::Index<flann::L2<float> > &index)
 {
-	Array<Sphere> sgroup = model.getFullHand();
+	SK::Array<Sphere> sgroup = model.getFullHand();
 	for(size_t c = 0; c < sgroup.size(); c++)
 	{
 		Eigen::Vector3f point = MyTools::SKtoEigenVector(sgroup[c].getCenter());
@@ -126,13 +128,13 @@ void MyCostFunction::setFTerm(flann::Index<flann::L2<float> > &index)
 
 void MyCostFunction::setLTerm()
 {
-	Array<Sphere> sgroup = model.getFullHand();
-	Array<int> fingerlist = model.getAllFingersIndex();
+	SK::Array<Sphere> sgroup = model.getFullHand();
+	SK::Array<int> fingerlist = model.getAllFingersIndex();
 	for(size_t i = 0; i < fingerlist.size(); i++)
 	{
 		double tmp_dis = 0;
 		Sphere tmpsphere = sgroup[fingerlist[i]];
-		Array<Sphere> neoghorlist = model.getNeighbors(fingerlist[i]);
+		SK::Array<Sphere> neoghorlist = model.getNeighbors(fingerlist[i]);
 		for(size_t j = 0; j < neoghorlist.size(); j++)
 		{
 			Sphere neisphere = neoghorlist[j];
@@ -141,6 +143,18 @@ void MyCostFunction::setLTerm()
 		}
 		l_term_value += tmp_dis * tmp_dis;
 	}
+}
+
+void MyCostFunction::setMTerm(HandPose pre_pose1, HandPose pre_pose2)
+{
+	HandModel prevmodel_1 = HandModel();
+	pre_pose1.applyPose(prevmodel_1);
+	HandModel prevmodel_2 = HandModel();
+	pre_pose2.applyPose(prevmodel_2);
+	Eigen::Matrix<float, 3, SPHERE_NUM> curr_center = model.getAllCenterMat(1.0f);
+	Eigen::Matrix<float, 3, SPHERE_NUM> prev_center_1 = prevmodel_1.getAllCenterMat(1.0f);
+	Eigen::Matrix<float, 3, SPHERE_NUM> prev_center_2 = prevmodel_2.getAllCenterMat(1.0f);
+	m_term_value = double((curr_center - prev_center_1 * 2 + prev_center_2).squaredNorm()) + double((curr_center - prev_center_1).squaredNorm());
 }
 
 void MyCostFunction::calculate()
@@ -154,6 +168,21 @@ void MyCostFunction::calculate(flann::Index<flann::L2<float> > &index)
 {
 	setDTerm();
 	setFTerm(index);
+	setLTerm();
+}
+
+void MyCostFunction::calculate(HandPose pre_pose1, HandPose pre_pose2)
+{
+	setDTerm();
+	setMTerm(pre_pose1, pre_pose2);
+	setLTerm();
+}
+
+void MyCostFunction::calculate(flann::Index<flann::L2<float> > &index, HandPose pre_pose1, HandPose pre_pose2)
+{
+	setDTerm();
+	setFTerm(index);
+	setMTerm(pre_pose1, pre_pose2);
 	setLTerm();
 }
 

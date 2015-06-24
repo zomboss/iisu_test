@@ -273,6 +273,8 @@ int main(int argc, char** argv)
 	// Hand Model & hand pose initialization
 	HandModel handmodel = HandModel();
 	HandPose handpose = HandPose();
+	HandPose prev_pose1 = HandPose();
+	HandPose prev_pose2 = HandPose();
 
 	if(!isseq)
 	{
@@ -323,8 +325,15 @@ int main(int argc, char** argv)
 				   >> pose_para[16] >> pose_para[17] >> pose_para[18] >> pose_para[19] >> pose_para[20] >> pose_para[21] >> pose_para[22] >> pose_para[23]
 				   >> pose_para[24] >> pose_para[25] >> ori_para[0] >> ori_para[1] >> ori_para[2])
 		{
+			if(count == (str_frame - 2))
+			{
+				prev_pose2.setAllParameters(pose_para);
+				prev_pose2.setOrientation(ori_para);
+			}
 			if(count == (str_frame - 1))
 			{
+				prev_pose1.setAllParameters(pose_para);
+				prev_pose1.setOrientation(ori_para);
 				handpose.setAllParameters(pose_para);
 				handpose.setOrientation(ori_para);
 				break;
@@ -335,19 +344,24 @@ int main(int argc, char** argv)
 	}
 /*	handpose.applyPose(handmodel);*/
 	cout << "Initialzation done." << endl;
-//	showParameter(handpose);
+	showParameter(prev_pose1, prev_pose2);
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(25, 24, 8, 1);
+	PSO pso = PSO(25, 24, -8, 1);
+	if(isseq)	pso.setPrevPose(prev_pose1, prev_pose2);
 	pso.generateParticles(handpose);
-//	SK::Array<HandPose> particles = pso.getAllParticles();
+	SK::Array<HandPose> particles = pso.getAllParticles();
 	cout << "PSO initial done..." << endl;
-	SK::Array<HandPose> particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
+//	SK::Array<HandPose> particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
 /*	bestpose.applyPose(handmodel);
 	cout << "show point: " << pso.getBestPoint() << endl;*/
 //	showParameter(handpose, bestpose);
+
+/*	AICP aicp = AICP(10, 10, handpose, prev_pose1, prev_pose2);
+	aicp.run_randomPara(cloud);
+	HandPose bestpose = aicp.getBestPose();*/
 	
 
 	addHandModel(handmodel, false);
@@ -358,9 +372,9 @@ int main(int argc, char** argv)
 	int frame = 0;
 	while(!viewer->wasStopped())
 	{
-		
 		handmodel = HandModel();
 		particles[(frame % particles.size())].applyPose(handmodel);
+//		bestpose.applyPose(handmodel);
 		updateHandModel(handmodel, false);
 		//updateHandSkeleton(handmodel);
 
@@ -372,7 +386,7 @@ int main(int argc, char** argv)
 		ss << "case: " << (frame %  particles.size());
 		viewer->updateText(ss.str(), 0, 400, "num_text");
 
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "mycloud");
 		viewer->spinOnce(100);
 		rviewer->spinOnce(100);
 		frame++;

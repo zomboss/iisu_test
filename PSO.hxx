@@ -29,6 +29,7 @@ public:
 
 	void setGenerationNum(int _g) {generation_num = _g;}
 	void setParticlesNum(int _p) {particles_num = _p;}
+	void setPrevPose(HandPose , HandPose );
 	void setM(int _m) {m = _m;}
 	void setK(int _k) {k = _k;}
 	int getGenerationNum() {return generation_num;}
@@ -59,8 +60,12 @@ private:
 	int k;
 	Vector3 ori_orientation;
 	float pix_meter;
-//	HandModel model;	 useless?
-	
+
+	// for MTerm
+	HandPose prev_pose1;		
+	HandPose prev_pose2;
+	bool hasprev;
+
 	// Swarm information
 	HandPose bestPose;				//Gk
 	SK::Array<double> gk_point;

@@ -68,7 +68,7 @@ HandModel::HandModel()
 	models.pushBack(Sphere(Vector3(-36 - CENTER_W,41 - CENTER_H,0), 7, &models[43], "thumb_m2"));	relatedmap[44] = 43;
 	models.pushBack(Sphere(Vector3(-43 - CENTER_W,48 - CENTER_H,0), 8, &models[44], "thumb_t1"));	relatedmap[45] = 44;
 	models.pushBack(Sphere(Vector3(-51.5 - CENTER_W,56.5 - CENTER_H,0), 6, &models[45], "thumb_t2"));	relatedmap[46] = 45;
-	models.pushBack(Sphere(Vector3(-58 - CENTER_W,63 - CENTER_H,0), 5, &models[46], "thumb_t3", Vector3(255,0,0)));	relatedmap[47] = 46;/**/
+	models.pushBack(Sphere(Vector3(-58 - CENTER_W,63 - CENTER_H,0), 5, &models[46], "thumb_t3", Vector3(255,0,0)));	relatedmap[47] = 46;
 
 	globalup = Vector3(0,1,0);
 	globalori = Vector3(0,0,1);

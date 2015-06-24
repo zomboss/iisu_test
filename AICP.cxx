@@ -16,6 +16,17 @@ AICP::AICP(int t, int it, const HandPose &pose)
 	times = t;
 	iter = it;
 	bestpose = pose;
+	hasprev = false;
+}
+
+AICP::AICP(int t, int it, const HandPose &pose, const HandPose &prev1, const HandPose &prev2)
+{
+	times = t;
+	iter = it;
+	bestpose = pose;
+	prevpose1 = prev1;
+	prevpose2 = prev2;
+	hasprev = true;
 }
 
 int AICP::getRandomJoint(int &finger, int &joint, double &theta, double &upper, double &lower)
@@ -95,7 +106,7 @@ void AICP::getSpecJoint(int index, int &finger, int &joint, double &theta, doubl
 
 void AICP::updatePose(int index, double theta)
 {
-	Array<float> tmpparas = bestpose.getAllParameters();
+	SK::Array<float> tmpparas = bestpose.getAllParameters();
 	tmpparas[index] = theta;
 	bestpose.setAllParameters(tmpparas);
 }
@@ -118,13 +129,15 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 		ceres::CostFunction* cf_curr;
 		if(finger == -1)
 		{
-			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
+			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
+			else			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose, prevpose1, prevpose2));
 //			cf_curr = new AutoDiffCostFunction<CF_Global, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 		}
 		else
 		{
-			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
+			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
+			else			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose, prevpose1, prevpose2));
 //			cf_curr = new AutoDiffCostFunction<CF_Finger, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 			problem.SetParameterUpperBound(&theta, 0, upper);

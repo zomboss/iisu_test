@@ -27,6 +27,7 @@ class AICP
 public:
 	AICP();
 	AICP(int , int , const HandPose &);
+	AICP(int , int , const HandPose &, const HandPose &, const HandPose &);
 	
 	void setTimes(int t) {times = t;}
 	int getTimes() {return times;}
@@ -46,7 +47,10 @@ private:
 	int times;
 	int iter;
 	HandPose bestpose;
+	HandPose prevpose1;
+	HandPose prevpose2;
 	double cost;
+	bool hasprev;
 
 	int getRandomJoint(int &, int &, double &, double &, double &);
 	int getRandomPart(int &, double **, double **, double **);
@@ -59,7 +63,9 @@ class CF_Finger
 {
 public:
 	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p): 
-		cloud(pc), finger(f), joint(j), handpose(p){isfull = false;}
+		cloud(pc), finger(f), joint(j), handpose(p){isfull = false; hasprev = false;}
+	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, HandPose pr1, HandPose pr2): 
+		cloud(pc), finger(f), joint(j), handpose(p), prevpose1(pr1), prevpose2(pr2){isfull = false; hasprev = true;}
 	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
 		cloud(pc), finger(f), joint(j), handpose(p), pix_meter(pm), pure_vec(pv), index(in){isfull = false;}
 	template <typename T>	
@@ -72,6 +78,12 @@ public:
 		pose.applyPose(model);
 
 		// Use Cost Function to compute residual
+		if(hasprev)
+		{
+			MyCostFunction costf = MyCostFunction(cloud, model);
+			costf.calculate(prevpose1, prevpose2);
+			residual[0] = T(costf.getCost());
+		}
 		if(!isfull)
 		{
 			MyCostFunction costf = MyCostFunction(cloud, model);
@@ -95,18 +107,22 @@ private:
 	vector<float> pure_vec;
 	Index<flann::L2<float>> *index;
 	HandPose handpose;
+	HandPose prevpose1;
+	HandPose prevpose2;
 	int finger;
 	int joint;
 	float pix_meter;
 	bool isfull;
-
+	bool hasprev;
 };
 
 class CF_Global
 {
 public:
 	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po):
-		cloud(pc), para(p), handpose(po), index(flann::Matrix<float>((new float[1]), 1, 1), KDTreeIndexParams(4)){isfull = false;}
+		cloud(pc), para(p), handpose(po), index(flann::Matrix<float>((new float[1]), 1, 1), KDTreeIndexParams(4)){isfull = false; hasprev = false;}
+	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po, HandPose pr1, HandPose pr2): 
+		cloud(pc), para(p), handpose(po), prevpose1(pr1), prevpose2(pr2), index(flann::Matrix<float>((new float[1]), 1, 1), KDTreeIndexParams(4)){isfull = false; hasprev = true;}
 	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po, float pm, vector<float> &pv, Index<flann::L2<float>> &in): 
 		cloud(pc), para(p), handpose(po), pix_meter(pm), pure_vec(pv), index(in){isfull = false;}
 	template <typename T>
@@ -119,6 +135,12 @@ public:
 		pose.applyPose(model);
 
 		// Use Cost Function to compute residual
+		if(hasprev)
+		{
+			MyCostFunction costf = MyCostFunction(cloud, model);
+			costf.calculate(prevpose1, prevpose2);
+			residual[0] = T(costf.getCost());
+		}
 		if(!isfull)
 		{
 			MyCostFunction costf = MyCostFunction(cloud, model);
@@ -142,10 +164,12 @@ private:
 	vector<float> pure_vec;
 	Index<flann::L2<float>> index;
 	HandPose handpose;
+	HandPose prevpose1;
+	HandPose prevpose2;
 	int para;
 	float pix_meter;
 	bool isfull;
-
+	bool hasprev;
 };
 
 class CF_Finger_Joint

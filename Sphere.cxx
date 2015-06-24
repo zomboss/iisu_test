@@ -5,7 +5,7 @@ using namespace pcl;
 
 Sphere::Sphere()
 {
-	//center = Vector3(-25,-28,0);	old version
+//	center = Vector3(-25,-28,0);	old version
 	center = Vector3(-25,-32,0);
 	radius = 10;
 	name = "root";
