@@ -43,10 +43,12 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/PSOonly_seq_mov2_4.txt";
-const char *seqname = "Sequences/Seq_mov2/pcd_seq";
+const char *posname = "PoseData/Seq_mov6_ICPPSO_temporal_7.txt";
+const char *infoname = "InfoData/info_seq7.txt";
+const char *seqname = "Sequences/Seq_mov7/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 104;
+const int FILENUM = 50;
+const bool hasinfo = true;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -63,9 +65,9 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 {
 	// We have to get HandInfo data first!!!
 	fin_num = 5;
-	float tips[5][3] = {{-20.5322, 290.636, 80.7601}, {-103.873, 265.723, -33.7899}, {18.1643, 275.483, 66.1698}, {-67.2961, 291.608, 61.8025}, {56.4801, 266.495, 27.6125}};
-	float dirs[5][3] = {{10.3357, -5.09727, -99.3337}, {73.4383, 36.0795, -57.49}, {-31.2238, 14.2255, -93.9293}, {6.31468, 7.0516, -99.551}, {-43.8927, 30.1956, -84.6266}};
-	int order[5] = {1, 3, 0, 2, 4};
+	float tips[5][3] = {{57.6566, 235.424, 13.3054}, {-86.4127, 251.339, -36.6958}, {-61.6907, 247.143, 41.9031}, {-20.9234, 246.811, 61.6078}, {12.4284, 239.899, 50.8434}};
+	float dirs[5][3] = {{-44.0742, 29.7824, -84.6787}, {64.0806, 17.1986, -74.819}, {20.6143, 16.0709, -96.5235}, {17.1699, 10.9513, -97.9044}, {-7.1979, 10.9608, -99.1365}};
+	int order[5] = {1, 2, 3, 4, 0};
 	pc_tips.resize(5);
 	pc_dirs.resize(5);
 	for(int i = 0; i < 5; i++)
@@ -75,8 +77,8 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 
 	}
 	pc_palm.resize(2);
-	pc_palm[0] = Vector3(-14.3112, 305.912, -40.3624);
-	pc_palm[1] = Vector3(-1.06762, 209.97, -65.2569);
+	pc_palm[0] = Vector3(-5.77849, 256.893, -56.3591);
+	pc_palm[1] = Vector3(-12.1116, 157.81, -68.2974);
 
 }
 

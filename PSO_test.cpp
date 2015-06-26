@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <ctime>
 #include <string>
 #include <math.h>
@@ -32,8 +33,8 @@ int str_frame = 40;
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
-const char *posname = "PoseData/PSOonly_seq_mov2_2.txt";
-const char *seqname = "Sequences/Seq_mov2/pcd_seq";
+const char *posname = "PoseData/Seq_mov6_ICPPSO_temporal_7.txt";
+const char *seqname = "Sequences/Seq_mov7/pcd_seq";
 const char *type = ".pcd";
 
 PointCloud<PointXYZRGB> cloud;
@@ -306,10 +307,10 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		// File initialization
-		fstream file;
-		file.open(posname, ios::in);
-		if(!file)
+		// Pose File initialization
+		fstream pos_file;
+		pos_file.open(posname, ios::in);
+		if(!pos_file)
 		{
 			cout << "cannot open file " << posname << "!!!" << endl;
 			return -1;
@@ -320,10 +321,10 @@ int main(int argc, char** argv)
 		pose_para.resize(26);
 		SK::Vector3 ori_para = SK::Vector3();
 		int count = 0;
-		while(file >> pose_para[0] >> pose_para[1] >> pose_para[2] >> pose_para[3] >> pose_para[4] >> pose_para[5] >> pose_para[6] >> pose_para[7]
-				   >> pose_para[8] >> pose_para[9] >> pose_para[10] >> pose_para[11] >> pose_para[12] >> pose_para[13] >> pose_para[14] >> pose_para[15]
-				   >> pose_para[16] >> pose_para[17] >> pose_para[18] >> pose_para[19] >> pose_para[20] >> pose_para[21] >> pose_para[22] >> pose_para[23]
-				   >> pose_para[24] >> pose_para[25] >> ori_para[0] >> ori_para[1] >> ori_para[2])
+		while( pos_file >> pose_para[0] >> pose_para[1] >> pose_para[2] >> pose_para[3] >> pose_para[4] >> pose_para[5] >> pose_para[6] >> pose_para[7]
+						>> pose_para[8] >> pose_para[9] >> pose_para[10] >> pose_para[11] >> pose_para[12] >> pose_para[13] >> pose_para[14] >> pose_para[15]
+						>> pose_para[16] >> pose_para[17] >> pose_para[18] >> pose_para[19] >> pose_para[20] >> pose_para[21] >> pose_para[22] >> pose_para[23]
+						>> pose_para[24] >> pose_para[25] >> ori_para[0] >> ori_para[1] >> ori_para[2] )
 		{
 			if(count == (str_frame - 2))
 			{
@@ -340,19 +341,19 @@ int main(int argc, char** argv)
 			}
 			count++;
 		}
-		file.close();
+		pos_file.close();
 	}
 /*	handpose.applyPose(handmodel);*/
 	cout << "Initialzation done." << endl;
 	showParameter(prev_pose1, prev_pose2);
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(25, 24, -8, 1);
+	PSO pso = PSO(25, 24, 8, 1);
 	if(isseq)	pso.setPrevPose(prev_pose1, prev_pose2);
 	pso.generateParticles(handpose);
-	SK::Array<HandPose> particles = pso.getAllParticles();
+//	SK::Array<HandPose> particles = pso.getAllParticles();
 	cout << "PSO initial done..." << endl;
-//	SK::Array<HandPose> particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
+	SK::Array<HandPose> particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
 /*	bestpose.applyPose(handmodel);

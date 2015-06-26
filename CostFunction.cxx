@@ -154,7 +154,7 @@ void MyCostFunction::setMTerm(HandPose pre_pose1, HandPose pre_pose2)
 	Eigen::Matrix<float, 3, SPHERE_NUM> curr_center = model.getAllCenterMat(1.0f);
 	Eigen::Matrix<float, 3, SPHERE_NUM> prev_center_1 = prevmodel_1.getAllCenterMat(1.0f);
 	Eigen::Matrix<float, 3, SPHERE_NUM> prev_center_2 = prevmodel_2.getAllCenterMat(1.0f);
-	m_term_value = double((curr_center - prev_center_1 * 2 + prev_center_2).squaredNorm()) + double((curr_center - prev_center_1).squaredNorm());
+	m_term_value = double((curr_center - prev_center_1 * 2 + prev_center_2).squaredNorm() * 0.5) + double((curr_center - prev_center_1).squaredNorm() * 0.5);
 }
 
 void MyCostFunction::calculate()

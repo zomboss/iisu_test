@@ -4,6 +4,7 @@
 #include <EasiiSDK/Iisu.h>
 #include <math.h> 
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@ bool start_time = false;
 int rec_index = 0;
 
 const char *seqname = "Sequences/Seq/pcd_seq";
+const char *infoname = "InfoData/info_seq.txt";
 const char *seqtype = ".pcd";
 const char *movname = "Movies/movie";
 const char *movtype = ".skv";
@@ -31,7 +33,7 @@ PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
 boost::shared_ptr<visualization::PCLVisualizer> viewer (new visualization::PCLVisualizer ("3D Viewer"));
 
-void save(string filename)
+void saveCloud(string filename)
 {
 	cout << "Save " << cloud.points.size() << " data points to " << filename << endl;
 	try
@@ -48,6 +50,33 @@ void save(string filename)
 	}
 }
 
+void saveInfo(fstream &outputfile, HandInfo &curr_info)
+{
+	// Write finger number
+	outputfile << curr_info.getFingerNum() << endl;
+	
+	// Write 5 tips into file
+	SK::Array<SK::Vector3> tips = curr_info.getAllFingerTips();
+	for(size_t i = 0; i < tips.size(); i++)
+		outputfile << tips[i][0] << " " << tips[i][1] << " " << tips[i][2] << " ";
+	outputfile << endl;
+
+	// Write 5 directions into file
+	SK::Array<SK::Vector3> dirs = curr_info.getAllFingerDirs();
+	for(size_t i = 0; i < dirs.size(); i++)
+		outputfile << dirs[i][0] << " " << dirs[i][1] << " " << dirs[i][2] << " ";
+	outputfile << endl;
+
+	// Write palm vector into file
+	SK::Array<SK::Vector3> palm = curr_info.getpalmOri();
+	outputfile << palm[0][0] << " " << palm[0][1] << " " << palm[0][2] << " " << palm[1][0] << " " << palm[1][1] << " " << palm[1][2] << endl;
+
+	// Write order for fingers
+	SK::Array<int> order = curr_info.getOrderedFingers();
+	outputfile << order[0] << " " << order[1] << " " << order[2] << " " << order[3] << " " << order[4] << endl;
+
+}
+
 // save clouds into pcd file
 void savePCDFile (const pcl::visualization::KeyboardEvent &event, void* viewer_void)
 {
@@ -55,12 +84,12 @@ void savePCDFile (const pcl::visualization::KeyboardEvent &event, void* viewer_v
 	if (event.getKeySym () == "s" && event.keyDown ())
 	{
 		cout << "Press s..." << endl;
-		save("test_pcd.pcd");
+		saveCloud("test_pcd.pcd");
 		system("pause");
 	}
 }
 
-// save clouds into pcd file
+// save clouds into pcd file sequence
 void savePCDSequence (const pcl::visualization::KeyboardEvent &event, void* viewer_void)
 {
 	boost::shared_ptr<visualization::PCLVisualizer> viewer = *static_cast<boost::shared_ptr<visualization::PCLVisualizer> *> (viewer_void);
@@ -77,7 +106,6 @@ void savePCDSequence (const pcl::visualization::KeyboardEvent &event, void* view
 			cout << "Press r again, total " << rec_index << " frames, stop..." << endl;
 			isrecord = false;
 			start_time = false;
-//			system("pause");
 		}
 	}
 }
@@ -117,15 +145,23 @@ int main(int argc, char **argv)
 	vector<visualization::Camera> camera;
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
 
+	// File initialization
+	fstream file;
+	file.open(infoname, ios::out);
+	if(!file)
+	{
+		cout << "cannot open file " << infoname << "!!!" << endl;
+		return -1;
+	}
+
 	// Recorder initialization
-	Recorder &recorder = iisu.getScene().getRecorder();
+/**/Recorder &recorder = iisu.getScene().getRecorder();
 
 	int frame = 0;
     while (iisu.update() && !viewer->wasStopped())
     {
         iisu.acquire();
         frame = iisu.getScene().getSource().getFrame();
-//		recorder = iisu.getScene().getRecorder();
 		CameraInfo &camerainfo = iisu.getScene().getSource().getCameraInfo();
 		
 		// Assume one hand here
@@ -149,11 +185,13 @@ int main(int argc, char **argv)
 				cout << endl;
 			}
 			handinfo.showInfo(viewer);
+			
+			// Start to take a film
 			stringstream ss;
 			ss << movname << movtype;
 			const std::string tmp = ss.str();
 			const char *name = tmp.c_str();
-			cout << recorder.start(name) << endl;
+/**/		cout << recorder.start(name) << endl;
 			start_time = true;
 		}
 
@@ -166,11 +204,17 @@ int main(int argc, char **argv)
 		{
 			stringstream ss;
 			ss << seqname << rec_index << seqtype;
-			save(ss.str());
+			saveCloud(ss.str());
+			saveInfo(file, handinfo);
 			rec_index++;
 		}
 		else if(recorder.isRecording())
+		{
 			recorder.stop();
+			file.close();
+		}/**/
+		else if(start_time && file.is_open())
+			file.close();
 
 		viewer->spinOnce(50);
 		iisu.release();

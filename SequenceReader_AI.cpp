@@ -11,6 +11,7 @@
 #include <math.h> 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <algorithm>
 #include <string>
@@ -43,10 +44,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/PSOonly_seq_mov6_2.txt";
-const char *seqname = "Sequences/Seq_mov6/pcd_seq";
+const char *posname = "PoseData/Seq_mov10_ICPPSO_temporal_1.txt";
+const char *infoname = "InfoData/info_seq_mov10.txt";
+const char *seqname = "Sequences/Seq_mov10/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 68;
+const int FILENUM = 64;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -56,16 +58,101 @@ double camera_left[] = {-722, -10.8, -322, -0.5, 0, 1};
 PointCloud<PointXYZRGB> cloud;
 PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
 boost::shared_ptr<visualization::PCLVisualizer> viewer (new visualization::PCLVisualizer ("3D Viewer"));
-boost::shared_ptr<visualization::RangeImageVisualizer > rviewer (new visualization::RangeImageVisualizer  ("Range Viewer"));
+//boost::shared_ptr<visualization::RangeImageVisualizer > rviewer (new visualization::RangeImageVisualizer  ("Range Viewer"));
 boost::shared_ptr<RangeImagePlanar> planar (new RangeImagePlanar());
 
-void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<Vector3> &pc_palm)
+void featurefromHandInfo(int frame, int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<Vector3> &pc_palm)
 {
-	// We have to get HandInfo data first!!!
-	fin_num = 5;
-	float tips[5][3] = {{57.6566, 235.424, 13.3054}, {-86.4127, 251.339, -36.6958}, {-61.6907, 247.143, 41.9031}, {-20.9234, 246.811, 61.6078}, {12.4284, 239.899, 50.8434}};
-	float dirs[5][3] = {{-44.0742, 29.7824, -84.6787}, {64.0806, 17.1986, -74.819}, {20.6143, 16.0709, -96.5235}, {17.1699, 10.9513, -97.9044}, {-7.1979, 10.9608, -99.1365}};
-	int order[5] = {1, 2, 3, 4, 0};
+	// Get Info from data
+	fstream file;
+	file.open(infoname, ios::in);
+	if(!file)
+	{
+		cout << "cannot open file " << infoname << "!!!" << endl;
+		return;
+	}
+	
+	float tips[5][3];
+	float dirs[5][3];
+	float palm[2][3];
+	int order[5];
+	string line;
+	int count = 0;
+	while(getline(file, line))
+	{
+		// find the correct data
+		if(count < frame * 5)
+		{
+			count++;
+			continue;
+		}
+		
+		istringstream iss(line);
+		switch(count % 5)
+		{
+		case 0:
+			if (!(iss >> fin_num))
+			{ 
+				cout << "error occur in line " << count << "!!!" << endl;
+				return;
+			}
+			break;
+		case 1:
+			if (!(iss >> tips[0][0] >> tips[0][1] >> tips[0][2] >> tips[1][0] >> tips[1][1] >> tips[1][2]
+					  >> tips[2][0] >> tips[2][1] >> tips[2][2] >> tips[3][0] >> tips[3][1] >> tips[3][2]
+					  >> tips[4][0] >> tips[4][1] >> tips[4][2]))
+			{ 
+				cout << "error occur in line " << count << "!!!" << endl;
+				return;
+			}
+			break;
+		case 2:
+			if (!(iss >> dirs[0][0] >> dirs[0][1] >> dirs[0][2] >> dirs[1][0] >> dirs[1][1] >> dirs[1][2]
+					  >> dirs[2][0] >> dirs[2][1] >> dirs[2][2] >> dirs[3][0] >> dirs[3][1] >> dirs[3][2]
+					  >> dirs[4][0] >> dirs[4][1] >> dirs[4][2]))
+			{ 
+				cout << "error occur in line " << count << "!!!" << endl;
+				return;
+			}
+			break;
+		case 3:
+			if (!(iss >> palm[0][0] >> palm[0][1] >> palm[0][2] >> palm[1][0] >> palm[1][1] >> palm[1][2]))
+			{ 
+				cout << "error occur in line " << count << "!!!" << endl;
+				return;
+			}
+			break;
+		case 4:
+			if (!(iss >> order[0] >> order[1] >> order[2] >> order[3] >> order[4]))
+			{ 
+				cout << "error occur in line " << count << "!!!" << endl;
+				return;
+			}
+			break;
+		}
+		
+		count++;
+		if(count > (frame + 1) * 5)	break;
+	}
+
+/*	cout << "In fun, num = " << fin_num << endl;
+	cout << "In fun, tips = ";
+	for(int i = 0; i < 5; i++)
+		for(int j = 0; j < 3; j++)
+			cout << tips[i][j] << " ";
+	cout << endl << "In fun, dirs = ";
+	for(int i = 0; i < 5; i++)
+		for(int j = 0; j < 3; j++)
+			cout << dirs[i][j] << " ";
+	cout << endl << "In fun, palm = ";
+	for(int i = 0; i < 2; i++)
+		for(int j = 0; j < 3; j++)
+			cout << palm[i][j] << " ";
+	cout << endl << "In fun, order = ";
+	for(int i = 0; i < 5; i++)
+			cout << order[i] << " ";
+	cout << endl;*/
+
 	pc_tips.resize(5);
 	pc_dirs.resize(5);
 	for(int i = 0; i < 5; i++)
@@ -75,9 +162,10 @@ void featurefromHandInfo(int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Ve
 
 	}
 	pc_palm.resize(2);
-	pc_palm[0] = Vector3(-5.77849, 256.893, -56.3591);
-	pc_palm[1] = Vector3(-12.1116, 157.81, -68.2974);
-
+	pc_palm[0] = Vector3(palm[0][0], palm[0][1], palm[0][2]);
+	pc_palm[1] = Vector3(palm[1][0], palm[1][1], palm[1][2]);
+	
+	file.close();
 }
 
 void showParameter(HandPose &strpose, HandPose &endpose)
@@ -201,10 +289,8 @@ int main(int argc, char** argv)
 	viewer->setBackgroundColor (0, 0, 0);
 	viewer->initCameraParameters();
 	viewer->addCoordinateSystem (1.0);
+	viewer->addText("info...", 0, 480, "info_text");
 	viewer->registerKeyboardCallback(chCameraViewPoint, (void*)&viewer);
-
-/*	rviewer->setSize(WIDTH, HEIGHT);
-	rviewer->setPosition(650, 300);*/
 
 	// Camera initialization
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
@@ -218,27 +304,19 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	
-	// Dataset initialization
-	int file_num, length;
-	cout << "choose one trail and pc space size: ";
-	cin >> file_num >> length;
-	DataDriven data_driven = (file_num >= 0 && file_num < 17)? DataDriven(file_num) : DataDriven();
-	SK::Array<SK::Array<float>> dataset = data_driven.getDataSet();
-	cout << "loading dataset done, set size = " << data_driven.getDataSetSize() << endl;
-	if(length < 0 || length > 6)	data_driven.startPCA(false);
-	else							data_driven.startPCA(length, false);
-	MatrixXf transmat = data_driven.getTransMatrix();
-	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
-	
 	// Point cloud Loading and random sampling (not yet now)
 	viewer->addPointCloud(cloudptr, "mycloud");
 
 	// Hand Model & Pose initialization
 	HandModel handmodel = HandModel();
 	HandPose poselist[FILENUM];
+	SK::Array<HandPose> testlist;
 
 	if(opti && show)	addHandModel(handmodel, skel);
 	if(opti && show && skel)	addHandSkeleton(handmodel);
+
+	// best point list
+	double costlist[FILENUM];
 
 	// For loop for computing
 	for(int curr_data = 0; curr_data < FILENUM; curr_data++)
@@ -267,10 +345,21 @@ int main(int argc, char** argv)
 		
 		if(curr_data == 0)	// Initialization
 		{
-			// get data from HandInfo(fake)
+			// get data from HandInfo
 			int finger_num;
 			SK::Array<Vector3> pc_tips, pc_dirs, pc_palm;
-			featurefromHandInfo(finger_num, pc_tips, pc_dirs, pc_palm);
+			featurefromHandInfo(curr_data, finger_num, pc_tips, pc_dirs, pc_palm);
+
+			// testing...
+			cout << "finger_num = " << finger_num << endl;
+			cout << "pc_tips: ";
+			for(int i = 0; i < 5; i++)
+				cout << "(" << pc_tips[i][0] << ", " << pc_tips[i][1] << ", " << pc_tips[i][2] << ") ";
+			cout << endl << "pc_dirs: ";
+			for(int i = 0; i < 5; i++)
+				cout << "(" << pc_dirs[i][0] << ", " << pc_dirs[i][1] << ", " << pc_dirs[i][2] << ") ";
+			cout << endl << "palm: (" << pc_palm[0][0] << ", " << pc_palm[0][1] << ", " << pc_palm[0][2] << ") -> (" 
+									  << pc_palm[1][0] << ", " << pc_palm[1][1] << ", " << pc_palm[1][2] << ")\n";
 
 			poselist[curr_data] = HandPose();
 			SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(finger_num);
@@ -289,23 +378,26 @@ int main(int argc, char** argv)
 				}
 			}
 
-			poselist[curr_data].applyPose(handmodel);/**/
+/*			poselist[curr_data].applyPose(handmodel);*/
 			cout << "Initialization done" << endl;
 		}
 		
 		// PSO Optimization
-		PSO pso = PSO(25, 24, -8, 1);
+		PSO pso = PSO(30, 24, 8, 1);
+		if(curr_data > 1)
+			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else
 			pso.generateParticles(poselist[curr_data]);
-//		pso.goGeneration_datafull(cloud, *planar.get(), handmodel, data_driven, false, false);
-		pso.goGeneration_full(cloud, *planar.get(), handmodel, false, false);
-//		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
+		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
+//		cout << "testlist size = " << testlist.size() << endl;
 		HandPose bestpose = pso.getBestPose();
 		bestpose.applyPose(handmodel);
+//		showParameter(poselist[curr_data], bestpose);
 		poselist[curr_data] = bestpose;/**/
-		cout << "best cost = " << pso.getBestPoint() << endl;
+		costlist[curr_data] = pso.getBestPoint();
+		cout << "best cost = " << costlist[curr_data] << endl;
 
 		// Time stamp
 		clock_t end = clock();
@@ -336,18 +428,19 @@ int main(int argc, char** argv)
 			PCL_ERROR ("Couldn't read file");
 			break;
 		}
-		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
 
-/*		vector<visualization::Camera> cameras;
-		viewer->getCameras(cameras);
-		cout << "camera position: (" << cameras[0].pos[0] << ", " << cameras[0].pos[1] << ", " << cameras[0].pos[2] << ")\n";
-		cout << "camera view: (" << cameras[0].view[0] << ", " << cameras[0].view[1] << ", " << cameras[0].view[2] << ")\n";*/
+		// Show info on screen
+		stringstream info;
+		info << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
+		info << "frame " << frame << ", cost = " << costlist[frame] << endl;
+		viewer->updateText(info.str(), 0, 480, "info_text");
 
 		// Update hand model
 		if(opti)
 		{
 			handmodel = HandModel();
 			poselist[frame].applyPose(handmodel);
+//			testlist[frame].applyPose(handmodel);
 			if(show)	updateHandModel(handmodel, skel);
 			if(show && skel)	updateHandSkeleton(handmodel);
 		}
@@ -355,9 +448,8 @@ int main(int argc, char** argv)
 
 		// Update viewer
 		viewer->updatePointCloud(cloudptr, "mycloud");
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "mycloud");
 		viewer->spinOnce(50);
-//		rviewer->spinOnce(50);
 		frame = (frame + 1) % FILENUM;
 	}
 
