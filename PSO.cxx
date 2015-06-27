@@ -503,7 +503,8 @@ Index<flann::L2<float>> PSO::buildDatasetIndex(const RangeImagePlanar &planar, v
 		}
 		prev = false;
 	}
-	pix_meter /= (float)counter;
+	pix_meter /= (float)counter;	// weird result
+	pix_meter = 0.5;
 
 	int pure_size = (int)data.size() / 2;
 	float *pure_data = data.data();

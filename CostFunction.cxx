@@ -110,16 +110,15 @@ void MyCostFunction::setFTerm(flann::Index<flann::L2<float> > &index)
 		Eigen::Vector3f point = MyTools::SKtoEigenVector(sgroup[c].getCenter());
 		int image_x, image_y;
 		float range;
-		planar.getImagePoint(point, image_x, image_y, range);
+		planar.getImagePoint(point, image_x, image_y, range);		// range of center
 		if(planar.isValid(image_x, image_y))
 		{
-			float ref = planar.getPoint(image_x, image_y).range;
+			float ref = planar.getPoint(image_x, image_y).range;	// range of image
 			if(ref > range)
 				f_term_value += (double)(ref - range);
 		}
 		else if(!planar.isValid(image_x, image_y))
 			f_term_value += getNearestNeighborNeighbor(index, image_x, image_y) * pix_meter;/**/
-
 	}
 
 	// lamda weight

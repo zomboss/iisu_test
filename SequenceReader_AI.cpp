@@ -44,11 +44,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov10_ICPPSO_temporal_1.txt";
-const char *infoname = "InfoData/info_seq_mov10.txt";
-const char *seqname = "Sequences/Seq_mov10/pcd_seq";
+const char *posname = "PoseData/Seq_mov9_ICPPSO_inichoose_3.txt";
+const char *infoname = "InfoData/info_seq_mov9.txt";
+const char *seqname = "Sequences/Seq_mov9/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 64;
+const int FILENUM = 66;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -166,6 +166,42 @@ void featurefromHandInfo(int frame, int &fin_num, SK::Array<Vector3> &pc_tips, S
 	pc_palm[1] = Vector3(palm[1][0], palm[1][1], palm[1][2]);
 	
 	file.close();
+}
+
+SK::Array<int> getFingerNumfromHandInfo()
+{
+	SK::Array<int> num_list;
+	num_list.resize(FILENUM);
+	
+	fstream file;
+	file.open(infoname, ios::in);
+	if(!file)
+	{
+		cout << "cannot open file " << infoname << "!!!" << endl;
+		return num_list;
+	}
+	
+	string line;
+	int count = 0;
+	while(getline(file, line))
+	{
+		if(count % 5 == 0)
+		{
+			istringstream iss(line);
+			if (!(iss >> num_list[count / 5]))
+				cout << "error occur in line " << count << "!!!" << endl;
+		}
+		count++;
+	}
+
+	file.close();
+	return num_list;
+}
+
+bool initChoosing(int frame, double *costlist, SK::Array<int> numlist)
+{
+	if(frame == 0) return true;
+	return (costlist[frame - 1] > costlist[0] * 2.0) && (numlist[frame] == 5 || numlist[frame] == 0);
 }
 
 void showParameter(HandPose &strpose, HandPose &endpose)
@@ -317,6 +353,7 @@ int main(int argc, char** argv)
 
 	// best point list
 	double costlist[FILENUM];
+	SK::Array<int> numlist = getFingerNumfromHandInfo();
 
 	// For loop for computing
 	for(int curr_data = 0; curr_data < FILENUM; curr_data++)
@@ -343,7 +380,7 @@ int main(int argc, char** argv)
 		handmodel = HandModel();
 		if(curr_data > 0)	poselist[curr_data] = poselist[curr_data - 1];
 		
-		if(curr_data == 0)	// Initialization
+		if(curr_data == 0 || initChoosing(curr_data, costlist, numlist))	// Initialization
 		{
 			// get data from HandInfo
 			int finger_num;
@@ -351,7 +388,7 @@ int main(int argc, char** argv)
 			featurefromHandInfo(curr_data, finger_num, pc_tips, pc_dirs, pc_palm);
 
 			// testing...
-			cout << "finger_num = " << finger_num << endl;
+			/*cout << "finger_num = " << finger_num << endl;
 			cout << "pc_tips: ";
 			for(int i = 0; i < 5; i++)
 				cout << "(" << pc_tips[i][0] << ", " << pc_tips[i][1] << ", " << pc_tips[i][2] << ") ";
@@ -359,7 +396,7 @@ int main(int argc, char** argv)
 			for(int i = 0; i < 5; i++)
 				cout << "(" << pc_dirs[i][0] << ", " << pc_dirs[i][1] << ", " << pc_dirs[i][2] << ") ";
 			cout << endl << "palm: (" << pc_palm[0][0] << ", " << pc_palm[0][1] << ", " << pc_palm[0][2] << ") -> (" 
-									  << pc_palm[1][0] << ", " << pc_palm[1][1] << ", " << pc_palm[1][2] << ")\n";
+									  << pc_palm[1][0] << ", " << pc_palm[1][1] << ", " << pc_palm[1][2] << ")\n";*/
 
 			poselist[curr_data] = HandPose();
 			SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(finger_num);
@@ -384,8 +421,8 @@ int main(int argc, char** argv)
 		
 		// PSO Optimization
 		PSO pso = PSO(30, 24, 8, 1);
-		if(curr_data > 1)
-			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);
+/*		if(curr_data > 1)
+			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);*/
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else

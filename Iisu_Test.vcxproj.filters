@@ -40,7 +40,7 @@
     <ClCompile Include="DataDriven.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="SequenceReader_AI.cpp">
+    <ClCompile Include="Sequence_test.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>

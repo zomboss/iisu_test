@@ -167,22 +167,24 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 	srand(time(NULL));
 	for(int t = 0; t < times; t++)
 	{
-		cout << "start" << endl;
 		int finger = -2, joint = -2;
 		double theta = 0.0, upper = 0.0, lower = 0.0;
 		int seed = getRandomJoint(finger, joint, theta, upper, lower);
-		cout << "In time " << t << ", seed = " << seed << endl;/**/
+		cout << "In time " << t << ", finger = " << finger << ", joint = " << joint << endl;/**/
+		cout << "hasprev? " << hasprev << endl;
 
 		Problem problem;
 		ceres::CostFunction* cf_curr;
 		if(finger == -1)
 		{
-			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose, /*planar,*/ pix_meter, pure_vec, index));
+			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose, &planar, pix_meter, pure_vec, &index));
+			else			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose, prevpose1, prevpose2, &planar, pix_meter, pure_vec, &index));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 		}
 		else
 		{
-			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, /*planar,*/ pix_meter, pure_vec, &index));
+			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, &planar, pix_meter, pure_vec, &index));
+			else			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, prevpose1, prevpose2, &planar, pix_meter, pure_vec, &index));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 			problem.SetParameterUpperBound(&theta, 0, upper);
 			problem.SetParameterLowerBound(&theta, 0, lower);
@@ -203,7 +205,6 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(seed, theta);
 		cost = std::sqrt(summary.final_cost);
-		cout << "next" << endl;
 	}
 }
 

@@ -43,10 +43,10 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov7_ICPPSO_temporal_1.txt";
-const char *seqname = "Sequences/Seq_mov7/pcd_seq";
+const char *posname = "PoseData/Seq_mov8_ICPPSO_temporal_1.txt";
+const char *seqname = "Sequences/Seq_mov8/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 50;
+const int FILENUM = 61;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
