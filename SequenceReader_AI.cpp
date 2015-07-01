@@ -44,9 +44,9 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov9_ICPPSO_inichoose_3.txt";
-const char *infoname = "InfoData/info_seq_mov9.txt";
-const char *seqname = "Sequences/Seq_mov9/pcd_seq";
+const char *posname = "PoseData/Seq_mov14_ICPPSO_ICPimp_1.txt";
+const char *infoname = "InfoData/info_seq_mov14.txt";
+const char *seqname = "Sequences/Seq_mov14/pcd_seq";
 const char *type = ".pcd";
 const int FILENUM = 66;
 
@@ -60,6 +60,38 @@ PointCloud<PointXYZRGB>::Ptr cloudptr(&cloud);
 boost::shared_ptr<visualization::PCLVisualizer> viewer (new visualization::PCLVisualizer ("3D Viewer"));
 //boost::shared_ptr<visualization::RangeImageVisualizer > rviewer (new visualization::RangeImageVisualizer  ("Range Viewer"));
 boost::shared_ptr<RangeImagePlanar> planar (new RangeImagePlanar());
+
+int posefromPoseData(SK::Array<HandPose> &arr)
+{
+	// Load pose file if needed
+	fstream file_pose_in;
+	file_pose_in.open(posname, ios::in);
+	if(!file_pose_in)
+	{
+		cout << "cannot open file " << posname << "!!!" << endl;
+		return 0;
+	}
+
+	// Load parameter from PoseData
+	SK::Array<float> pose_para;
+	pose_para.resize(26);
+	SK::Vector3 ori_para = SK::Vector3();
+	int count = 0;
+	while( file_pose_in >> pose_para[0] >> pose_para[1] >> pose_para[2] >> pose_para[3] >> pose_para[4] >> pose_para[5] >> pose_para[6] >> pose_para[7]
+						>> pose_para[8] >> pose_para[9] >> pose_para[10] >> pose_para[11] >> pose_para[12] >> pose_para[13] >> pose_para[14] >> pose_para[15]
+						>> pose_para[16] >> pose_para[17] >> pose_para[18] >> pose_para[19] >> pose_para[20] >> pose_para[21] >> pose_para[22] >> pose_para[23]
+						>> pose_para[24] >> pose_para[25] >> ori_para[0] >> ori_para[1] >> ori_para[2])
+	{
+		HandPose tmppose = HandPose();
+		tmppose.setAllParameters(pose_para);
+		tmppose.setOrientation(ori_para);
+		arr.pushBack(tmppose);
+
+		count++;
+	}
+
+	return count;
+}
 
 void featurefromHandInfo(int frame, int &fin_num, SK::Array<Vector3> &pc_tips, SK::Array<Vector3> &pc_dirs, SK::Array<Vector3> &pc_palm)
 {
@@ -86,7 +118,7 @@ void featurefromHandInfo(int frame, int &fin_num, SK::Array<Vector3> &pc_tips, S
 			count++;
 			continue;
 		}
-		
+
 		istringstream iss(line);
 		switch(count % 5)
 		{
@@ -132,7 +164,7 @@ void featurefromHandInfo(int frame, int &fin_num, SK::Array<Vector3> &pc_tips, S
 		}
 		
 		count++;
-		if(count > (frame + 1) * 5)	break;
+		if(count >= (frame + 1) * 5)	break;
 	}
 
 /*	cout << "In fun, num = " << fin_num << endl;
@@ -192,6 +224,7 @@ SK::Array<int> getFingerNumfromHandInfo()
 				cout << "error occur in line " << count << "!!!" << endl;
 		}
 		count++;
+		if(count >= FILENUM * 5)	break;	// For sake
 	}
 
 	file.close();
@@ -332,9 +365,9 @@ int main(int argc, char** argv)
 	viewer->setCameraPosition(-14.4617, -171.208, 6.5311, 0, 0, 1);
 	
 	// File initialization
-	fstream file;
-	file.open(posname, ios::out);
-	if(!file)
+	fstream file_pose_out;
+	file_pose_out.open(posname, ios::app);
+	if(!file_pose_out)
 	{
 		cout << "cannot open file " << posname << "!!!" << endl;
 		return -1;
@@ -348,15 +381,21 @@ int main(int argc, char** argv)
 	HandPose poselist[FILENUM];
 	SK::Array<HandPose> testlist;
 
-	if(opti && show)	addHandModel(handmodel, skel);
-	if(opti && show && skel)	addHandSkeleton(handmodel);
-
 	// best point list
 	double costlist[FILENUM];
 	SK::Array<int> numlist = getFingerNumfromHandInfo();
 
+	SK::Array<HandPose> posearray;
+	int str_point = posefromPoseData(posearray);
+	cout << "start at " << str_point << endl;
+	cout << "show data: " << endl;
+	for(int i = 0; i < str_point; i++)
+		cout << posearray[i].getAllParametersT(1.0f) << endl;/**/
+	for(size_t i = 0; i < posearray.size(); i++)
+		poselist[i] = posearray[i];
+
 	// For loop for computing
-	for(int curr_data = 0; curr_data < FILENUM; curr_data++)
+	for(int curr_data = str_point; curr_data < FILENUM; curr_data++)
 	{
 		if(!opti)	break;
 		
@@ -380,7 +419,7 @@ int main(int argc, char** argv)
 		handmodel = HandModel();
 		if(curr_data > 0)	poselist[curr_data] = poselist[curr_data - 1];
 		
-		if(curr_data == 0 || initChoosing(curr_data, costlist, numlist))	// Initialization
+		if(curr_data == 0 /*|| initChoosing(curr_data, costlist, numlist)*/)	// Initialization
 		{
 			// get data from HandInfo
 			int finger_num;
@@ -421,8 +460,8 @@ int main(int argc, char** argv)
 		
 		// PSO Optimization
 		PSO pso = PSO(30, 24, 8, 1);
-/*		if(curr_data > 1)
-			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);*/
+		if(curr_data > 1)
+			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);/**/
 		if(curr_data > 0)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else
@@ -446,14 +485,17 @@ int main(int argc, char** argv)
 		pose_para.pushBack(poselist[curr_data].getOrientation()[1]);
 		pose_para.pushBack(poselist[curr_data].getOrientation()[2]);
 		for(int i = 0; i < 29; i++)
-			file << pose_para[i] << " ";
-		file << endl;
+			file_pose_out << pose_para[i] << " ";
+		file_pose_out << endl;
 
 	}
 	cout << "all frame computation done" << endl;
-	file.close();
+	file_pose_out.close();
 
 	// While loop for display
+	if(opti && show)	addHandModel(handmodel, skel);
+	if(opti && show && skel)	addHandSkeleton(handmodel);
+
 	int frame = 0;
 	while(!viewer->wasStopped())
 	{

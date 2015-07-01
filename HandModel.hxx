@@ -22,10 +22,10 @@ template <typename T>
 Eigen::Matrix<T, 1, 4> getQuaternionfromVec(Eigen::Matrix<T, 3, 1> &vec)
 {
 	T sqrAngle = vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
-	T angle = sqrt(sqrAngle);
+	T angle = ceres::sqrt(sqrAngle);
 	Eigen::Matrix<T, 1, 4> para;
 	
-	if (abs(angle) < T(0.00001))
+	if (ceres::abs(angle) < T(0.00001))
 	{
 		para(0, 0) = T(1.0f);
 		para(0, 1) = T(0.0f);

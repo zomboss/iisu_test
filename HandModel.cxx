@@ -61,14 +61,14 @@ HandModel::HandModel()
 	models.pushBack(Sphere(Vector3(60 - CENTER_W,116 - CENTER_H,0), 4, &models[38], "little_t2", Vector3(255,0,0)));	relatedmap[39] = 38;
 
 	// build sphere thumb (assume plam 1-1 is root)
-	models.pushBack(Sphere(Vector3(5 - CENTER_W,0 - CENTER_H,0), 14, &models[0], "thumb_b1"));		relatedmap[40] = 0;
-	models.pushBack(Sphere(Vector3(-7 - CENTER_W,12 - CENTER_H,0), 11, &models[40], "thumb_b2"));	relatedmap[41] = 40;
-	models.pushBack(Sphere(Vector3(-17.5 - CENTER_W,22.5 - CENTER_H,0), 11, &models[41], "thumb_b3"));	relatedmap[42] = 41;
-	models.pushBack(Sphere(Vector3(-28 - CENTER_W,33 - CENTER_H,0), 7, &models[42], "thumb_m1"));	relatedmap[43] = 42;
-	models.pushBack(Sphere(Vector3(-36 - CENTER_W,41 - CENTER_H,0), 7, &models[43], "thumb_m2"));	relatedmap[44] = 43;
-	models.pushBack(Sphere(Vector3(-43 - CENTER_W,48 - CENTER_H,0), 8, &models[44], "thumb_t1"));	relatedmap[45] = 44;
-	models.pushBack(Sphere(Vector3(-51.5 - CENTER_W,56.5 - CENTER_H,0), 6, &models[45], "thumb_t2"));	relatedmap[46] = 45;
-	models.pushBack(Sphere(Vector3(-58 - CENTER_W,63 - CENTER_H,0), 5, &models[46], "thumb_t3", Vector3(255,0,0)));	relatedmap[47] = 46;
+	models.pushBack(Sphere(Vector3(0 - CENTER_W,0 - CENTER_H,0), 14, &models[0], "thumb_b1"));		relatedmap[40] = 0;
+	models.pushBack(Sphere(Vector3(-12 - CENTER_W,12 - CENTER_H,0), 11, &models[40], "thumb_b2"));	relatedmap[41] = 40;
+	models.pushBack(Sphere(Vector3(-22.5 - CENTER_W,22.5 - CENTER_H,0), 11, &models[41], "thumb_b3"));	relatedmap[42] = 41;
+	models.pushBack(Sphere(Vector3(-33 - CENTER_W,33 - CENTER_H,0), 7, &models[42], "thumb_m1"));	relatedmap[43] = 42;
+	models.pushBack(Sphere(Vector3(-41 - CENTER_W,41 - CENTER_H,0), 7, &models[43], "thumb_m2"));	relatedmap[44] = 43;
+	models.pushBack(Sphere(Vector3(-48 - CENTER_W,48 - CENTER_H,0), 8, &models[44], "thumb_t1"));	relatedmap[45] = 44;
+	models.pushBack(Sphere(Vector3(-56.5 - CENTER_W,56.5 - CENTER_H,0), 6, &models[45], "thumb_t2"));	relatedmap[46] = 45;
+	models.pushBack(Sphere(Vector3(-63 - CENTER_W,63 - CENTER_H,0), 5, &models[46], "thumb_t3", Vector3(255,0,0)));	relatedmap[47] = 46;
 
 	globalup = Vector3(0,1,0);
 	globalori = Vector3(0,0,1);
@@ -347,9 +347,16 @@ SK::Array<Sphere> HandModel::getNeighbors(int index)
 {
 	// index follow the hand model
 	SK::Array<Sphere> cand;
-	// thumb condition: consider index
-	if(index >= 40 && index < 48)
+	// thumb condition: consider index and palm
+	if(index >= 40 && index < 43)
 	{
+		for(int i = 16; i < 22; i++)
+			cand.pushBack(models[i]);
+	}
+	else if(index >= 43 && index < 48)
+	{
+		for(int i = 0; i < 16; i++)
+			cand.pushBack(models[i]);
 		for(int i = 16; i < 22; i++)
 			cand.pushBack(models[i]);
 	}

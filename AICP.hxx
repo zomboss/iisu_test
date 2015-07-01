@@ -36,9 +36,10 @@ public:
 	HandPose getBestPose() {return bestpose;}
 
 	void run_randomPara(const PointCloud<PointXYZRGB> &);
-	void run_randomPara(PointCloud<PointXYZRGB> &, RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
+	void run_randomPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
 	void run_randomPara(const Eigen::Matrix<float, 3, Eigen::Dynamic> &);
 	void run_specPara(const PointCloud<PointXYZRGB> &, int );
+	void run_specPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &, int );
 	void run_cyclePara(const PointCloud<PointXYZRGB> &);
 	void run_randomJoint(const PointCloud<PointXYZRGB> &);
 
@@ -61,17 +62,18 @@ private:
 class CF_Finger
 {
 public:
-	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p): 
+	CF_Finger(const PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p): 
 		cloud(pc), finger(f), joint(j), handpose(p){isfull = false; hasprev = false;}
-	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, HandPose pr1, HandPose pr2): 
+	CF_Finger(const PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, HandPose pr1, HandPose pr2): 
 		cloud(pc), finger(f), joint(j), handpose(p), prevpose1(pr1), prevpose2(pr2){isfull = false; hasprev = true;}
-	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
-		cloud(pc), finger(f), joint(j), handpose(p), planar(pl), pix_meter(pm), pure_vec(pv), index(in){isfull = false; hasprev = false;}
-	CF_Finger(PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, HandPose pr1, HandPose pr2, RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
-		cloud(pc), finger(f), joint(j), handpose(p), prevpose1(pr1), prevpose2(pr2), planar(pl), pix_meter(pm), pure_vec(pv), index(in){isfull = true; hasprev = false;}
+	CF_Finger(const PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, const RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
+		cloud(pc), finger(f), joint(j), handpose(p), planar(pl), pix_meter(pm), index(in){pure_vec = pv; isfull = true; hasprev = false;}
+	CF_Finger(const PointCloud<PointXYZRGB> &pc, int f, int j, HandPose p, HandPose pr1, HandPose pr2, const RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
+		cloud(pc), finger(f), joint(j), handpose(p), prevpose1(pr1), prevpose2(pr2), planar(pl), pix_meter(pm), index(in){pure_vec = pv; isfull = true; hasprev = true;}
 	template <typename T>	
 	bool operator()(const double* const theta, T* residual) const
 	{
+//		cout << "theta = " << *theta << endl;
 		// Set up the pose
 		HandModel model = HandModel();
 		HandPose pose = handpose;
@@ -89,10 +91,11 @@ public:
 			}
 			else
 			{
-				vector<float> tmp_vec = pure_vec;
-				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, tmp_vec);
+				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, (vector<float>)pure_vec);
 				costf.calculate(*index, prevpose1, prevpose2);
 				residual[0] = T(costf.getCost());
+	/*			cout << "cost in D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", L-term = " << costf.getLTerm() << ", M-term = " << costf.getMTerm() << endl;
+				cout << "total cost = " << costf.getCost() << endl;*/
 			}
 		}
 		else
@@ -105,8 +108,7 @@ public:
 			}
 			else
 			{
-				vector<float> tmp_vec = pure_vec;
-				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, tmp_vec);
+				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, (vector<float>)pure_vec);
 				costf.calculate(*index);
 				residual[0] = T(costf.getCost());
 			}
@@ -117,7 +119,7 @@ public:
 
 private:
 	PointCloud<PointXYZRGB> cloud;
-	RangeImagePlanar *planar;
+	const RangeImagePlanar *planar;
 	vector<float> pure_vec;
 	Index<flann::L2<float>> *index;
 	HandPose handpose;
@@ -133,14 +135,14 @@ private:
 class CF_Global
 {
 public:
-	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po):
+	CF_Global(const PointCloud<PointXYZRGB> &pc, int p, HandPose po):
 		cloud(pc), para(p), handpose(po){isfull = false; hasprev = false;}
-	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po, HandPose pr1, HandPose pr2): 
+	CF_Global(const PointCloud<PointXYZRGB> &pc, int p, HandPose po, HandPose pr1, HandPose pr2): 
 		cloud(pc), para(p), handpose(po), prevpose1(pr1), prevpose2(pr2){isfull = false; hasprev = true;}
-	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po, RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
-		cloud(pc), para(p), handpose(po), planar(pl), pix_meter(pm), pure_vec(pv), index(in){isfull = true; hasprev = false;}
-	CF_Global(PointCloud<PointXYZRGB> &pc, int p, HandPose po, HandPose pr1, HandPose pr2, RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
-		cloud(pc), para(p), handpose(po), prevpose1(pr1), prevpose2(pr2), planar(pl), pix_meter(pm), pure_vec(pv), index(in){isfull = true; hasprev = false;}
+	CF_Global(const PointCloud<PointXYZRGB> &pc, int p, HandPose po, const RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
+		cloud(pc), para(p), handpose(po), planar(pl), pix_meter(pm), index(in){pure_vec = pv; isfull = true; hasprev = false;}
+	CF_Global(const PointCloud<PointXYZRGB> &pc, int p, HandPose po, HandPose pr1, HandPose pr2, const RangeImagePlanar *pl, float pm, vector<float> &pv, Index<flann::L2<float>> *in): 
+		cloud(pc), para(p), handpose(po), prevpose1(pr1), prevpose2(pr2), planar(pl), pix_meter(pm), index(in){pure_vec = pv; isfull = true; hasprev = true;}
 	template <typename T>
 	bool operator()(const double* const theta, T* residual) const
 	{
@@ -161,8 +163,7 @@ public:
 			}
 			else
 			{
-				vector<float> tmp_vec = pure_vec;
-				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, tmp_vec);
+				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, (vector<float>)pure_vec);
 				costf.calculate(*index, prevpose1, prevpose2);
 				residual[0] = T(costf.getCost());
 			}
@@ -177,8 +178,7 @@ public:
 			}
 			else
 			{
-				vector<float> tmp_vec = pure_vec;
-				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, tmp_vec);
+				MyCostFunction costf = MyCostFunction(cloud, model, *planar, pix_meter, (vector<float>)pure_vec);
 				costf.calculate(*index);
 				residual[0] = T(costf.getCost());
 			}
@@ -189,7 +189,7 @@ public:
 
 private:
 	PointCloud<PointXYZRGB> cloud;
-	RangeImagePlanar *planar;
+	const RangeImagePlanar *planar;
 	vector<float> pure_vec;
 	Index<flann::L2<float>> *index;
 	HandPose handpose;
@@ -280,7 +280,7 @@ public:
 	template <typename T>
 	bool operator()(const T* const theta, T* residual) const
 	{
-/*		HandModel handmodel = HandModel();
+		HandModel handmodel = HandModel();
 		Eigen::Matrix<float, 1, SPHERE_NUM> radius_mat = handmodel.getRadiusMat(0.0f);
 		
 		// Cast to T type
@@ -288,14 +288,17 @@ public:
 		Eigen::Matrix<T, 1, SPHERE_NUM> radius_mat_t = radius_mat.cast<T>();
 		Eigen::Matrix<T, 1, 26> para_mat_t = para_mat.cast<T>();
 
+		// what!?
+		Eigen::Quaternion<T> test(T(1.0), T(1.0), T(1.0), T(1.0));
+
 		// Set up the pose
 		para_mat_t(0, index) = *theta;
-		Eigen::Matrix<T, 1, SPHERE_NUM> model_mat_t = handmodel.transformT(para_mat_t);
+		Eigen::Matrix<T, 3, SPHERE_NUM> model_mat_t = handmodel.transformT(para_mat_t);
 
 		// Use Cost Function to compute residual
 		CostFunctionT<T> costtf = CostFunctionT<T>(cloud_mat_t, model_mat_t, radius_mat_t);
 		costtf.calculate();
-		residual[0] = costtf.getCost();*/
+		residual[0] = costtf.getCost();/**/
 		
 		return true;
 	}

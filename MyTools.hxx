@@ -1,6 +1,8 @@
 #pragma once
 
 #include <pcl/common/transforms.h>
+#include <pcl/range_image/range_image_planar.h>
+#include <flann/flann.hpp>
 #include <EasiiSDK/Iisu.h>
 #include <math.h> 
 #include <iostream>
@@ -17,6 +19,7 @@ using namespace std;
 using namespace SK;
 using namespace SK::Easii;
 using namespace pcl;
+using namespace flann;
 
 class MyTools
 {
@@ -58,4 +61,8 @@ public:
 	static SK::Array<float> subArray(const SK::Array<float> &, const SK::Array<float> &);
 	static SK::Array<float> addArray(const SK::Array<float> &, const SK::Array<float> &);
 	static SK::Array<float> scaArray(const SK::Array<float> &, float);
+
+	// flann index
+	static Index<flann::L2<float>> buildDatasetIndex(const RangeImagePlanar &planar, vector<float> &data, float &pix_meter);
+
 };

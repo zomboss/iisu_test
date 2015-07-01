@@ -309,8 +309,9 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 //				cout << " in particle " << p << ", show D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", M-term = " << costf.getMTerm() << endl;
 
 				// Get gradient descent
-				AICP aicp = AICP(m, 1, particles[p], prev_pose1, prev_pose2);
-				aicp.run_randomPara(cloud);
+				AICP aicp = hasprev ? AICP(m, 1, particles[p], prev_pose1, prev_pose2) : AICP(m, 1, particles[p]);
+				aicp.run_randomPara(cloud, planar, pix_meter, pure_vec, index);
+//				aicp.run_randomPara(cloud);
 				SK::Array<float> stepvel = MyTools::subArray(aicp.getBestPose().getAllParameters(), particles[p].getAllParameters());
 				velocity[p] = MyTools::addArray(velocity[p], stepvel);
 			}

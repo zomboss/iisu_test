@@ -115,14 +115,27 @@ void MyCostFunction::setFTerm(flann::Index<flann::L2<float> > &index)
 		{
 			float ref = planar.getPoint(image_x, image_y).range;	// range of image
 			if(ref > range)
-				f_term_value += (double)(ref - range);
+				f_term_value += (double)((ref - range) * (ref - range));
 		}
 		else if(!planar.isValid(image_x, image_y))
-			f_term_value += getNearestNeighborNeighbor(index, image_x, image_y) * pix_meter;/**/
+		{
+			int tar_x, tar_y;
+			float tmpbe = getNearestNeighborNeighbor(index, image_x, image_y, tar_x, tar_y);
+			float tmpref = planar.getPoint(tar_x, tar_y).range;
+/*			if(c == 33)
+			{
+				cout << "In NN, project on: (" << image_x << ", " << image_y << "), nearest: (" << tar_x << ", " << tar_y << ")";
+				cout << ", tmpref = " << tmpref << ", range = " << range << endl;
+			}*/
+			if(tmpref > range)
+				f_term_value += (tmpbe * tmpbe * pix_meter + (tmpref - range) * (tmpref - range));
+			else
+				f_term_value += tmpbe * tmpbe * pix_meter;
+		}
 	}
 
 	// lamda weight
-	f_term_value *= 1.0;
+	f_term_value *= 3.0;
 }
 
 void MyCostFunction::setLTerm()
@@ -142,6 +155,9 @@ void MyCostFunction::setLTerm()
 		}
 		l_term_value += tmp_dis * tmp_dis;
 	}
+
+	// lamda weight
+	//l_term_value *= 3.0;
 }
 
 void MyCostFunction::setMTerm(HandPose pre_pose1, HandPose pre_pose2)
@@ -185,7 +201,7 @@ void MyCostFunction::calculate(flann::Index<flann::L2<float> > &index, HandPose 
 	setLTerm();
 }
 
-float MyCostFunction::getNearestNeighborNeighbor(flann::Index<flann::L2<float> > &index, int query_x, int query_y)
+float MyCostFunction::getNearestNeighborNeighbor(flann::Index<flann::L2<float> > &index, int query_x, int query_y, int &tar_x, int &tar_y)
 {
 	float *query_data = new float[2];
 	query_data[0] = (float)query_x; query_data[1] = (float)query_y;
@@ -198,7 +214,9 @@ float MyCostFunction::getNearestNeighborNeighbor(flann::Index<flann::L2<float> >
 	// Do a knn search, using 128 checks
 	index.knnSearch(query, indices, dists, 1, flann::SearchParams(128));
 	int tar = indices[0][0];
-//	cout << "In NN, target = (" << pure_data[tar * 2] << ", " << pure_data[tar * 2 + 1] << "), index = " << tar << ", dist = " << dists[0][0] << endl;
+	tar_x = (int)pure_data[tar * 2];
+	tar_y = (int)pure_data[tar * 2 + 1];
+//	cout << "In NN, target = (" <<tar_x << ", " << tar_y << "), index = " << tar << ", dist = " << dists[0][0] << endl;
 
 	return dists[0][0];
 

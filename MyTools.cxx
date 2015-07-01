@@ -292,3 +292,48 @@ Array<float> MyTools::scaArray(const Array<float> &arr, float scalar)
 	}
 	return sca;
 }
+
+const int HEIGHT = 240;
+const int WIDTH = 320;
+Index<flann::L2<float>> MyTools::buildDatasetIndex(const RangeImagePlanar &planar, vector<float> &data, float &pix_meter)
+{
+	// Load valid index (x,y)
+	bool prev = false;
+	int counter = 0;
+	for(int j = 0; j < HEIGHT; j++)
+	{
+		for(int i = 0; i < WIDTH; i++)
+		{
+			if(planar.isValid(i, j))
+			{
+				// get the distance between one pixel
+				if(prev)
+				{
+					PointWithRange prev_point = planar.getPoint(i - 1, j);
+					PointWithRange curr_point = planar.getPoint(i, j);
+					pix_meter += squaredEuclideanDistance(prev_point, curr_point);
+					counter++;
+				}
+				data.push_back((float)i);
+				data.push_back((float)j);
+				prev = true;
+			}
+			else prev = false;
+		}
+		prev = false;
+	}
+	pix_meter /= (float)counter;	// weird result
+	pix_meter = 0.5;
+
+	int pure_size = (int)data.size() / 2;
+	float *pure_data = data.data();
+
+	// Initial flann
+	flann::Matrix<float> dataset(pure_data, pure_size, 2);
+	
+	// Construct an randomized kd-tree index using 4 kd-trees
+	flann::Index<flann::L2<float> > index(dataset, flann::KDTreeIndexParams(4));
+    index.buildIndex();
+
+	return index;
+}

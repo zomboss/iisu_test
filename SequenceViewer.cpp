@@ -37,16 +37,17 @@ using namespace SK::Easii;
 // Processing & show
 const bool opti = true;
 const bool skel = false;
-const bool show = true;
+bool show = true;
+bool reshow = false;
 
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov8_ICPPSO_temporal_1.txt";
-const char *seqname = "Sequences/Seq_mov8/pcd_seq";
+const char *posname = "PoseData/Seq_mov14_ICPPSO_ICPimp_1.txt";
+const char *seqname = "Sequences/Seq_mov14/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 61;
+const int FILENUM = 43;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -170,6 +171,27 @@ void chCameraViewPoint (const pcl::visualization::KeyboardEvent &event, void* vi
 		viewer->setCameraPosition(camera_right[0], camera_right[1], camera_right[2], camera_right[3], camera_right[4], camera_right[5]);
 }
 
+void showModel(const pcl::visualization::KeyboardEvent &event, void* viewer_void)
+{
+	boost::shared_ptr<visualization::PCLVisualizer> viewer = *static_cast<boost::shared_ptr<visualization::PCLVisualizer> *> (viewer_void);
+	if (event.getKeySym () == "m" && event.keyDown ())
+	{
+		if(show == true)
+		{
+			viewer->removeAllShapes();
+			show = false;
+			reshow = false;
+		}
+		else
+		{
+			show = true;
+			reshow = true;
+		}
+
+	}
+
+}
+
 int main(int argc, char** argv)
 {
 	google::InitGoogleLogging(argv[0]);
@@ -179,6 +201,7 @@ int main(int argc, char** argv)
 	viewer->initCameraParameters();
 	viewer->addCoordinateSystem (1.0);
 	viewer->registerKeyboardCallback(chCameraViewPoint, (void*)&viewer);
+	viewer->registerKeyboardCallback(showModel, (void*)&viewer);
 	viewer->addText("Info...", 0, 450, "info_text");
 
 /*	rviewer->setSize(WIDTH, HEIGHT);
@@ -237,8 +260,19 @@ int main(int argc, char** argv)
 		}
 //		cout << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
 		stringstream infoss;
-		infoss << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str();
-		viewer->updateText(infoss.str(), 0, 450, "info_text");
+		infoss << "In viewing, loaded " << cloudptr->width * cloudptr->height << " data points from " << ss.str() << endl;
+		
+		// set up planar
+		setDepthImage();
+
+		// reshow the model?
+		if(reshow)
+		{
+			viewer->addText("Info...", 0, 450, "info_text");
+			if(opti && show)	addHandModel(handmodel, skel);
+			if(opti && show && skel)	addHandSkeleton(handmodel);
+			reshow = false;
+		}
 
 		// Update hand model
 		if(opti)
@@ -247,10 +281,21 @@ int main(int argc, char** argv)
 			poselist[frame].applyPose(handmodel);
 			if(show)	updateHandModel(handmodel, skel);
 			if(show && skel)	updateHandSkeleton(handmodel);
+
+			// Compute costs
+			vector<float> pure_vec;
+			float pix_meter;
+			Index<flann::L2<float>> index = MyTools::buildDatasetIndex(*planar.get(), pure_vec, pix_meter);
+			MyCostFunction costf = MyCostFunction(cloud, handmodel, *planar.get(), pix_meter, pure_vec);
+			if(frame > 1)	costf.calculate(index, poselist[frame - 1], poselist[frame - 2]);
+			else		costf.calculate(index);
+			infoss << "cost in D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", L-term = " << costf.getLTerm() << ", M-term = " << costf.getMTerm() << endl;
+			infoss << "total cost = " << costf.getCost() << endl;
+
 		}
 
-
 		// Update viewer
+		viewer->updateText(infoss.str(), 0, 450, "info_text");
 		viewer->updatePointCloud(cloudptr, "mycloud");
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "mycloud");
 		viewer->spinOnce(50);

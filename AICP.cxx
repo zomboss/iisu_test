@@ -116,7 +116,6 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 	srand(time(NULL));
 	for(int t = 0; t < times; t++)
 	{
-		PointCloud<PointXYZRGB> tmpcloud = cloud;
 		int finger = -2, joint = -2;
 		double theta = 0.0, upper = 0.0, lower = 0.0;
 		int seed = getRandomJoint(finger, joint, theta, upper, lower);
@@ -129,15 +128,15 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 		ceres::CostFunction* cf_curr;
 		if(finger == -1)
 		{
-			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
-			else			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose, prevpose1, prevpose2));
+			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose));
+			else			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose, prevpose1, prevpose2));
 //			cf_curr = new AutoDiffCostFunction<CF_Global, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 		}
 		else
 		{
-			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
-			else			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose, prevpose1, prevpose2));
+			if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose));
+			else			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, prevpose1, prevpose2));
 //			cf_curr = new AutoDiffCostFunction<CF_Finger, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 			problem.SetParameterUpperBound(&theta, 0, upper);
@@ -162,7 +161,7 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud)
 	}
 }
 
-void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &planar, float pix_meter, vector<float> &pure_vec, Index<flann::L2<float>> &index)
+void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud, const RangeImagePlanar &planar, float pix_meter, vector<float> &pure_vec, Index<flann::L2<float>> &index)
 {
 	srand(time(NULL));
 	for(int t = 0; t < times; t++)
@@ -170,8 +169,8 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 		int finger = -2, joint = -2;
 		double theta = 0.0, upper = 0.0, lower = 0.0;
 		int seed = getRandomJoint(finger, joint, theta, upper, lower);
-		cout << "In time " << t << ", finger = " << finger << ", joint = " << joint << endl;/**/
-		cout << "hasprev? " << hasprev << endl;
+/*		cout << "In time " << t << ", finger = " << finger << ", joint = " << joint << endl;
+		cout << "hasprev? " << hasprev << endl;*/
 
 		Problem problem;
 		ceres::CostFunction* cf_curr;
@@ -189,7 +188,7 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 			problem.SetParameterUpperBound(&theta, 0, upper);
 			problem.SetParameterLowerBound(&theta, 0, lower);
 		}
-		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
+//		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
 
 		// Set the solver
 		Solver::Options options;
@@ -202,7 +201,7 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 		Solve(options, &problem, &summary);
 
 		// Recover the theta
-		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
+//		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(seed, theta);
 		cost = std::sqrt(summary.final_cost);
 	}
@@ -210,7 +209,6 @@ void AICP::run_randomPara(PointCloud<PointXYZRGB> &cloud, RangeImagePlanar &plan
 
 void AICP::run_specPara(const PointCloud<PointXYZRGB> &cloud, int spec_para)
 {
-	PointCloud<PointXYZRGB> tmpcloud = cloud;
 	int finger = -2, joint = -2;
 	double theta = 0.0, upper = 0.0, lower = 0.0;
 	getSpecJoint(spec_para, finger, joint, theta, upper, lower);
@@ -219,12 +217,12 @@ void AICP::run_specPara(const PointCloud<PointXYZRGB> &cloud, int spec_para)
 	ceres::CostFunction* cf_curr;
 	if(finger == -1)
 	{
-		cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
+		cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose));
 		problem.AddResidualBlock(cf_curr, NULL, &theta);
 	}
 	else
 	{
-		cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
+		cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose));
 		problem.AddResidualBlock(cf_curr, NULL, &theta);
 		problem.SetParameterUpperBound(&theta, 0, upper);
 		problem.SetParameterLowerBound(&theta, 0, lower);
@@ -248,11 +246,53 @@ void AICP::run_specPara(const PointCloud<PointXYZRGB> &cloud, int spec_para)
 
 }
 
+void AICP::run_specPara(const PointCloud<PointXYZRGB> &cloud, const RangeImagePlanar &planar, float pix_meter, vector<float> &pure_vec, Index<flann::L2<float>> &index, int spec_para)
+{
+	int finger = -2, joint = -2;
+	double theta = 0.0, upper = 0.0, lower = 0.0;
+	getSpecJoint(spec_para, finger, joint, theta, upper, lower);
+/*	cout << "In spec, finger = " << finger << ", joint = " << joint << endl;
+	cout << "hasprev? " << hasprev << endl;*/
+
+	Problem problem;
+	ceres::CostFunction* cf_curr;
+	if(finger == -1)
+	{
+		if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose, &planar, pix_meter, pure_vec, &index));
+		else			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose, prevpose1, prevpose2, &planar, pix_meter, pure_vec, &index));
+		problem.AddResidualBlock(cf_curr, NULL, &theta);
+	}
+	else
+	{
+		if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, &planar, pix_meter, pure_vec, &index));
+		else			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, prevpose1, prevpose2, &planar, pix_meter, pure_vec, &index));
+		problem.AddResidualBlock(cf_curr, NULL, &theta);
+		problem.SetParameterUpperBound(&theta, 0, upper);
+		problem.SetParameterLowerBound(&theta, 0, lower);
+	}
+//	cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
+
+	// Set the solver
+	Solver::Options options;
+	options.max_num_iterations = iter;
+	options.linear_solver_type = ceres::DENSE_QR;
+	options.minimizer_progress_to_stdout = true;
+
+	// Run the solver
+	Solver::Summary summary;
+	Solve(options, &problem, &summary);
+
+	// Recover the theta
+//	cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
+	updatePose(spec_para, theta);
+	cost = std::sqrt(summary.final_cost);
+
+}
+
 void AICP::run_cyclePara(const PointCloud<PointXYZRGB> &cloud)
 {
 	for(int t = 0; t < (26 * times); t++)
 	{
-		PointCloud<PointXYZRGB> tmpcloud = cloud;
 		int finger = -2, joint = -2;
 		double theta = 0.0, upper = 0.0, lower = 0.0;
 		int curr_para = (t + 20) % 26;
@@ -263,12 +303,12 @@ void AICP::run_cyclePara(const PointCloud<PointXYZRGB> &cloud)
 		ceres::CostFunction* cf_curr;
 		if(finger == -1)
 		{
-			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(tmpcloud, joint, bestpose));
+			cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 		}
 		else
 		{
-			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(tmpcloud, finger, joint, bestpose));
+			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose));
 			problem.AddResidualBlock(cf_curr, NULL, &theta);
 			problem.SetParameterUpperBound(&theta, 0, upper);
 			problem.SetParameterLowerBound(&theta, 0, lower);

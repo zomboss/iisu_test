@@ -63,6 +63,6 @@ private:
 
 	vector<float> pure_data; //testing
 
-	float getNearestNeighborNeighbor(flann::Index<flann::L2<float> > &, int , int );
+	float getNearestNeighborNeighbor(flann::Index<flann::L2<float> > &, int , int , int &, int &);
 
 };
