@@ -44,11 +44,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov14_ICPPSO_ICPimp_1.txt";
-const char *infoname = "InfoData/info_seq_mov14.txt";
-const char *seqname = "Sequences/Seq_mov14/pcd_seq";
+const char *posname = "PoseData/Seq_mov16_ICPPSO_ICPimp_1.txt";
+const char *infoname = "InfoData/info_seq_mov16.txt";
+const char *seqname = "Sequences/Seq_mov16/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 66;
+const int FILENUM = 80;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -229,6 +229,44 @@ SK::Array<int> getFingerNumfromHandInfo()
 
 	file.close();
 	return num_list;
+}
+
+void getPalmCenterfromHandInfo(int frame, Eigen::Matrix<float, 3, 1> &curr, Eigen::Matrix<float, 3, 1> &prev)
+{
+	fstream file;
+	file.open(infoname, ios::in);
+	if(!file)
+	{
+		cout << "cannot open file " << infoname << "!!!" << endl;
+		return ;
+	}
+	
+	string line;
+	int count = 0;
+	while(getline(file, line))
+	{
+		istringstream iss(line);
+		float useless[3];
+		
+		// find the previous data
+		if(count == ((frame - 1) * 5 + 3))
+		{
+			if (!(iss >> prev(0, 0) >> prev(1, 0) >> prev(2, 0) >> useless[0] >> useless[1] >> useless[2]))
+				cout << "error occur in line " << count << "!!!" << endl;
+		}
+		
+		// find the current data
+		if(count == (frame * 5 + 3))
+		{	
+			if (!(iss >> curr(0, 0) >> curr(1, 0) >> curr(2, 0) >> useless[0] >> useless[1] >> useless[2]))
+				cout << "error occur in line " << count << "!!!" << endl;
+			if(frame == 0)	prev = curr;
+			break;
+		}
+
+		count++;
+	}
+
 }
 
 bool initChoosing(int frame, double *costlist, SK::Array<int> numlist)
@@ -458,6 +496,11 @@ int main(int argc, char** argv)
 			cout << "Initialization done" << endl;
 		}
 		
+		// Get the center to define is moving or not
+		Eigen::Matrix<float, 3, 1> prev_center, curr_center;
+		getPalmCenterfromHandInfo(curr_data, curr_center, prev_center);
+		cout << "show previous center: (" << prev_center.transpose() << "), current center: (" << curr_center.transpose() << ")\n";
+
 		// PSO Optimization
 		PSO pso = PSO(30, 24, 8, 1);
 		if(curr_data > 1)
@@ -466,6 +509,8 @@ int main(int argc, char** argv)
 			pso.generateParticles(poselist[curr_data - 1]);
 		else
 			pso.generateParticles(poselist[curr_data]);
+		pso.checkMoving(curr_center, prev_center);
+		cout << "show is moving: " << pso.getIsMov() << endl;
 		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
 //		cout << "testlist size = " << testlist.size() << endl;
 		HandPose bestpose = pso.getBestPose();

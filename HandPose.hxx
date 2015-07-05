@@ -109,6 +109,16 @@ public:
 		parameter(0, 23) = T(global_rot[0]);parameter(0, 24) = T(global_rot[1]);parameter(0, 25) = T(global_rot[2]);
 		return parameter;
 	}
+	template <typename T>
+	Eigen::Matrix<T, 3, 1> getOrientation(T typevar)
+	{
+		Eigen::Matrix<T, 3, 1> ori;
+		ori(0, 0) = T(global_ori[0]);
+		ori(1, 0) = T(global_ori[1]);
+		ori(2, 0) = T(global_ori[2]);
+		return ori;
+	}
+
 
 private:
 	Vector3 j_thumb_base;	// 2 degrees

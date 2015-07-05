@@ -30,12 +30,15 @@ public:
 	void setGenerationNum(int _g) {generation_num = _g;}
 	void setParticlesNum(int _p) {particles_num = _p;}
 	void setPrevPose(HandPose , HandPose );
+	void checkMoving(SK::Vector3 , SK::Vector3 );
+	void checkMoving(Eigen::Matrix<float, 3, 1> , Eigen::Matrix<float, 3, 1> );
 	void setM(int _m) {m = _m;}
 	void setK(int _k) {k = _k;}
 	int getGenerationNum() {return generation_num;}
 	int getParticlesNum() {return particles_num;}
 	int getM() {return m;}
 	int getK() {return k;}
+	bool getIsMov() {return ismov;}
 	float getPixmeter() {return pix_meter;}
 	double getBestPoint() {return gk_point[generation_num - 1];}
 	SK::Array<HandPose> getAllParticles() {return particles;}
@@ -45,6 +48,7 @@ public:
 	
 	void generateParticles(const HandPose &);
 	void generateParticles(HandPose &, HandPose &);
+	void generateLParticles(const HandPose &, Eigen::Matrix<float, 3, 1> );
 	void goGeneration(const PointCloud<PointXYZRGB> &, const HandModel &, bool );
 	void goGeneration_mp(const PointCloud<PointXYZRGB> &, const HandModel &, bool, bool );
 	void goGeneration_data(const PointCloud<PointXYZRGB> &, const HandModel &, DataDriven &, bool, bool );
@@ -60,6 +64,7 @@ private:
 	int k;
 	Vector3 ori_orientation;
 	float pix_meter;
+	bool ismov;
 
 	// for MTerm
 	HandPose prev_pose1;		

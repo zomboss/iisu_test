@@ -20,6 +20,7 @@
 #include "PSO.hxx"
 #include "AICP.hxx"
 #include "Initialization.hxx"
+#include "InitializationT.hxx"
 
 
 using namespace std;
@@ -351,8 +352,8 @@ int main(int argc, char** argv)
 	cin >> str_frame;
 	cout << "show origin? ";
 	cin >> isori;
-	cout << "choose parameter: ";
-	cin >> fin_ch;/**/
+/*	cout << "choose parameter: ";
+	cin >> fin_ch;*/
 
 	// Load the point cloud
 	stringstream ss;
@@ -425,11 +426,11 @@ int main(int argc, char** argv)
 		int finger_num;
 		SK::Array<Vector3> pc_tips, pc_dirs, pc_palm;
 		featurefromHandInfo(str_frame, finger_num, pc_tips, pc_dirs, pc_palm);
+		Eigen::Matrix<float, 3, Eigen::Dynamic> pc_tips_mat = MyTools::SKArraytoEigenMatrix(pc_tips, 1.0f);
+		Eigen::Matrix<float, 3, Eigen::Dynamic> pc_dirs_mat = MyTools::SKArraytoEigenMatrix(pc_dirs, 1.0f);
 
 		// Try to follow last frame global position
 		SK::Vector3 tmpdir = pc_palm[1] - pc_palm[0];
-/*		pc_palm[0] = prev_pose1.getPosition();
-		pc_palm[1] = prev_pose1.getPosition() + tmpdir;*/
 
 		// Initailization
 		SK::Array<SK::Array<bool>> permlist = MyTools::fingerChoosing(finger_num);
@@ -437,26 +438,41 @@ int main(int argc, char** argv)
 		for(size_t i = 0; i < permlist.size(); i++)
 		{
 			Initialization in = Initialization(finger_num, pc_tips, pc_dirs, handmodel);
+			InitializationT in_t = InitializationT(finger_num, pc_tips_mat, pc_dirs_mat);
 			
 			// set global position & orientation
 			initpose.setPosition(pc_palm[0]);
 			initpose.setOrientation(pc_palm[1] - pc_palm[0]);
+			cout << "In main, orientation = (" << initpose.getOrientation()[0] << ", " << initpose.getOrientation()[1] << ", " << initpose.getOrientation()[2] << ")\n";
 
-			in.fingerExist(permlist[0]);
-			in.goFullInitail(initpose, false);
-			if(bestcost > in.getCost())
+			if(isori)
 			{
-				bestcost = in.getCost();
-				in.setFullResultPose(initpose);
-			}/**/
-		}
+				in.fingerExist(permlist[i]);
+				in.goFullInitail(initpose, true);
+				if(bestcost > in.getCost())
+				{
+					bestcost = in.getCost();
+					in.setFullResultPose(initpose);
+				}
+			}
+			else
+			{	
+				in_t.fingerExist(permlist[i]);
+				in_t.goInitail(initpose, true);
+				if(bestcost > in.getCost())
+				{
+					bestcost = in.getCost();
+					in_t.setFullResultPose(initpose);
+				}
+			}
 
-		/*	initpose.applyPose(handmodel);*/
+		}
+		initpose.applyPose(handmodel);/**/
 		cout << "Initialzation done." << endl;
 	}
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(25, 24, 8, 1);
+/*	PSO pso = PSO(25, 24, 8, 1);
 	if(str_frame > 1)	pso.setPrevPose(prev_pose1, prev_pose2);
 	if(isinit)	pso.generateParticles(initpose, handpose);
 	else if(str_frame == 0)	pso.generateParticles(initpose);
@@ -467,12 +483,12 @@ int main(int argc, char** argv)
 	if(!isori)	particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
-/*	bestpose.applyPose(handmodel);
+	bestpose.applyPose(handmodel);
 	cout << "show point: " << pso.getBestPoint() << endl;*/
 //	showParameter(handpose, bestpose);
 
 	// For cost function testing
-	vector<float> pure_vec;
+/*	vector<float> pure_vec;
 	Index<flann::L2<float>> index = pso.buildDatasetIndex(*planar.get(), pure_vec);
 
 
@@ -482,7 +498,7 @@ int main(int argc, char** argv)
 //	aicp.run_randomPara(cloud, *planar.get(), pso.getPixmeter(), pure_vec, index);
 //	aicp.run_randomPara(cloud);
 	HandPose aicppose = aicp.getBestPose();
-	showParameter(handpose, aicppose);/**/
+	showParameter(handpose, aicppose);*/
 
 /*	HandPose trypose = aicp.getBestPose();
 	trypose.setFingerPose(3, trypose.getRingPose()[0], SK::Vector3(RING_PIP_FE_UPPERBOUND, 0, 0), trypose.getRingPose()[2]);
@@ -492,22 +508,18 @@ int main(int argc, char** argv)
 	if(isskel)	addHandSkeleton(handmodel);
 	projectDepthImage(handmodel);
 
-	// trytry
-	// dynamic index !!??
-
-
 	// main while
 	int frame = 0;
 	while(!viewer->wasStopped())
 	{
-		handmodel = HandModel();
-/*		particles[(frame % particles.size())].applyPose(handmodel);*/
+/*		handmodel = HandModel();
+		particles[(frame % particles.size())].applyPose(handmodel);
 		if(frame % 2 == 0)		handpose.applyPose(handmodel);
 		else if(frame % 2 == 1)	aicppose.applyPose(handmodel);
-//		else if(frame % 3 == 2)	trypose.applyPose(handmodel);
+//		else if(frame % 3 == 2)	trypose.applyPose(handmodel);*/
 		
 		// Get cost function
-		MyCostFunction costf = MyCostFunction(cloud, handmodel, *planar.get(), pso.getPixmeter(), pure_vec);
+/*		MyCostFunction costf = MyCostFunction(cloud, handmodel, *planar.get(), pso.getPixmeter(), pure_vec);
 		if(str_frame > 1)	costf.calculate(index, prev_pose1, prev_pose2);
 		else		costf.calculate(index);
 
@@ -515,7 +527,7 @@ int main(int argc, char** argv)
 		float range;
 		Eigen::Vector3f point = handmodel.getAllCenterMat(1.0f).col(33);
 		(*planar.get()).getImagePoint(point, img_x, img_y, range);
-		float ref = (*planar.get()).getPoint(img_x, img_y).range;
+		float ref = (*planar.get()).getPoint(img_x, img_y).range;*/
 		
 		// reshow the model?
 		if(reshow)
@@ -534,12 +546,12 @@ int main(int argc, char** argv)
 		cout << endl;*/
 
 		// info
-		stringstream ss;
+/*		stringstream ss;
 		ss << "case: " << (frame %  particles.size()) << endl;
 		ss << "cost in D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", L-term = " << costf.getLTerm() << ", M-term = " << costf.getMTerm() << endl;
 		ss << "total cost = " << costf.getCost() << endl;
 		ss << "(x, y) = (" << img_x << ", " << img_y << "), range = " << range << ", ref = " << ref << endl;
-		viewer->updateText(ss.str(), 0, 450, "num_text");
+		viewer->updateText(ss.str(), 0, 450, "num_text");*/
 
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "mycloud");
 		viewer->spinOnce(100);

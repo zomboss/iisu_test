@@ -37,6 +37,8 @@ public:
 
 	void run_randomPara(const PointCloud<PointXYZRGB> &);
 	void run_randomPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
+	void run_globalPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
+	void run_localPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
 	void run_randomPara(const Eigen::Matrix<float, 3, Eigen::Dynamic> &);
 	void run_specPara(const PointCloud<PointXYZRGB> &, int );
 	void run_specPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &, int );
@@ -53,6 +55,8 @@ private:
 	bool hasprev;
 
 	int getRandomJoint(int &, int &, double &, double &, double &);
+	int getLocalJoint(int &, int &, double &, double &, double &);
+	int getGlobalJoint(int &, double &);
 	int getRandomPart(int &, double **, double **, double **);
 	void getSpecJoint(int, int &, int &, double &, double &, double &);
 	void updatePose(int , double );
@@ -272,14 +276,17 @@ private:
 class CF_T
 {
 public:
-	CF_T(const Eigen::Matrix<float, 3, Eigen::Dynamic> &cm, Eigen::Matrix<float, 1, 26> p, int i): 
-		cloud_mat(cm), para_mat(p), index(i)
+	CF_T(const Eigen::Matrix<float, 3, Eigen::Dynamic> &cm, Eigen::Matrix<float, 1, 26> p, Eigen::Matrix<float, 3, 1> po, int i): 
+		cloud_mat(cm), para_mat(p), pose_ori(po), index(i)
 	{
 		
 	}
 	template <typename T>
 	bool operator()(const T* const theta, T* residual) const
 	{
+		// what!?
+		Eigen::Quaternion<T> test(T(1.0), T(1.0), T(1.0), T(1.0));
+		
 		HandModel handmodel = HandModel();
 		Eigen::Matrix<float, 1, SPHERE_NUM> radius_mat = handmodel.getRadiusMat(0.0f);
 		
@@ -287,13 +294,11 @@ public:
 		Eigen::Matrix<T, 3, Eigen::Dynamic> cloud_mat_t = cloud_mat.cast<T>();
 		Eigen::Matrix<T, 1, SPHERE_NUM> radius_mat_t = radius_mat.cast<T>();
 		Eigen::Matrix<T, 1, 26> para_mat_t = para_mat.cast<T>();
-
-		// what!?
-		Eigen::Quaternion<T> test(T(1.0), T(1.0), T(1.0), T(1.0));
+		Eigen::Matrix<T, 3, 1> pose_ori_t = pose_ori.cast<T>();
 
 		// Set up the pose
 		para_mat_t(0, index) = *theta;
-		Eigen::Matrix<T, 3, SPHERE_NUM> model_mat_t = handmodel.transformT(para_mat_t);
+		Eigen::Matrix<T, 3, SPHERE_NUM> model_mat_t = handmodel.transformT(para_mat_t, pose_ori_t);
 
 		// Use Cost Function to compute residual
 		CostFunctionT<T> costtf = CostFunctionT<T>(cloud_mat_t, model_mat_t, radius_mat_t);
@@ -308,6 +313,7 @@ private:
 //	Eigen::Matrix<float, 1, SPHERE_NUM> radius_mat;
 //	HandModel handmodel;
 	Eigen::Matrix<float, 1, 26> para_mat;
+	Eigen::Matrix<float, 3, 1> pose_ori;
 
 	int index;
 };

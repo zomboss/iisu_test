@@ -167,8 +167,11 @@ void MyCostFunction::setMTerm(HandPose pre_pose1, HandPose pre_pose2)
 	HandModel prevmodel_2 = HandModel();
 	pre_pose2.applyPose(prevmodel_2);
 	Eigen::Matrix<float, 3, SPHERE_NUM> curr_center = model.getAllCenterMat(1.0f);
+	curr_center = (curr_center.colwise() - MyTools::SKtoEigenVector(model.getGlobalpos()));
 	Eigen::Matrix<float, 3, SPHERE_NUM> prev_center_1 = prevmodel_1.getAllCenterMat(1.0f);
+	prev_center_1 = (prev_center_1.colwise() - MyTools::SKtoEigenVector(pre_pose1.getPosition()));
 	Eigen::Matrix<float, 3, SPHERE_NUM> prev_center_2 = prevmodel_2.getAllCenterMat(1.0f);
+	prev_center_2 = (prev_center_2.colwise() - MyTools::SKtoEigenVector(pre_pose2.getPosition()));
 	m_term_value = double((curr_center - prev_center_1 * 2 + prev_center_2).squaredNorm() * 0.5) + double((curr_center - prev_center_1).squaredNorm() * 0.5);
 }
 

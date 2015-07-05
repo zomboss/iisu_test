@@ -259,6 +259,7 @@ void Initialization::goFullInitail(HandPose &pose, bool show = true)
 	cost = summary.final_cost;
 	if(show)
 	{
+		cout << "report: " << endl << summary.FullReport() << endl;
 		cout << "Final cost = " << cost << "\n";
 		cout << "Final theta = (" << theta_array[0] << ", " << theta_array[1] << ", " << theta_array[2] << ", " << theta_array[3] << ", " << theta_array[4] << ")\n"
 			 << "phi = (" << phi_array[0] << ", " << phi_array[1] << ", " << phi_array[2] << ", " << phi_array[3] << ", " << phi_array[4] << ")\n"

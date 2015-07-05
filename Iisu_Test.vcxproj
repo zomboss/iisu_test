@@ -213,9 +213,10 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClCompile Include="HandModel.cxx" />
     <ClCompile Include="ICPPCA.cxx" />
     <ClCompile Include="Initialization.cxx" />
+    <ClCompile Include="InitializationT.cxx" />
     <ClCompile Include="MyTools.cxx" />
     <ClCompile Include="PSO.cxx" />
-    <ClCompile Include="SequenceViewer.cpp" />
+    <ClCompile Include="SequenceReader_Grasp.cpp" />
     <ClCompile Include="Sphere.cxx" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +230,7 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClInclude Include="HandPose.hxx" />
     <ClInclude Include="ICPPCA.hxx" />
     <ClInclude Include="Initialization.hxx" />
+    <ClInclude Include="InitializationT.hxx" />
     <ClInclude Include="MyTools.hxx" />
     <ClInclude Include="PSO.hxx" />
     <ClInclude Include="Sphere.hxx" />

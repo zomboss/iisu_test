@@ -40,6 +40,7 @@ public:
 	static SK::Matrix4 translation(SK::Vector3 pos);
 	static SK::Matrix4 transVector(SK::Vector3 pos1, SK::Vector3 ori1, SK::Vector3 pos2, SK::Vector3 ori2);
 	static PointXYZRGB rotatedPoint(Matrix4 rot, const PointXYZRGB &oldpoint);
+	
 	template <typename T>
 	static Eigen::Matrix<T, 3, Eigen::Dynamic> PointCloudtoMatrix(const PointCloud<PointXYZRGB> &cloud, T typevar)
 	{
@@ -49,12 +50,26 @@ public:
 			mat.col(i) = Eigen::Matrix<T, 3, 1>(T(cloud[i].x), T(cloud[i].y), T(cloud[i].z));
 		return mat;
 	}
-	
+	template <typename T>
+	static Eigen::Matrix<T, 3, Eigen::Dynamic> SKArraytoEigenMatrix(SK::Array<SK::Vector3> &arr, T typevar)
+	{
+		Eigen::Matrix<T, 3, Eigen::Dynamic> mat;
+		mat.resize(3, arr.size());
+		for(size_t i = 0; i < arr.size(); i++)
+		{
+			mat(0, i) = arr[i][0];
+			mat(1, i) = arr[i][1];
+			mat(2, i) = arr[i][2];
+		}
+		return mat;
+	}
+
 	// Permutaion with order fixed
 	static SK::Array<SK::Array<bool>> fingerChoosing(int num);
 
 	// Random Sampling
 	static SK::Array<float> perturbParameter(SK::Array<float> );
+	static SK::Array<float> perturbParameterL(SK::Array<float> , Eigen::Matrix<float, 3, 1> );
 	static PointCloud<PointXYZRGB> downsampling(PointCloud<PointXYZRGB> &);
 	
 	// Array operations

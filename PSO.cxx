@@ -26,6 +26,7 @@ PSO::PSO(int _g, int _p, int _m, int _k)
 	prev_pose1 = HandPose();
 	prev_pose2 = HandPose();
 	hasprev = false;
+	ismov = false;
 }
 
 void PSO::setPrevPose(HandPose prev1, HandPose prev2)
@@ -33,6 +34,22 @@ void PSO::setPrevPose(HandPose prev1, HandPose prev2)
 	prev_pose1 = prev1;
 	prev_pose2 = prev2;
 	hasprev = true;
+}
+
+void PSO::checkMoving(SK::Vector3 curr, SK::Vector3 prev)
+{
+	if(curr.distance(prev) > 2.0)
+		ismov = true;
+	else
+		ismov = false;
+}
+
+void PSO::checkMoving(Eigen::Matrix<float, 3, 1> curr, Eigen::Matrix<float, 3, 1> prev)
+{
+	if((curr - prev).norm() > 2.0)
+		ismov = true;
+	else
+		ismov = false;
 }
 
 void PSO::generateParticles(const HandPose &inipose)
@@ -97,6 +114,34 @@ void PSO::generateParticles(HandPose &inipose, HandPose &prepose)
 		pk_point.pushBack(100000.0);
 	}
 }
+
+void PSO::generateLParticles(const HandPose &inipose, Eigen::Matrix<float, 3, 1> info_ori)
+{
+	hispose.resize(particles_num);
+	bestPose = inipose;
+	ori_orientation = bestPose.getOrientation();
+	SK::Array<float> curr_para = bestPose.getAllParameters();
+	for(int i = 0; i < particles_num; i++)
+	{
+		bestPose.setPosition(MyTools::EigentoSKVector(info_ori));
+		HandPose tmppose = bestPose;
+		SK::Array<float> new_para = MyTools::perturbParameterL(curr_para, info_ori);
+		tmppose.setAllParameters(new_para);
+		tmppose.setOrientation(ori_orientation);
+		if(i == 0)	particles.pushBack(bestPose);
+		else		particles.pushBack(tmppose);
+
+		//initial particle's parameters
+		SK::Array<float> v;
+		v.assign(new_para.size(), 0.0);
+		// random velocities
+		velocity.pushBack(v);
+//		velocity.pushBack(MyTools::perturbParameter(v));
+		curr_points.pushBack(0.0);
+		pk_point.pushBack(100000.0);
+	}
+}
+
 
 void PSO::goGeneration(const PointCloud<PointXYZRGB> &cloud, const HandModel &model, bool iskmean = false)
 {
@@ -310,8 +355,9 @@ SK::Array<HandPose> PSO::goGeneration_test(const PointCloud<PointXYZRGB> &cloud,
 
 				// Get gradient descent
 				AICP aicp = hasprev ? AICP(m, 1, particles[p], prev_pose1, prev_pose2) : AICP(m, 1, particles[p]);
-				aicp.run_randomPara(cloud, planar, pix_meter, pure_vec, index);
-//				aicp.run_randomPara(cloud);
+/*				if(ismov && g == 0)	aicp.run_globalPara(cloud, planar, pix_meter, pure_vec, index);
+				else				aicp.run_randomPara(cloud, planar, pix_meter, pure_vec, index);*/
+				aicp.run_localPara(cloud, planar, pix_meter, pure_vec, index);
 				SK::Array<float> stepvel = MyTools::subArray(aicp.getBestPose().getAllParameters(), particles[p].getAllParameters());
 				velocity[p] = MyTools::addArray(velocity[p], stepvel);
 			}

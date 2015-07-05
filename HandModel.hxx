@@ -46,6 +46,80 @@ Eigen::Matrix<T, 1, 4> getQuaternionfromVec(Eigen::Matrix<T, 3, 1> &vec)
 	return para;
 }
 
+template <typename T>
+Eigen::Transform<T, 3, Eigen::Affine> getGlobalMovement(Eigen::Matrix<T, 1, 26> &para, Eigen::Matrix<T, 3, 1> &ori)
+{
+	// get tranlation and retation from parameter
+	Eigen::Translation<T, 3> global_trans = Eigen::Translation<T, 3>(para(0, 20), para(0, 21), para(0, 22));
+	Eigen::Matrix<T, 1, 4> q_para = getQuaternionfromVec(Eigen::Matrix<T, 3, 1>(para(0, 23), para(0, 24), para(0, 25)));
+	Eigen::Quaternion<T> global_rot = Eigen::Quaternion<T>(q_para(0, 0), q_para(0, 1), q_para(0, 2), q_para(0, 3));
+
+	// move with orientation
+	Eigen::Matrix<T, 3, 1> origin;
+	origin(0, 0) = T(0); origin(1, 0) = T(0); origin(2, 0) = T(1); 
+	ori.normalize();
+	Eigen::Matrix<T, 3, 1> normal = ori.cross(origin);
+	T len = normal.norm();
+	Eigen::Transform<T, 3, Eigen::Affine> global_go;
+	if(len != T(0))
+	{
+		T d = origin.dot(ori);
+		Eigen::Matrix<T, 3, 3> skewv; 
+		skewv << T(0), T(-normal(2, 0)), T(normal(1, 0)), 
+					T(normal(2, 0)), T(0), T(-normal(0, 0)), 
+					T(-normal(1, 0)), T(normal(0 ,0)), T(0);
+		Eigen::Matrix<T, 3, 3> id;
+		id.setIdentity();
+		Eigen::Matrix<T, 3, 3> rot = id + skewv + ((T(1) + (d * T(-1))) / len) * skewv * skewv;
+		global_go = global_trans * rot;
+	}
+	else
+		global_go = global_trans;
+	Eigen::Transform<T, 3, Eigen::Affine> global_move = global_go * global_rot;
+
+	return global_move;
+}
+
+template <typename T>
+void getProcessFingerArray(int fin, Eigen::Matrix<T, 1, 26> &para, int (&r_array)[3], int (&j_array)[3], int &tip, SK::Array<Eigen::Matrix<T, 3, 1>> &angle, T typevar)
+{
+	// index spheres: 16~21, 12: first joint, 18: mid joint, 20: last joint, 21:tips
+	// middle spheres: 22~27, 13: first joint, 24: mid joint, 26: last joint, 27:tips
+	// ring spheres: 28~33, 14: first joint, 30: mid joint, 32: last joint, 33:tips
+	// little spheres: 34~39, 15: first joint, 36: mid joint, 38: last joint, 39:tips
+	switch(fin)
+	{
+	case 1:	// index
+		r_array[0] = 16; r_array[1] = 18; r_array[2] = 20; tip = 21;
+		j_array[0] = 12; j_array[1] = 18; j_array[2] = 20;
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 4), T(0), para(0, 5)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 6), T(0), T(0)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 7), T(0), T(0)));
+		break;
+	case 2:	// middle
+		r_array[0] = 22; r_array[1] = 24; r_array[2] = 26; tip = 27;
+		j_array[0] = 13; j_array[1] = 24; j_array[2] = 26;
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 8), T(0), para(0, 9)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 10), T(0), T(0)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 11), T(0), T(0)));
+		break;
+	case 3:	// ring
+		r_array[0] = 28; r_array[1] = 30; r_array[2] = 32; tip = 33;
+		j_array[0] = 14; j_array[1] = 30; j_array[2] = 32;
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 12), T(0), para(0, 13)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 14), T(0), T(0)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 15), T(0), T(0)));
+		break;
+	case 4:	// little
+		r_array[0] = 34; r_array[1] = 36; r_array[2] = 38; tip = 39;
+		j_array[0] = 15; j_array[1] = 36; j_array[2] = 38;
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 16), T(0), para(0, 17)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 18), T(0), T(0)));
+		angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 19), T(0), T(0)));
+		break;
+	}
+}
+
 class HandModel
 {
 public:
@@ -78,14 +152,11 @@ public:
 	SK::Array<ModelCoefficients> getSkeleton();
 
 	template <typename T>
-	Eigen::Matrix<T, 3, SPHERE_NUM> transformT(Eigen::Matrix<T, 1, 26> &para)
+	Eigen::Matrix<T, 3, SPHERE_NUM> transformT(Eigen::Matrix<T, 1, 26> &para, Eigen::Matrix<T, 3, 1> &ori)
 	{
 		// return 48 new point positions
 		Eigen::Matrix<T, 3, SPHERE_NUM> t_point_list;
-		Eigen::Translation<T, 3> global_trans = Eigen::Translation<T, 3>(para(0, 20), para(0, 21), para(0, 22));
-		Eigen::Matrix<T, 1, 4> q_para = getQuaternionfromVec(Eigen::Matrix<T, 3, 1>(para(0, 23), para(0, 24), para(0, 25)));
-		Eigen::Quaternion<T> global_rot = Eigen::Quaternion<T>(q_para(0, 0), q_para(0, 1), q_para(0, 2), q_para(0, 3));
-		Eigen::Transform<T, 3, Eigen::Affine> global_move = global_trans * global_rot;
+		Eigen::Transform<T, 3, Eigen::Affine> global_move = getGlobalMovement(para, ori);
 
 		// finger without thumb
 		for(int fin = 0; fin < 4; fin++)
@@ -94,39 +165,9 @@ public:
 			// middle spheres: 22~27, 13: first joint, 24: mid joint, 26: last joint, 27:tips
 			// ring spheres: 28~33, 14: first joint, 30: mid joint, 32: last joint, 33:tips
 			// little spheres: 34~39, 15: first joint, 36: mid joint, 38: last joint, 39:tips
-			int rootarray[3], tips, jointarray[3];
+			int rootarray[3], jointarray[3], tips;
 			SK::Array<Eigen::Matrix<T, 3, 1>> angle;
-			switch(fin)
-			{
-			case 0:	// index
-				rootarray[0] = 16;rootarray[1] = 18;rootarray[2] = 20;tips = 21;
-				jointarray[0] = 12;jointarray[1] = 18;jointarray[2] = 20;
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 4), T(0), para(0, 5)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 6), T(0), T(0)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 7), T(0), T(0)));
-				break;
-			case 1:	// middle
-				rootarray[0] = 22;rootarray[1] = 24;rootarray[2] = 26;tips = 27;
-				jointarray[0] = 13;jointarray[1] = 24;jointarray[2] = 26;
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 8), T(0), para(0, 9)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 10), T(0), T(0)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 11), T(0), T(0)));
-				break;
-			case 2:	// ring
-				rootarray[0] = 28;rootarray[1] = 30;rootarray[2] = 32;tips = 33;
-				jointarray[0] = 14;jointarray[1] = 30;jointarray[2] = 32;
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 12), T(0), para(0, 13)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 14), T(0), T(0)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 15), T(0), T(0)));
-				break;
-			case 3:	// little
-				rootarray[0] = 34;rootarray[1] = 36;rootarray[2] = 38;tips = 39;
-				jointarray[0] = 15;jointarray[1] = 36;jointarray[2] = 38;
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 16), T(0), para(0, 17)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 18), T(0), T(0)));
-				angle.pushBack(Eigen::Matrix<T, 3, 1>(para(0, 19), T(0), T(0)));
-				break;
-			}
+			getProcessFingerArray((fin + 1), para, rootarray, jointarray, tips, angle, T(0.0));
 
 			// initial spheres
 			for(int i = 0; i < 6; i++)	// basic?
@@ -159,7 +200,7 @@ public:
 			// Quaternion form:, given axis A(Ax,Ay,Az) and theta, s = sin(theta/2), w = cos(theta/2), x = s*Ax, y = s*Ay, z = s*Az
 			// angle form: (below), (theta1, 0, 0), (theta2, 0, 0)
 			// thumb spheres: 40~47, 40: first joint, 44: mid joint, 47: last joint, 47:tips
-			T theta[3] = {T(0), T(para(0, 3)), T(para(0, 3))};
+			T theta[3] = {T(0), T(para(0, 2)), T(para(0, 3))};
 			int rootarray_st[3] = {40, 42, 45}, tips = 47;
 
 			// initial spheres
@@ -230,6 +271,89 @@ public:
 		for(int i = 0; i < SPHERE_NUM; i++)
 			radius_mat(0, i) = T(models[i].getRadius());
 		return radius_mat;
+	}
+	template <typename T>
+	void getSpecFingerStatus(int fin, Eigen::Matrix<T, 1, 26> &para, Eigen::Matrix<T, 3, 1> &ori, Eigen::Matrix<T, 3, 1> &m_tips, Eigen::Matrix<T, 3, 1> &m_dirs)
+	{
+		// Get global movement
+		Eigen::Transform<T, 3, Eigen::Affine> global_move = getGlobalMovement(para, ori);
+		m_tips(0, 0) = T(getFingerTips(fin)[0]);
+		m_tips(1, 0) = T(getFingerTips(fin)[1]);
+		m_tips(2, 0) = T(getFingerTips(fin)[2]);
+		m_dirs(0, 0) = T(getFingerBaseJoint(fin)[0]);
+		m_dirs(1, 0) = T(getFingerBaseJoint(fin)[1]);
+		m_dirs(2, 0) = T(getFingerBaseJoint(fin)[2]);
+		
+		if(fin == 0)	// thumb
+		{
+			// the main axis = (2,1,-2)
+			// Quaternion form:, given axis A(Ax,Ay,Az) and theta, s = sin(theta/2), w = cos(theta/2), x = s*Ax, y = s*Ay, z = s*Az
+			// angle form: (below), (theta1, 0, 0), (theta2, 0, 0)
+			// thumb spheres: 40~47, 40: first joint, 44: mid joint, 47: last joint, 47:tips
+			T theta[3] = {T(0), T(para(0, 2)), T(para(0, 3))};
+			int rootarray_st[3] = {40, 42, 45}, tips = 47;
+
+			for(int t = 2; t >= 1; t--)
+			{
+				// T and -T
+				Eigen::Matrix<T, 3, 1> tmp_root(T(models[rootarray_st[t]].getCenter()[0]), T(models[rootarray_st[t]].getCenter()[1]), T(models[rootarray_st[t]].getCenter()[2])); 
+				Eigen::Translation<T, 3> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
+				Eigen::Translation<T, 3> re_trans = Eigen::Translation<T, 3>(tmp_root);
+				// R (Quaternion building)
+				T s = ceres::sin(theta[t] / T(2.0)), w = ceres::cos(theta[t] / T(2.0));
+				T x =  s * T(2) / T(3), y = s / T(3), z =  s * T(2) / T(-3);
+				Eigen::Quaternion<T> rot = Eigen::Quaternion<T>(w, x, y, z);
+			
+				// transform
+				m_tips = re_trans * rot * pre_trans * m_tips;
+			}
+			//the first joint rotatation axis: y and z (0, phi1, phi2)
+			// T and -T
+			Eigen::Matrix<T, 3, 1> tmp_root_st(T(models[rootarray_st[0]].getCenter()[0]), T(models[rootarray_st[0]].getCenter()[1]), T(models[rootarray_st[0]].getCenter()[2])); 
+			Eigen::Translation<T, 3> pre_trans_st = Eigen::Translation<T, 3>(-tmp_root_st);
+			Eigen::Translation<T, 3> re_trans_st = Eigen::Translation<T, 3>(tmp_root_st);
+			// R
+			Eigen::Matrix<T, 3, 1> root_angle(T(0), para(0, 0), para(0, 1));
+			Eigen::Matrix<T, 1, 4> q_para_fin = getQuaternionfromVec(root_angle);
+			Eigen::Quaternion<T> rot_st = Eigen::Quaternion<T>(q_para_fin(0, 0), q_para_fin(0, 1), q_para_fin(0, 2), q_para_fin(0, 3));
+
+			// transform
+			m_tips = re_trans_st * rot_st * pre_trans_st * m_tips;
+
+			// global transform
+			m_tips = global_move * m_tips;
+			m_dirs = global_move * m_dirs - m_tips;
+
+		}
+		else
+		{
+			// Set up the root joint
+			int rootarray[3], jointarray[3], tips;
+			SK::Array<Eigen::Matrix<T, 3, 1>> angle;
+			getProcessFingerArray(fin, para, rootarray, jointarray, tips, angle, T(0.0));
+			
+			// Set last joint as root, rotate all spheres
+			// And then set mid joint as root, rotate spheres
+			// Finally, set the first joint as root, rotate all spheres (all movements have to move back)	
+			for(int t = 2; t >= 0; t--)
+			{
+				// T and -T
+				Eigen::Matrix<T, 3, 1> tmp_root(T(models[jointarray[t]].getCenter()[0]), T(models[jointarray[t]].getCenter()[1]), T(models[jointarray[t]].getCenter()[2])); 
+				Eigen::Translation<T, 3> pre_trans = Eigen::Translation<T, 3>(-tmp_root);
+				Eigen::Translation<T, 3> re_trans = Eigen::Translation<T, 3>(tmp_root);
+				// R
+				Eigen::Matrix<T, 1, 4> q_para_fin = getQuaternionfromVec(angle[t]);
+				Eigen::Quaternion<T> rot = Eigen::Quaternion<T>(q_para_fin(0, 0), q_para_fin(0, 1), q_para_fin(0, 2), q_para_fin(0, 3));
+			
+				// transform
+				m_tips = re_trans * rot * pre_trans * m_tips;
+			}
+
+			// global transform
+			m_tips = global_move * m_tips;
+			m_dirs = global_move * m_dirs - m_tips;
+
+		}
 	}
 
 private:

@@ -11,6 +11,7 @@
 #include <math.h> 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <algorithm>
 #include <string>
@@ -44,10 +45,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov14_ICPPSO_ICPimp_1.txt";
-const char *seqname = "Sequences/Seq_mov14/pcd_seq";
+const char *posname = "PoseData/Seq_mov9_ICPPSO_ICPimp_4.txt";
+const char *infoname = "InfoData/info_seq_mov9.txt";
+const char *seqname = "Sequences/Seq_mov9/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 43;
+const int FILENUM = 29;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -187,9 +189,7 @@ void showModel(const pcl::visualization::KeyboardEvent &event, void* viewer_void
 			show = true;
 			reshow = true;
 		}
-
 	}
-
 }
 
 int main(int argc, char** argv)

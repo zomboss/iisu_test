@@ -226,6 +226,39 @@ Array<float> MyTools::perturbParameter(Array<float> curr_para)
 	return rand_para;
 }
 
+Array<float> MyTools::perturbParameterL(Array<float> curr_para, Eigen::Matrix<float, 3, 1> info_ori)
+{
+	random_device rd;
+    mt19937 gen(rd());
+	Array<float> rand_para;
+	for(size_t i = 0; i < curr_para.size(); i++)
+	{
+		if(i < 20 && i % 4 != 1)		// x-joint
+		{
+			normal_distribution<float> randnormal(curr_para[i], 0.4);	// angle: 0.2 arc degree ~= 5 degree
+			// Check angles limitation
+			float value = HandPose::validFingers((i / 5), (i % 4), randnormal(gen));
+			// Concern not too far from original
+			rand_para.pushBack(value);
+		}
+		else if(i < 20)		// z-joint
+		{
+			normal_distribution<float> randnormal(curr_para[i], 0.2);	// angle: 0.2 arc degree ~= 5 degree
+			// Check angles limitation
+			float value = HandPose::validFingers((i / 5), (i % 4), randnormal(gen));
+			// Concern not too far from original
+			rand_para.pushBack(value);
+		}
+		else if(i < 23)	// position
+		{
+			rand_para.pushBack(info_ori((i - 20), 0));
+		}
+		else			// global does not move
+			rand_para.pushBack(curr_para[i]);
+	}
+	return rand_para;
+}
+
 int myrandom(int i)
 {
 	return std::rand() % i;

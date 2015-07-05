@@ -31,6 +31,7 @@ bool isinit = false;
 bool isori = true;
 int str_frame = 17;
 int fin_ch = -1;
+bool is_upper = false;
 const bool isskel = false;
 bool show = true;
 bool reshow = false;
@@ -38,9 +39,9 @@ bool reshow = false;
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
-const char *posname = "PoseData/Seq_mov10_ICPPSO_ICPimp_2.txt";
-const char *infoname = "InfoData/info_seq_mov10.txt";
-const char *seqname = "Sequences/Seq_mov10/pcd_seq";
+const char *posname = "PoseData/Seq_mov9_ICPPSO_ICPimp_3_tmp.txt";
+const char *infoname = "InfoData/info_seq_mov9.txt";
+const char *seqname = "Sequences/Seq_mov9/pcd_seq";
 const char *type = ".pcd";
 
 PointCloud<PointXYZRGB> cloud;
@@ -191,6 +192,40 @@ int getFingerNumfromHandInfo(int frame)
 	return fin_num;
 }
 
+Eigen::Matrix<float, 3, 1> showPalmCenterList()
+{
+	Eigen::Matrix<float, 3, 1> info_pos;
+	
+	fstream file;
+	file.open(infoname, ios::in);
+	if(!file)
+	{
+		cout << "cannot open file " << infoname << "!!!" << endl;
+		return info_pos;
+	}
+	
+	string line;
+	int count = 0;
+	while(getline(file, line))
+	{
+		Eigen::Matrix<float, 3, 1> palm_pos, pre_pos;
+		float useless[3];
+		if(count % 5 == 3)
+		{
+			pre_pos = palm_pos;
+			istringstream iss(line);
+			if (!(iss >> palm_pos(0, 0) >> palm_pos(1, 0) >> palm_pos(2, 0) >> useless[0] >> useless[1] >> useless[2]))
+				cout << "error occur in line " << count << "!!!" << endl;
+			cout << "in frame " << (count / 5) << ", center: (" << palm_pos(0, 0) << ", " << palm_pos(1, 0) << ", " << palm_pos(2, 0) << ")";
+			if(count / 5 > 0)	cout << ", distance = " << (palm_pos - pre_pos).norm() << endl;
+			else				cout << endl;
+			if(count / 5 == str_frame)	info_pos = palm_pos;
+		}
+		count++;
+	}
+	return info_pos;
+}
+
 void showParameter(HandPose &strpose, HandPose &endpose)
 {
 	cout << "checking parameter..." << endl;
@@ -327,6 +362,97 @@ void showModel(const pcl::visualization::KeyboardEvent &event, void* viewer_void
 	}
 }
 
+void loadTryPose(HandPose &trypose)
+{
+	switch(fin_ch)
+	{
+	case 0:
+		if(is_upper)trypose.setFingerPose(0, SK::Vector3(0, THUMB_MCP_FE_UPPERBOUND, trypose.getThumbPose()[0][2]), trypose.getThumbPose()[1], trypose.getThumbPose()[2]);
+		else		trypose.setFingerPose(0, SK::Vector3(0, THUMB_MCP_FE_LOWERBOUND, trypose.getThumbPose()[0][2]), trypose.getThumbPose()[1], trypose.getThumbPose()[2]);
+		break;
+	case 1:
+		if(is_upper)trypose.setFingerPose(0, SK::Vector3(0, trypose.getThumbPose()[0][1], THUMB_MCP_AA_UPPERBOUND), trypose.getThumbPose()[1], trypose.getThumbPose()[2]);
+		else		trypose.setFingerPose(0, SK::Vector3(0, trypose.getThumbPose()[0][1], THUMB_MCP_AA_LOWERBOUND), trypose.getThumbPose()[1], trypose.getThumbPose()[2]);
+		break;
+	case 2:
+		if(is_upper)trypose.setFingerPose(0, trypose.getThumbPose()[0], SK::Vector3(THUMB_PIP_FE_UPPERBOUND, 0, 0), trypose.getThumbPose()[2]);
+		else		trypose.setFingerPose(0, trypose.getThumbPose()[0], SK::Vector3(THUMB_PIP_FE_LOWERBOUND, 0, 0), trypose.getThumbPose()[2]);
+		break;
+	case 3:
+		if(is_upper)trypose.setFingerPose(0, trypose.getThumbPose()[0], trypose.getThumbPose()[1], SK::Vector3(THUMB_DIP_FE_UPPERBOUND, 0, 0));
+		else		trypose.setFingerPose(0, trypose.getThumbPose()[0], trypose.getThumbPose()[1], SK::Vector3(THUMB_DIP_FE_LOWERBOUND, 0, 0));
+		break;
+	case 4:
+		if(is_upper)trypose.setFingerPose(1, SK::Vector3(INDEX_MCP_FE_UPPERBOUND, 0, trypose.getIndexPose()[0][2]), trypose.getIndexPose()[1], trypose.getIndexPose()[2]);
+		else		trypose.setFingerPose(1, SK::Vector3(INDEX_MCP_FE_LOWERBOUND, 0, trypose.getIndexPose()[0][2]), trypose.getIndexPose()[1], trypose.getIndexPose()[2]);
+		break;
+	case 5:
+		if(is_upper)trypose.setFingerPose(1, SK::Vector3(trypose.getIndexPose()[0][0], 0, INDEX_MCP_AA_UPPERBOUND), trypose.getIndexPose()[1], trypose.getIndexPose()[2]);
+		else		trypose.setFingerPose(1, SK::Vector3(trypose.getIndexPose()[0][0], 0, INDEX_MCP_AA_LOWERBOUND), trypose.getIndexPose()[1], trypose.getIndexPose()[2]);
+		break;
+	case 6:
+		if(is_upper)trypose.setFingerPose(1, trypose.getIndexPose()[0], SK::Vector3(INDEX_PIP_FE_UPPERBOUND, 0, 0), trypose.getIndexPose()[2]);
+		else		trypose.setFingerPose(1, trypose.getIndexPose()[0], SK::Vector3(INDEX_PIP_FE_LOWERBOUND, 0, 0), trypose.getIndexPose()[2]);
+		break;
+	case 7:
+		if(is_upper)trypose.setFingerPose(1, trypose.getIndexPose()[0], trypose.getIndexPose()[1], SK::Vector3(INDEX_DIP_FE_UPPERBOUND, 0, 0));
+		else		trypose.setFingerPose(1, trypose.getIndexPose()[0], trypose.getIndexPose()[1], SK::Vector3(INDEX_DIP_FE_LOWERBOUND, 0, 0));
+		break;
+	case 8:
+		if(is_upper)trypose.setFingerPose(2, SK::Vector3(MIDDLE_MCP_FE_UPPERBOUND, 0, trypose.getMiddlePose()[0][2]), trypose.getMiddlePose()[1], trypose.getMiddlePose()[2]);
+		else		trypose.setFingerPose(2, SK::Vector3(MIDDLE_MCP_FE_LOWERBOUND, 0, trypose.getMiddlePose()[0][2]), trypose.getMiddlePose()[1], trypose.getMiddlePose()[2]);
+		break;
+	case 9:
+		if(is_upper)trypose.setFingerPose(2, SK::Vector3(trypose.getMiddlePose()[0][0], 0, MIDDLE_MCP_AA_UPPERBOUND), trypose.getMiddlePose()[1], trypose.getMiddlePose()[2]);
+		else		trypose.setFingerPose(2, SK::Vector3(trypose.getMiddlePose()[0][0], 0, MIDDLE_MCP_AA_LOWERBOUND), trypose.getMiddlePose()[1], trypose.getMiddlePose()[2]);
+		break;
+	case 10:
+		if(is_upper)trypose.setFingerPose(2, trypose.getMiddlePose()[0], SK::Vector3(MIDDLE_PIP_FE_UPPERBOUND, 0, 0), trypose.getMiddlePose()[2]);
+		else		trypose.setFingerPose(2, trypose.getMiddlePose()[0], SK::Vector3(MIDDLE_PIP_FE_LOWERBOUND, 0, 0), trypose.getMiddlePose()[2]);
+		break;
+	case 11:
+		if(is_upper)trypose.setFingerPose(2, trypose.getMiddlePose()[0], trypose.getMiddlePose()[1], SK::Vector3(MIDDLE_DIP_FE_UPPERBOUND, 0, 0));
+		else		trypose.setFingerPose(2, trypose.getMiddlePose()[0], trypose.getMiddlePose()[1], SK::Vector3(MIDDLE_DIP_FE_LOWERBOUND, 0, 0));
+		break;
+	case 12:
+		if(is_upper)trypose.setFingerPose(3, SK::Vector3(RING_MCP_FE_UPPERBOUND, 0, trypose.getRingPose()[0][2]), trypose.getRingPose()[1], trypose.getRingPose()[2]);
+		else		trypose.setFingerPose(3, SK::Vector3(RING_MCP_FE_LOWERBOUND, 0, trypose.getRingPose()[0][2]), trypose.getRingPose()[1], trypose.getRingPose()[2]);
+		break;
+	case 13:
+		if(is_upper)trypose.setFingerPose(3, SK::Vector3(trypose.getRingPose()[0][0], 0, RING_MCP_AA_UPPERBOUND), trypose.getRingPose()[1], trypose.getRingPose()[2]);
+		else		trypose.setFingerPose(3, SK::Vector3(trypose.getRingPose()[0][0], 0, RING_MCP_AA_LOWERBOUND), trypose.getRingPose()[1], trypose.getRingPose()[2]);
+		break;
+	case 14:
+		if(is_upper)trypose.setFingerPose(3, trypose.getRingPose()[0], SK::Vector3(RING_PIP_FE_UPPERBOUND, 0, 0), trypose.getRingPose()[2]);
+		else		trypose.setFingerPose(3, trypose.getRingPose()[0], SK::Vector3(RING_PIP_FE_LOWERBOUND, 0, 0), trypose.getRingPose()[2]);
+		break;
+	case 15:
+		if(is_upper)trypose.setFingerPose(3, trypose.getRingPose()[0], trypose.getRingPose()[1], SK::Vector3(RING_DIP_FE_UPPERBOUND, 0, 0));
+		else		trypose.setFingerPose(3, trypose.getRingPose()[0], trypose.getRingPose()[1], SK::Vector3(RING_DIP_FE_LOWERBOUND, 0, 0));
+		break;
+	case 16:
+		if(is_upper)trypose.setFingerPose(4, SK::Vector3(LITTLE_MCP_FE_UPPERBOUND, 0, trypose.getLittlePose()[0][2]), trypose.getLittlePose()[1], trypose.getLittlePose()[2]);
+		else		trypose.setFingerPose(4, SK::Vector3(LITTLE_MCP_FE_LOWERBOUND, 0, trypose.getLittlePose()[0][2]), trypose.getLittlePose()[1], trypose.getLittlePose()[2]);
+		break;
+	case 17:
+		if(is_upper)trypose.setFingerPose(4, SK::Vector3(trypose.getLittlePose()[0][0], 0, LITTLE_MCP_AA_UPPERBOUND), trypose.getLittlePose()[1], trypose.getLittlePose()[2]);
+		else		trypose.setFingerPose(4, SK::Vector3(trypose.getLittlePose()[0][0], 0, LITTLE_MCP_AA_LOWERBOUND), trypose.getLittlePose()[1], trypose.getLittlePose()[2]);
+		break;
+	case 18:
+		if(is_upper)trypose.setFingerPose(4, trypose.getLittlePose()[0], SK::Vector3(LITTLE_PIP_FE_UPPERBOUND, 0, 0), trypose.getLittlePose()[2]);
+		else		trypose.setFingerPose(4, trypose.getLittlePose()[0], SK::Vector3(LITTLE_PIP_FE_LOWERBOUND, 0, 0), trypose.getLittlePose()[2]);
+		break;
+	case 19:
+		if(is_upper)trypose.setFingerPose(4, trypose.getLittlePose()[0], trypose.getLittlePose()[1], SK::Vector3(LITTLE_DIP_FE_UPPERBOUND, 0, 0));
+		else		trypose.setFingerPose(4, trypose.getLittlePose()[0], trypose.getLittlePose()[1], SK::Vector3(LITTLE_DIP_FE_LOWERBOUND, 0, 0));
+		break;
+	default:
+		// do nothing
+		break;
+	}
+
+}
+
 int main(int argc, char** argv)
 {
 	google::InitGoogleLogging(argv[0]);
@@ -352,7 +478,13 @@ int main(int argc, char** argv)
 	cout << "show origin? ";
 	cin >> isori;
 	cout << "choose parameter: ";
-	cin >> fin_ch;/**/
+	cin >> fin_ch;
+	cout << "is upper? ";
+	cin >> is_upper;/**/
+
+	// testing...
+	Eigen::Matrix<float, 3, 1> info_pos = showPalmCenterList();
+	cout << "show info_pos = " << info_pos.transpose() << endl;
 
 	// Load the point cloud
 	stringstream ss;
@@ -460,7 +592,8 @@ int main(int argc, char** argv)
 	if(str_frame > 1)	pso.setPrevPose(prev_pose1, prev_pose2);
 	if(isinit)	pso.generateParticles(initpose, handpose);
 	else if(str_frame == 0)	pso.generateParticles(initpose);
-	else		pso.generateParticles(handpose);
+//	else		pso.generateParticles(handpose);
+	else		pso.generateLParticles(handpose, info_pos);
 	SK::Array<HandPose> particles;
 	if(isori)	particles = pso.getAllParticles();
 	cout << "PSO initial done..." << endl;
@@ -484,28 +617,30 @@ int main(int argc, char** argv)
 	HandPose aicppose = aicp.getBestPose();
 	showParameter(handpose, aicppose);/**/
 
-/*	HandPose trypose = aicp.getBestPose();
-	trypose.setFingerPose(3, trypose.getRingPose()[0], SK::Vector3(RING_PIP_FE_UPPERBOUND, 0, 0), trypose.getRingPose()[2]);
-	showParameter(aicppose, trypose);*/
+	HandPose trypose = aicp.getBestPose();
+	loadTryPose(trypose);
+	showParameter(aicppose, trypose);/**/
 
 	addHandModel(handmodel, isskel);
 	if(isskel)	addHandSkeleton(handmodel);
 	projectDepthImage(handmodel);
-
-	// trytry
-	// dynamic index !!??
-
 
 	// main while
 	int frame = 0;
 	while(!viewer->wasStopped())
 	{
 		handmodel = HandModel();
-/*		particles[(frame % particles.size())].applyPose(handmodel);*/
-		if(frame % 2 == 0)		handpose.applyPose(handmodel);
-		else if(frame % 2 == 1)	aicppose.applyPose(handmodel);
-//		else if(frame % 3 == 2)	trypose.applyPose(handmodel);
+		if(fin_ch < 0)	particles[(frame % particles.size())].applyPose(handmodel);
+		else
+		{
+			if(frame % 3 == 0)		handpose.applyPose(handmodel);
+			else if(frame % 3 == 1)	aicppose.applyPose(handmodel);
+			else if(frame % 3 == 2)	trypose.applyPose(handmodel);/**/
+		}
 		
+/*		cout << "position in pose: (" << particles[(frame % particles.size())].getPosition()[0] << ", " << particles[(frame % particles.size())].getPosition()[1] << ", " << particles[(frame % particles.size())].getPosition()[2] << ")<------>"
+			 << "position in model: (" << handmodel.getGlobalpos()[0] << ", " << handmodel.getGlobalpos()[1] << ", " << handmodel.getGlobalpos()[2] << ")\n";*/
+
 		// Get cost function
 		MyCostFunction costf = MyCostFunction(cloud, handmodel, *planar.get(), pso.getPixmeter(), pure_vec);
 		if(str_frame > 1)	costf.calculate(index, prev_pose1, prev_pose2);
@@ -515,7 +650,7 @@ int main(int argc, char** argv)
 		float range;
 		Eigen::Vector3f point = handmodel.getAllCenterMat(1.0f).col(33);
 		(*planar.get()).getImagePoint(point, img_x, img_y, range);
-		float ref = (*planar.get()).getPoint(img_x, img_y).range;
+		float ref = (*planar.get()).getPoint(img_x, img_y).range;/**/
 		
 		// reshow the model?
 		if(reshow)

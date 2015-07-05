@@ -40,7 +40,10 @@
     <ClCompile Include="DataDriven.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="SequenceViewer.cpp">
+    <ClCompile Include="InitializationT.cxx">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="SequenceReader_Grasp.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -82,6 +85,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="CostFunctionT.hxx">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="InitializationT.hxx">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

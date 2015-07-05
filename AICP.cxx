@@ -36,6 +36,21 @@ int AICP::getRandomJoint(int &finger, int &joint, double &theta, double &upper, 
 	return randomjoint;
 }
 
+int AICP::getLocalJoint(int &finger, int &joint, double &theta, double &upper, double &lower)
+{
+	int randomjoint = rand() % 20;
+	getSpecJoint(randomjoint, finger, joint, theta, upper, lower);
+	return randomjoint;
+}
+
+int AICP::getGlobalJoint(int &para, double &theta)
+{
+	int randomjoint = rand() % 6;
+	para = randomjoint;
+	theta = bestpose.getAllParameters()[randomjoint + 20];
+	return randomjoint;
+}
+
 int AICP::getRandomPart(int &finger, double **theta, double **upper, double **lower)
 {
 	int randompart = rand() % 7;
@@ -188,6 +203,75 @@ void AICP::run_randomPara(const PointCloud<PointXYZRGB> &cloud, const RangeImage
 			problem.SetParameterUpperBound(&theta, 0, upper);
 			problem.SetParameterLowerBound(&theta, 0, lower);
 		}
+//		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
+
+		// Set the solver
+		Solver::Options options;
+		options.max_num_iterations = iter;
+		options.linear_solver_type = ceres::DENSE_QR;
+		options.minimizer_progress_to_stdout = false;
+
+		// Run the solver
+		Solver::Summary summary;
+		Solve(options, &problem, &summary);
+
+		// Recover the theta
+//		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
+		updatePose(seed, theta);
+		cost = std::sqrt(summary.final_cost);
+	}
+}
+
+void AICP::run_globalPara(const PointCloud<PointXYZRGB> &cloud, const RangeImagePlanar &planar, float pix_meter, vector<float> &pure_vec, Index<flann::L2<float>> &index)
+{
+	srand(time(NULL));
+	for(int t = 0; t < times; t++)
+	{
+		int para = -1;
+		double theta = 0.0;
+		int seed = getGlobalJoint(para, theta);
+/*		cout << "In time " << t << ", finger = " << finger << ", joint = " << joint << endl;
+		cout << "hasprev? " << hasprev << endl;*/
+
+		Problem problem;
+		ceres::CostFunction* cf_curr;
+		cf_curr = new NumericDiffCostFunction<CF_Global, CENTRAL, 1, 1> (new CF_Global(cloud, para, bestpose, &planar, pix_meter, pure_vec, &index));
+		problem.AddResidualBlock(cf_curr, NULL, &theta);
+//		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
+
+		// Set the solver
+		Solver::Options options;
+		options.max_num_iterations = iter;
+		options.linear_solver_type = ceres::DENSE_QR;
+		options.minimizer_progress_to_stdout = false;
+
+		// Run the solver
+		Solver::Summary summary;
+		Solve(options, &problem, &summary);
+
+		// Recover the theta
+//		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
+		updatePose(seed, theta);
+		cost = std::sqrt(summary.final_cost);
+	}
+}
+
+void AICP::run_localPara(const PointCloud<PointXYZRGB> &cloud, const RangeImagePlanar &planar, float pix_meter, vector<float> &pure_vec, Index<flann::L2<float>> &index)
+{
+	srand(time(NULL));
+	for(int t = 0; t < times; t++)
+	{
+		int finger = -2, joint = -2;
+		double theta = 0.0, upper = 0.0, lower = 0.0;
+		int seed = getLocalJoint(finger, joint, theta, upper, lower);
+/*		cout << "In time " << t << ", finger = " << finger << ", joint = " << joint << endl;
+		cout << "hasprev? " << hasprev << endl;*/
+
+		Problem problem;
+		ceres::CostFunction* cf_curr;
+		if(!hasprev)	cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, &planar, pix_meter, pure_vec, &index));
+		else			cf_curr = new NumericDiffCostFunction<CF_Finger, CENTRAL, 1, 1> (new CF_Finger(cloud, finger, joint, bestpose, prevpose1, prevpose2, &planar, pix_meter, pure_vec, &index));
+		problem.AddResidualBlock(cf_curr, NULL, &theta);
 //		cout << "Number of residual blocks: " << problem.NumResidualBlocks() << std::endl;
 
 		// Set the solver
@@ -399,11 +483,12 @@ void AICP::run_randomPara(const Eigen::Matrix<float, 3, Eigen::Dynamic> &cloud_m
 	{
 		int seed = rand() % 26;
 		Eigen::Matrix<float, 1, 26> para_mat = bestpose.getAllParametersT(float(0.0));
+		Eigen::Matrix<float, 3, 1> pose_ori = bestpose.getOrientation(float(0.0));
 		double theta = double(para_mat(0, seed));
 		
 		Problem problem;
 		ceres::CostFunction* cf_curr;
-		cf_curr = new AutoDiffCostFunction<CF_T, 1, 1> (new CF_T(cloud_mat, para_mat, seed));
+		cf_curr = new AutoDiffCostFunction<CF_T, 1, 1> (new CF_T(cloud_mat, para_mat, pose_ori, seed));
 		problem.AddResidualBlock(cf_curr, NULL, &theta);
 		if(seed < 20)
 		{

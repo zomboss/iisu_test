@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
-#include "mat.h"
 #include "MyTools.hxx"
 #include "HandPose.hxx"
 #include "HandModel.hxx"
@@ -125,10 +124,28 @@ int main(int argc, char **argv)
 
 		// Apply the new parameters by transformT (Animation)
 		Eigen::Matrix<float, 1, 26> curr_mat;
+		Eigen::Matrix<float, 3, 1> pose_ori;
+		pose_ori(0, 0) = 0; pose_ori(1, 0) = 1; pose_ori(2, 0) = 3;
 		for(int i = 0; i < 26; i++)
 			curr_mat(0, i) = curr_para[i];
-		Eigen::Matrix<float, 3, SPHERE_NUM> transT = handmodel.transformT(curr_mat);
+		Eigen::Matrix<float, 3, SPHERE_NUM> transT = handmodel.transformT(curr_mat, pose_ori);
 		handmodel.setAllCenter(transT);
+		
+/*		int tip_idx[5] = {47, 21, 27, 33, 39};
+		int root_idx[5] = {40, 12, 13, 14, 15};
+		HandModel tmpmodel = HandModel();
+		for(int i= 0; i < 5; i++)
+		{
+			Eigen::Matrix<float, 3, 1> tips_1 = transT.col(tip_idx[i]);
+			Eigen::Matrix<float, 3, 1> dirs_1 = transT.col(tip_idx[i]) - transT.col(root_idx[i]);
+			
+			Eigen::Matrix<float, 3, 1> tips_2; 
+			Eigen::Matrix<float, 3, 1> dirs_2;
+			tmpmodel.getSpecFingerStatus(i, curr_mat, pose_ori, tips_2, dirs_2);
+
+			cout << "compare tips, ori: (" << tips_1(0, 0) << ", " << tips_1(1, 0) << ", " << tips_1(2, 0) << ")<----> aft: (" << tips_2(0, 0) << ", " << tips_2(1, 0) << ", " << tips_2(2, 0) << ")\n";
+			cout << "compare dirs, ori: (" << dirs_1(0, 0) << ", " << dirs_1(1, 0) << ", " << dirs_1(2, 0) << ")<----> aft: (" << dirs_2(0, 0) << ", " << dirs_2(1, 0) << ", " << dirs_2(2, 0) << ")\n";
+		}*/
 
 		updateHandModel(handmodel, skel);
 		if(skel)	updateHandSkeleton(handmodel);
