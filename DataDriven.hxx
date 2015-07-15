@@ -22,6 +22,7 @@ public:
 	void startPCA(int , bool);
 	SK::Array<SK::Array<float>> getDataSet() {return dataset;}
 	SK::Array<float> getSpecData(int index){return dataset[index];}
+	MatrixXf getDataMatrix() {return data_matrix;}
 	MatrixXf getCovMatrix() {return cov_matrix;}
 	MatrixXf getTransMatrix(){return trans_matrix;}
 	MatrixXf getrevMatrix(){return trans_matrix.transpose();}

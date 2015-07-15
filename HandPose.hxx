@@ -68,6 +68,7 @@ public:
 	Array<Vector3> getMiddlePose();
 	Array<Vector3> getRingPose();
 	Array<Vector3> getLittlePose();
+	Array<Vector3> getFingerPose(int );
 	Vector3 getPosition() {return global_pos;}
 	Vector3 getRotation() {return global_rot;}
 	Vector3 getOrientation() {return global_ori;}

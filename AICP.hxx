@@ -44,6 +44,7 @@ public:
 	void run_specPara(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &, int );
 	void run_cyclePara(const PointCloud<PointXYZRGB> &);
 	void run_randomJoint(const PointCloud<PointXYZRGB> &);
+	void run_strategy(int ,const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, float, vector<float> &, Index<flann::L2<float>> &);
 
 private:
 	int times;

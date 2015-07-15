@@ -249,12 +249,19 @@ Array<float> MyTools::perturbParameterL(Array<float> curr_para, Eigen::Matrix<fl
 			// Concern not too far from original
 			rand_para.pushBack(value);
 		}
-		else if(i < 23)	// position
+		else if(i < 23)	// position does not move
 		{
 			rand_para.pushBack(info_ori((i - 20), 0));
 		}
-		else			// global does not move
+		else			// rotation
+		{
+/*			normal_distribution<float> randnormal(curr_para[i], 0.2);	// angle: 0.2 arc degree ~= 5 degree
+			// Check angles limitation
+			float value = randnormal(gen);
+			// Concern not too far from original
+			rand_para.pushBack(value);*/
 			rand_para.pushBack(curr_para[i]);
+		}
 	}
 	return rand_para;
 }

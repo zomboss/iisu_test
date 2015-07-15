@@ -7,6 +7,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/eigen.hpp>
 #include "glog/logging.h"
 #include "MyTools.hxx"
 #include "HandPose.hxx"
@@ -19,6 +21,7 @@ using namespace std;
 using namespace SK;
 using namespace SK::Easii;
 using namespace Eigen;
+using namespace cv;
 
 const int HEIGHT = 240;
 const int WIDTH = 320;
@@ -127,6 +130,7 @@ int main(int argc, char **argv)
 	viewer->setBackgroundColor (0, 0, 0);
 	viewer->initCameraParameters();
 	viewer->addCoordinateSystem (1.0);
+	viewer->addText("frame: ", 0, 480, "frame_num");
 	
 	// get dataset
 	int file_num, length;
@@ -139,8 +143,6 @@ int main(int argc, char **argv)
 	else	data_driven.startPCA(length, true);
 	MatrixXf transmat = data_driven.getTransMatrix();
 	cout << endl << setprecision(3) << "trans matrix: " << endl << transmat << endl;
-
-	// new part!!!
 
 	// Hand Model & pose initialization
 	HandModel handmodel = HandModel();
@@ -159,11 +161,43 @@ int main(int argc, char **argv)
 						   data_driven.getMeanVector(), data_driven.getMaxVector(), data_driven.getMinVector());
 
 	// new part!!!
+	Mat mat_o;
+	Eigen::Matrix<float, 20, -1> mat_e = data_driven.getDataMatrix();
+	cv::eigen2cv(mat_e, mat_o);
+/*	for(int i = 0; i < mat_o.rows; i++)
+	{
+		for(int j = 0; j < mat_o.cols; j++)
+		{
+			if(mat_o.at<float>(i, j) - mat_e(i, j) != 0)	cout << "fucking wrong in (" << i << ", " << j <<")!!!" << endl;
+		}
+
+	}*/
+	int cvlen = (length < 0) ? data_driven.getPCSpaceSize() : length;
+	cv::PCA cvpca = cv::PCA(mat_o, Mat(), 1/*PCA::DATA_AS_COL*/, cvlen);
+	
+	Eigen::Matrix<float, 26, 1> curr_para = MyTools::SKtoEigenVector(data_driven.getSpecData(index));
+	Eigen::Matrix<float, 20, 1> local_para = curr_para.block(0, 0, 20, 1);
+	Mat para;
+	cv::eigen2cv(local_para, para);
+	cout << "para size = (" << para.rows << ", " << para.cols << ")\n";
+	Mat coeff;
+	cvpca.project(para, coeff);
+	cout << "coeff size = (" << coeff.rows << ", " << coeff.cols << ")\n";
+	Mat recov;
+	cvpca.backProject(coeff, recov);
+	cout << "recov size = (" << recov.rows << ", " << recov.cols << ")\n";
+	Eigen::Matrix<float, 20, 1> aft_mat;
+	cv::cv2eigen(recov, aft_mat);
+	SK::Array<float> aft_para = MyTools::EigentoSKVector((Eigen::VectorXf)aft_mat);
+	for(int i = 0; i < 6; i++)
+		aft_para.pushBack(curr_para[20 + i]);
+	HandPose cvpose = HandPose();
+	cvpose.setAllParameters(aft_para, false);
 
 	
 	// PCA trans testing
 	HandPose tmppose = icppca.pureTrans(length);
-	showParameter(handpose, tmppose);
+	showParameter(handpose, tmppose);/**/
 
 	// Show the model
 	addHandModel(handmodel, skel);
@@ -175,12 +209,16 @@ int main(int argc, char **argv)
 	{
 		handmodel = HandModel();
 
-		if(frame % 2 == 0)		handpose.applyPose(handmodel);
-		else if(frame % 2 == 1)	tmppose.applyPose(handmodel);
+		if(frame % 3 == 0)		handpose.applyPose(handmodel);
+		else if(frame % 3 == 1)	cvpose.applyPose(handmodel);
+		else if(frame % 3 == 2)	tmppose.applyPose(handmodel);
 
 		updateHandModel(handmodel, skel);
 		if(skel)	updateHandSkeleton(handmodel);
 
+		stringstream ss;
+		ss << "frame: " << frame << endl;
+		viewer->updateText(ss.str(), 0, 480, "frame_num");
 		viewer->spinOnce(100);
 		frame++;
 	}

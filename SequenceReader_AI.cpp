@@ -44,11 +44,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov16_ICPPSO_ICPimp_1.txt";
-const char *infoname = "InfoData/info_seq_mov16.txt";
-const char *seqname = "Sequences/Seq_mov16/pcd_seq";
+const char *posname = "PoseData/Seq_mov19_ICPPSO_onlyA_1.txt";
+const char *infoname = "InfoData/info_seq_mov19.txt";
+const char *seqname = "Sequences/Seq_mov19/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 80;
+const int FILENUM = 139;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -502,7 +502,7 @@ int main(int argc, char** argv)
 		cout << "show previous center: (" << prev_center.transpose() << "), current center: (" << curr_center.transpose() << ")\n";
 
 		// PSO Optimization
-		PSO pso = PSO(30, 24, 8, 1);
+		PSO pso = PSO(18, 30, 5, 1);
 		if(curr_data > 1)
 			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);/**/
 		if(curr_data > 0)
@@ -511,7 +511,9 @@ int main(int argc, char** argv)
 			pso.generateParticles(poselist[curr_data]);
 		pso.checkMoving(curr_center, prev_center);
 		cout << "show is moving: " << pso.getIsMov() << endl;
-		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
+//		pso.goGeneration_loop(cloud, *planar.get(), handmodel, false, false);
+		pso.goGeneration_triv(cloud, *planar.get(), handmodel, false, false);
+//		pso.goGeneration_test(cloud, *planar.get(), handmodel, false, false);
 //		cout << "testlist size = " << testlist.size() << endl;
 		HandPose bestpose = pso.getBestPose();
 		bestpose.applyPose(handmodel);

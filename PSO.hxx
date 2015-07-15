@@ -49,6 +49,7 @@ public:
 	void generateParticles(const HandPose &);
 	void generateParticles(HandPose &, HandPose &);
 	void generateLParticles(const HandPose &, Eigen::Matrix<float, 3, 1> );
+
 	void goGeneration(const PointCloud<PointXYZRGB> &, const HandModel &, bool );
 	void goGeneration_mp(const PointCloud<PointXYZRGB> &, const HandModel &, bool, bool );
 	void goGeneration_data(const PointCloud<PointXYZRGB> &, const HandModel &, DataDriven &, bool, bool );
@@ -56,6 +57,9 @@ public:
 	void goGeneration_datafull(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, DataDriven &, bool, bool );
 
 	SK::Array<HandPose> goGeneration_test(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, bool, bool );
+	SK::Array<HandPose> goGeneration_triv(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, bool, bool );
+	SK::Array<HandPose> goGeneration_loop(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, bool, bool );
+	SK::Array<HandPose> goGeneration_func(const PointCloud<PointXYZRGB> &, const RangeImagePlanar &, const HandModel &, Eigen::Matrix<float, 3, 1> , bool, bool );
 
 private:
 	int generation_num;
@@ -82,5 +86,9 @@ private:
 	SK::Array<double> pk_point;
 	SK::Array<HandPose> hispose;	//Pk
 	
+	SK::Array<HandPose> generateTParticles(int );
+	
 	void PSOupdate();
+	void PSOupdate_tri(SK::Array<SK::Array<float>> &);
+	void PSOupdate_noH(SK::Array<HandPose> &, SK::Array<SK::Array<float>> &);
 };

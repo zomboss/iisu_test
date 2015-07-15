@@ -37,7 +37,7 @@ using namespace SK::Easii;
 
 // Processing & show
 const bool opti = true;
-const bool skel = false;
+bool skel = false;
 bool show = true;
 bool reshow = false;
 
@@ -45,11 +45,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov9_ICPPSO_ICPimp_4.txt";
+const char *posname = "PoseData/Seq_mov9_ICPPSO_onlyA_5.txt";
 const char *infoname = "InfoData/info_seq_mov9.txt";
 const char *seqname = "Sequences/Seq_mov9/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 29;
+const int FILENUM = 32;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -187,6 +187,21 @@ void showModel(const pcl::visualization::KeyboardEvent &event, void* viewer_void
 		else
 		{
 			show = true;
+			reshow = true;
+		}
+	}
+	if (event.getKeySym () == "b" && event.keyDown ())
+	{
+		if(skel == true)
+		{
+			viewer->removeAllShapes();
+			skel = false;
+			reshow = true;
+		}
+		else
+		{
+			viewer->removeAllShapes();
+			skel = true;
 			reshow = true;
 		}
 	}

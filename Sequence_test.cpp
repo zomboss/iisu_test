@@ -32,14 +32,14 @@ bool isori = true;
 int str_frame = 17;
 int fin_ch = -1;
 bool is_upper = false;
-const bool isskel = false;
+const bool isskel = true;
 bool show = true;
 bool reshow = false;
 
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
-const char *posname = "PoseData/Seq_mov9_ICPPSO_ICPimp_3_tmp.txt";
+const char *posname = "PoseData/Seq_mov9_ICPPSO_onlyA_2.txt";
 const char *infoname = "InfoData/info_seq_mov9.txt";
 const char *seqname = "Sequences/Seq_mov9/pcd_seq";
 const char *type = ".pcd";
@@ -216,9 +216,9 @@ Eigen::Matrix<float, 3, 1> showPalmCenterList()
 			istringstream iss(line);
 			if (!(iss >> palm_pos(0, 0) >> palm_pos(1, 0) >> palm_pos(2, 0) >> useless[0] >> useless[1] >> useless[2]))
 				cout << "error occur in line " << count << "!!!" << endl;
-			cout << "in frame " << (count / 5) << ", center: (" << palm_pos(0, 0) << ", " << palm_pos(1, 0) << ", " << palm_pos(2, 0) << ")";
+/*			cout << "in frame " << (count / 5) << ", center: (" << palm_pos(0, 0) << ", " << palm_pos(1, 0) << ", " << palm_pos(2, 0) << ")";
 			if(count / 5 > 0)	cout << ", distance = " << (palm_pos - pre_pos).norm() << endl;
-			else				cout << endl;
+			else				cout << endl;*/
 			if(count / 5 == str_frame)	info_pos = palm_pos;
 		}
 		count++;
@@ -588,7 +588,7 @@ int main(int argc, char** argv)
 	}
 
 	// ICP-PSO Optimization
-	PSO pso = PSO(25, 24, 8, 1);
+	PSO pso = PSO(24, 30, 8, 1);
 	if(str_frame > 1)	pso.setPrevPose(prev_pose1, prev_pose2);
 	if(isinit)	pso.generateParticles(initpose, handpose);
 	else if(str_frame == 0)	pso.generateParticles(initpose);
@@ -597,7 +597,11 @@ int main(int argc, char** argv)
 	SK::Array<HandPose> particles;
 	if(isori)	particles = pso.getAllParticles();
 	cout << "PSO initial done..." << endl;
-	if(!isori)	particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
+//	if(!isori)	particles = pso.goGeneration_test(cloud, *planar.get(), handmodel, false, true);
+	if(!isori)	particles = pso.goGeneration_triv(cloud, *planar.get(), handmodel, false, true);
+//	if(!isori)	particles = pso.goGeneration_loop(cloud, *planar.get(), handmodel, false, true);
+//	if(!isori)	particles = pso.goGeneration_func(cloud, *planar.get(), handmodel, info_pos, false, true);
+//	particles = pso.getAllParticles();
 	cout << "PSO optimizaiton done..." << endl;
 	HandPose bestpose = pso.getBestPose();
 /*	bestpose.applyPose(handmodel);
@@ -610,10 +614,7 @@ int main(int argc, char** argv)
 
 
 	AICP aicp = AICP(10, 1, handpose, prev_pose1, prev_pose2);
-	aicp.run_specPara(cloud, *planar.get(), pso.getPixmeter(), pure_vec, index, fin_ch);
-//	aicp.run_specPara(cloud, fin_ch);
-//	aicp.run_randomPara(cloud, *planar.get(), pso.getPixmeter(), pure_vec, index);
-//	aicp.run_randomPara(cloud);
+	if(fin_ch >= 0)	aicp.run_specPara(cloud, *planar.get(), pso.getPixmeter(), pure_vec, index, fin_ch);
 	HandPose aicppose = aicp.getBestPose();
 	showParameter(handpose, aicppose);/**/
 
@@ -630,13 +631,13 @@ int main(int argc, char** argv)
 	while(!viewer->wasStopped())
 	{
 		handmodel = HandModel();
-		if(fin_ch < 0)	particles[(frame % particles.size())].applyPose(handmodel);
+		if(fin_ch < 0)	particles[frame %  particles.size()].applyPose(handmodel);
 		else
 		{
 			if(frame % 3 == 0)		handpose.applyPose(handmodel);
 			else if(frame % 3 == 1)	aicppose.applyPose(handmodel);
-			else if(frame % 3 == 2)	trypose.applyPose(handmodel);/**/
-		}
+			else if(frame % 3 == 2)	trypose.applyPose(handmodel);
+		}/**/
 		
 /*		cout << "position in pose: (" << particles[(frame % particles.size())].getPosition()[0] << ", " << particles[(frame % particles.size())].getPosition()[1] << ", " << particles[(frame % particles.size())].getPosition()[2] << ")<------>"
 			 << "position in model: (" << handmodel.getGlobalpos()[0] << ", " << handmodel.getGlobalpos()[1] << ", " << handmodel.getGlobalpos()[2] << ")\n";*/
@@ -673,7 +674,7 @@ int main(int argc, char** argv)
 		ss << "case: " << (frame %  particles.size()) << endl;
 		ss << "cost in D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", L-term = " << costf.getLTerm() << ", M-term = " << costf.getMTerm() << endl;
 		ss << "total cost = " << costf.getCost() << endl;
-		ss << "(x, y) = (" << img_x << ", " << img_y << "), range = " << range << ", ref = " << ref << endl;
+//		ss << "(x, y) = (" << img_x << ", " << img_y << "), range = " << range << ", ref = " << ref << endl;
 		viewer->updateText(ss.str(), 0, 450, "num_text");
 
 		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "mycloud");

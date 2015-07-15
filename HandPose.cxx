@@ -153,6 +153,26 @@ Array<Vector3> HandPose::getLittlePose()
 
 }
 
+Array<Vector3> HandPose::getFingerPose(int fin)
+{
+	switch(fin)
+	{
+	case 0:
+		return getThumbPose();
+	case 1:
+		return getIndexPose();
+	case 2:
+		return getMiddlePose();
+	case 3:
+		return getRingPose();
+	case 4:
+		return getLittlePose();
+	default:
+		cout << "error happened in getFingerPose!!!" << endl;
+		return getThumbPose();
+	}
+}
+
 Array<float> HandPose::getAllParameters()
 {
 	Array<float> parameter;

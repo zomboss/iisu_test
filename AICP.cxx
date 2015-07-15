@@ -360,7 +360,7 @@ void AICP::run_specPara(const PointCloud<PointXYZRGB> &cloud, const RangeImagePl
 	Solver::Options options;
 	options.max_num_iterations = iter;
 	options.linear_solver_type = ceres::DENSE_QR;
-	options.minimizer_progress_to_stdout = true;
+	options.minimizer_progress_to_stdout = false;
 
 	// Run the solver
 	Solver::Summary summary;
@@ -510,5 +510,35 @@ void AICP::run_randomPara(const Eigen::Matrix<float, 3, Eigen::Dynamic> &cloud_m
 //		cout << "final cost = " << summary.final_cost << ", theta = " << theta << endl;
 		updatePose(seed, theta);
 		cost = std::sqrt(summary.final_cost);
+	}
+}
+
+void AICP::run_strategy(int g, const PointCloud<PointXYZRGB> &cloud, const RangeImagePlanar &planar, float pix_meter, vector<float> &pure_vec, Index<flann::L2<float>> &index)
+{
+	switch(g % 6)
+	{
+	case 0:	// global
+		run_globalPara(cloud, planar, pix_meter, pure_vec, index);
+		break;
+	case 1:	// thumb, 2 times for each parameters
+		for(int i = 0; i < 4; i++)
+			run_specPara(cloud, planar, pix_meter, pure_vec, index, i);
+		break;
+	case 2:	// index, 2 times for each parameters
+		for(int i = 4; i < 8; i++)
+			run_specPara(cloud, planar, pix_meter, pure_vec, index, i);
+		break;
+	case 3:	// middle, 2 times for each parameters
+		for(int i = 8; i < 12; i++)
+			run_specPara(cloud, planar, pix_meter, pure_vec, index, i);
+		break;
+	case 4:	// ring, 2 times for each parameters
+		for(int i = 12; i < 16; i++)
+			run_specPara(cloud, planar, pix_meter, pure_vec, index, i);
+		break;
+	case 5:	// little, 2 times for each parameters
+		for(int i = 16; i < 20; i++)
+			run_specPara(cloud, planar, pix_meter, pure_vec, index, i);
+		break;
 	}
 }

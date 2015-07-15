@@ -507,9 +507,12 @@ SK::Array<ModelCoefficients> HandModel::getSkeleton()
 	
 	// palm skeleton
 	Vector3 center = Vector3();
-	center[0] = (models[5].getCenter()[0] + models[6].getCenter()[0] + models[9].getCenter()[0] + models[10].getCenter()[0]) / 4.0;
+/*	center[0] = (models[5].getCenter()[0] + models[6].getCenter()[0] + models[9].getCenter()[0] + models[10].getCenter()[0]) / 4.0;
 	center[1] = (models[5].getCenter()[1] + models[6].getCenter()[1] + models[9].getCenter()[1] + models[10].getCenter()[1]) / 4.0;
-	center[2] = (models[5].getCenter()[2] + models[6].getCenter()[2] + models[9].getCenter()[2] + models[10].getCenter()[2]) / 4.0;
+	center[2] = (models[5].getCenter()[2] + models[6].getCenter()[2] + models[9].getCenter()[2] + models[10].getCenter()[2]) / 4.0;*/
+	center[0] = (models[1].getCenter()[0] + models[2].getCenter()[0]) / 2.0;
+	center[1] = (models[1].getCenter()[1] + models[2].getCenter()[1]) / 2.0;
+	center[2] = (models[1].getCenter()[2] + models[2].getCenter()[2]) / 2.0;
 	int palm_index[5] = {40, 16, 22, 28, 34};
 	for(int n = 0; n < 5; n++)
 	{
