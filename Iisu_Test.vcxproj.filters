@@ -43,7 +43,7 @@
     <ClCompile Include="InitializationT.cxx">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="SequenceReader_Grasp.cpp">
+    <ClCompile Include="SequenceRecorder.cpp">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>

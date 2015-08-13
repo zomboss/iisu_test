@@ -1,3 +1,19 @@
+/**
+Main Program
+Purpose:
+	(1)	The core program to handle hand pose tracking
+	(2)	Record pose data to PoseData directory
+Usage:
+<before compile>
+	(1)	Modify the variable seqname to select the sequence data
+	(2) Modify the variable infoname to select the info data (the sequence has to be consistent with the sequence data)
+	(3)	Modify the variable posename to select the pose output you want to save (recommend store in PoseData directory)
+	(4)	Modify FILENUM to the number of sequence
+<in runtime>
+	(1) When crashing, re-run the program
+	(2)	After processing, the operation is same as inSequenceViewer.cpp
+*/
+
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/image_viewer.h>
 #include <pcl/visualization/range_image_visualizer.h>
@@ -44,11 +60,11 @@ const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov19_ICPPSO_onlyA_1.txt";
-const char *infoname = "InfoData/info_seq_mov19.txt";
-const char *seqname = "Sequences/Seq_mov19/pcd_seq";
+const char *posname = "PoseData/Seq_mov9_PSOonly_2.txt";
+const char *infoname = "InfoData/info_seq_mov9.txt";
+const char *seqname = "Sequences/Seq_mov9/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 139;
+const int FILENUM = 66;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -502,7 +518,7 @@ int main(int argc, char** argv)
 		cout << "show previous center: (" << prev_center.transpose() << "), current center: (" << curr_center.transpose() << ")\n";
 
 		// PSO Optimization
-		PSO pso = PSO(18, 30, 5, 1);
+		PSO pso = PSO(30, 30, -5, 1);
 		if(curr_data > 1)
 			pso.setPrevPose(poselist[curr_data - 1], poselist[curr_data - 2]);/**/
 		if(curr_data > 0)

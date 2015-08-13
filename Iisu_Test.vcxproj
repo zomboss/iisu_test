@@ -216,7 +216,7 @@ copy "$(ProjectDir)Resources" "$(TargetDir)Resources"
     <ClCompile Include="InitializationT.cxx" />
     <ClCompile Include="MyTools.cxx" />
     <ClCompile Include="PSO.cxx" />
-    <ClCompile Include="SequenceReader_Grasp.cpp" />
+    <ClCompile Include="SequenceRecorder.cpp" />
     <ClCompile Include="Sphere.cxx" />
   </ItemGroup>
   <ItemGroup>

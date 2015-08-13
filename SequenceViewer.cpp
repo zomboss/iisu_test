@@ -1,3 +1,21 @@
+/**
+Main Program
+Purpose:
+	(1)	Show the results from PoseData directory
+	(2)	Record cost to cost directory (desicded by variable save)
+Usage:
+<before compile>
+	(1)	Modify the variable posname to select the pose data
+	(2) Modify the variable infoname to select the info data (the sequence has to be consistent with the sequence data)
+	(3)	Modify the variable costname to select the cost output you want to save (recommend store in cost directory)
+	(4)	Modify FILENUM to the number of sequence
+<in runtime>
+	(1) Decide whether you want to store the costs or not by 0/1
+	(2) Key "m" to disable/enable the model
+	(3) Key "b" to select sphere/skelton model
+	(4) Key "a" "s" "d" to select the viewpoint of results
+*/
+
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/image_viewer.h>
 #include <pcl/visualization/range_image_visualizer.h>
@@ -40,16 +58,18 @@ const bool opti = true;
 bool skel = false;
 bool show = true;
 bool reshow = false;
+bool save = true;
 
 const int HEIGHT = 240;
 const int WIDTH = 320;
 
 // Data cames from
-const char *posname = "PoseData/Seq_mov9_ICPPSO_onlyA_5.txt";
-const char *infoname = "InfoData/info_seq_mov9.txt";
-const char *seqname = "Sequences/Seq_mov9/pcd_seq";
+const char *posname = "PoseData/Seq_mov19_ICPPSO_ICPimp_1.txt";
+const char *infoname = "InfoData/info_seq_mov19.txt";
+const char *costname = "cost/cost_mov19_ICPPSO_ICPimp_1.txt";
+const char *seqname = "Sequences/Seq_mov19/pcd_seq";
 const char *type = ".pcd";
-const int FILENUM = 32;
+const int FILENUM = 139;
 
 // camera pose
 double camera_front[] = {-14.4617, -171.208, 6.5311, 0, 0, 1};
@@ -261,7 +281,19 @@ int main(int argc, char** argv)
 
 	file.close();
 
+	// store cost 
+	cout << "save the cost?";
+	cin >> save;
+	fstream cofile;
+	cofile.open(costname, ios::app);
+	if(!cofile)
+	{
+		cout << "cannot open file " << costname << "!!!" << endl;
+		return -1;
+	}
+
 	// While loop for display
+	int forsave = 0;
 	int frame = 0;
 	while(!viewer->wasStopped())
 	{
@@ -307,6 +339,14 @@ int main(int argc, char** argv)
 			infoss << "cost in D-term = " << costf.getDTerm() << ", F-term = " << costf.getFTerm() << ", L-term = " << costf.getLTerm() << ", M-term = " << costf.getMTerm() << endl;
 			infoss << "total cost = " << costf.getCost() << endl;
 
+			// store th cost
+			if(forsave < FILENUM && save)
+			{
+				cofile << costf.getCost() << " " << costf.getDTerm() << " " << costf.getFTerm() << " " << costf.getLTerm() << " " << costf.getMTerm() << endl;
+				forsave++;
+			}
+			else if(forsave == FILENUM || !save)
+				cofile.close();
 		}
 
 		// Update viewer

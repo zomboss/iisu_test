@@ -1,3 +1,15 @@
+/**
+Main Program
+Purpose:
+	(1)	Record pose data (.pcd file, Sequences/Seq directory is needed), info data(.txt file) and film (.skv file)
+Usage:
+<in runtime>
+	(1) Key "r" to start/end recording
+	(2) Key "s" to store a single pcd file
+<postprocessing>
+	(1)	Change names of Sequences/Seq directory, Movies/movie.skv and InfoData/info_seq.txt to prevent overwriting
+*/
+
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/common/transforms.h>
 #include <pcl/io/pcd_io.h>
@@ -197,7 +209,7 @@ int main(int argc, char **argv)
 
 		// Update viewer
 		viewer->updatePointCloud(cloudptr, "mycloud");
-		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "mycloud");/**/
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "mycloud");/**/
 		
 		// Recording
 		if(isrecord)

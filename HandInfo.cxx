@@ -366,7 +366,7 @@ void HandInfo::fingerDetection(PointCloud<PointXYZRGB>::Ptr &cloudptr,Calibratio
 				int *color = getColor(f);
 				cloudptr->points[fingersPointIndex[i]].r = color[0];
 				cloudptr->points[fingersPointIndex[i]].g = color[1];
-				cloudptr->points[fingersPointIndex[i]].b = color[2];
+				cloudptr->points[fingersPointIndex[i]].b = color[2];/**/
 
 				// Put into fingersPointcloud
 				fingersPointCloud.pushBack(MyTools::PointtoVector3(cloudptr->points[fingersPointIndex[i]]));
@@ -398,7 +398,7 @@ void HandInfo::fingerDetection(PointCloud<PointXYZRGB>::Ptr &cloudptr,Calibratio
 					int *color = getColor(f);
 					cloudptr->points[fingersPointIndex[i]].r = color[0];
 					cloudptr->points[fingersPointIndex[i]].g = color[1];
-					cloudptr->points[fingersPointIndex[i]].b = color[2];
+					cloudptr->points[fingersPointIndex[i]].b = color[2];/**/
 
 					// Put into fingersPointcloud
 					fingersPointCloud.pushBack(MyTools::PointtoVector3(cloudptr->points[fingersPointIndex[i]]));
